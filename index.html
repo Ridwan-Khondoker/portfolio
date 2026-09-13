@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --void:#050507;
+  --void:#000000;
   --panel:#0b0a11;
   --panel-2:#121019;
   --line:#241f33;
@@ -21,6 +21,7 @@
   --violet-lo:#7b2ff7;
   --violet-hi:#d0a2ff;
   --gold:#c9a227;
+  --gold-hi:#f0cf6b;
   --text:#9aa0ad;
   --text-hi:#e6e9ef;
   --display:"Chakra Petch","Bahnschrift","DIN Alternate","Segoe UI Semibold",system-ui,sans-serif;
@@ -39,6 +40,7 @@ body::before{
   background:repeating-linear-gradient(to bottom,rgba(168,85,255,.035) 0 1px,transparent 1px 3px);
   mix-blend-mode:screen;opacity:.5;
 }
+#scene3d{position:fixed;inset:0;z-index:-1;display:block;outline:none;pointer-events:none}
 h1,h2,h3,h4{font-family:var(--display);color:var(--text-hi);margin:0;font-weight:600;letter-spacing:-.01em}
 p{margin:0 0 1.1rem}
 a{color:inherit}
@@ -81,20 +83,19 @@ img{max-width:100%}
 }
 
 /* ---------- shell ---------- */
-.shell{margin-left:var(--rail)}
-section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px}
+.shell{margin-left:var(--rail);perspective:1600px;perspective-origin:50% 40%}
+section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;transform-style:preserve-3d;will-change:transform,opacity}
 .eyebrow{
   font-family:var(--display);font-size:12px;letter-spacing:.28em;color:var(--violet);
   display:flex;align-items:center;gap:12px;margin-bottom:18px;
 }
-.eyebrow::before{content:"";width:28px;height:1px;background:linear-gradient(90deg,var(--violet),transparent)}
+.eyebrow::before{content:"";width:28px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
 .h2{font-size:clamp(28px,3.6vw,46px);line-height:1.08;margin-bottom:20px;letter-spacing:-.02em}
 .lede{max-width:62ch;font-size:17px;color:var(--text)}
-.rule{height:1px;background:linear-gradient(90deg,var(--line),transparent);margin:0 clamp(24px,5vw,88px);max-width:1280px}
+.rule{height:1px;background:linear-gradient(90deg,var(--line) 0%,var(--violet) 35%,var(--gold) 65%,var(--line) 100%);opacity:.55;margin:0 clamp(24px,5vw,88px);max-width:1280px}
 
 /* ---------- hero ---------- */
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:90px;padding-bottom:90px;overflow:hidden}
-#stars{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .hero::after{
   content:"";position:absolute;right:-14%;top:6%;width:58vw;height:58vw;border-radius:50%;
   background:radial-gradient(circle at 50% 50%,rgba(123,47,247,.20),rgba(123,47,247,.05) 45%,transparent 68%);
@@ -268,9 +269,18 @@ footer{
   font-family:var(--display);font-size:11.5px;letter-spacing:.16em;color:var(--chrome-lo);
 }
 
-/* ---------- reveal ---------- */
-.rv{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
-.rv.in{opacity:1;transform:none}
+/* ---------- reveal (3D, scroll-linked) ---------- */
+.rv{
+  --p:0;--ry:10deg;
+  opacity:calc(.06 + .94 * var(--p));
+  transform:
+    translateY(calc((1 - var(--p)) * 50px))
+    translateZ(calc((1 - var(--p)) * -220px))
+    rotateX(calc((1 - var(--p)) * 9deg))
+    rotateY(calc((1 - var(--p)) * var(--ry)));
+  transform-style:preserve-3d;will-change:transform,opacity;
+}
+section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(calc(1 - var(--spabs) * 0.035))}
 
 @media (max-width:1080px){
   .about-grid,.contact-grid,.globe-wrap{grid-template-columns:1fr}
@@ -296,10 +306,14 @@ footer{
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important;scroll-behavior:auto}
   .rv{opacity:1;transform:none}
+  section{transform:none}
+  #scene3d{display:none}
 }
 </style>
 </head>
 <body>
+
+<canvas id="scene3d" aria-hidden="true"></canvas>
 
 <aside class="spine">
   <a href="#top" class="mark">RM</a>
@@ -319,7 +333,6 @@ footer{
 
   <!-- ============ HERO ============ -->
   <section class="hero">
-    <canvas id="stars" aria-hidden="true"></canvas>
     <div class="hero-id">RIDWAN MAHIN &nbsp;/&nbsp; <b>SYSTEMS ONLINE</b></div>
     <h1><span class="chrome-text">I build and ship</span><span class="line2">web systems.</span></h1>
     <p class="hero-sub">Senior developer and project manager. I take products from an empty repository to a platform real people use every day — writing the code, running the team, and staying on the hook after launch.</p>
@@ -559,6 +572,7 @@ footer{
   <span>BANGLADESH · INDIA · PHILIPPINES · USA · SLOVAKIA</span>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script>
 (function(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -588,17 +602,17 @@ footer{
     wrap.appendChild(d);
   });
 
-  /* ---------- reveal + bar fill ---------- */
-  var io = new IntersectionObserver(function(entries){
+  /* ---------- bar fill (one-shot, on first approach) ---------- */
+  var fillIO = new IntersectionObserver(function(entries){
     entries.forEach(function(en){
       if(!en.isIntersecting) return;
-      en.target.classList.add('in');
       var f = en.target.querySelector('.fill');
       if(f) f.style.width = f.dataset.v + '%';
-      io.unobserve(en.target);
+      fillIO.unobserve(en.target);
     });
   },{threshold:.2});
-  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+  var rvEls = Array.prototype.slice.call(document.querySelectorAll('.rv'));
+  rvEls.forEach(function(el){ fillIO.observe(el); });
 
   /* ---------- spine active state ---------- */
   var ticks = Array.prototype.slice.call(document.querySelectorAll('.tick'));
@@ -612,34 +626,132 @@ footer{
   },{rootMargin:'-45% 0px -50% 0px'});
   secs.forEach(function(s){ if(s) spy.observe(s); });
 
-  /* ---------- starfield ---------- */
-  var sc = document.getElementById('stars'), sx = sc.getContext('2d'), stars = [];
-  function sizeStars(){
-    var r = sc.parentElement.getBoundingClientRect(), dpr = Math.min(devicePixelRatio||1,2);
-    sc.width = r.width*dpr; sc.height = r.height*dpr; sx.setTransform(dpr,0,0,dpr,0,0);
-    stars = [];
-    var n = Math.round(r.width*r.height/7000);
-    for(var i=0;i<n;i++) stars.push({
-      x:Math.random()*r.width, y:Math.random()*r.height,
-      r:Math.random()*1.25+.25, a:Math.random()*.65+.15,
-      t:Math.random()*6.28, s:Math.random()*.018+.004,
-      v:Math.random()<.16
+  /* ---------- 3D scroll-linked reveal engine ---------- */
+  var activeRv = new Set();
+  var rvIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting) activeRv.add(en.target); else activeRv.delete(en.target);
     });
-    sc._w = r.width; sc._h = r.height;
+  },{rootMargin:'15% 0px 15% 0px',threshold:0});
+  rvEls.forEach(function(el,i){
+    el.style.setProperty('--ry',(i%2===0?'9deg':'-9deg'));
+    rvIO.observe(el);
+    if(!reduce) el.style.setProperty('--p',0);
+  });
+  function updateRv(el){
+    var r = el.getBoundingClientRect();
+    var vh = window.innerHeight;
+    var start = vh*0.92, end = vh*0.5;
+    var p = (start - r.top) / (start - end);
+    p = p<0?0:(p>1?1:p);
+    el.style.setProperty('--p', p);
   }
-  function drawStars(){
-    sx.clearRect(0,0,sc._w,sc._h);
-    for(var i=0;i<stars.length;i++){
-      var p = stars[i];
-      if(!reduce){ p.t += p.s; p.y += p.s*1.6; if(p.y > sc._h) p.y = 0; }
-      var a = p.a * (0.6 + 0.4*Math.sin(p.t));
-      sx.beginPath(); sx.arc(p.x,p.y,p.r,0,6.283);
-      sx.fillStyle = p.v ? 'rgba(190,140,255,'+a+')' : 'rgba(225,230,240,'+a+')';
-      sx.fill();
+
+  var sectionEls = Array.prototype.slice.call(document.querySelectorAll('section'));
+  function updateSection(el){
+    var r = el.getBoundingClientRect();
+    var vh = window.innerHeight;
+    var center = r.top + r.height/2;
+    var sp = (center - vh/2) / vh;
+    sp = sp<-1?-1:(sp>1?1:sp);
+    el.style.setProperty('--sp', sp);
+    el.style.setProperty('--spabs', Math.abs(sp));
+  }
+
+  function scrollFraction(){
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    if(max<=0) return 0;
+    var f = window.scrollY / max;
+    return f<0?0:(f>1?1:f);
+  }
+
+  /* ---------- ambient 3D backdrop (Three.js) ---------- */
+  var scene3d = null;
+  try{
+    if(typeof THREE !== 'undefined'){
+      var canvas = document.getElementById('scene3d');
+      var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
+      renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 200);
+      camera.position.set(0,0,18);
+
+      var group = new THREE.Group();
+      scene.add(group);
+
+      var geoPool = [
+        new THREE.IcosahedronGeometry(1,0),
+        new THREE.OctahedronGeometry(1,0),
+        new THREE.TorusGeometry(0.8,0.26,8,22),
+        new THREE.TetrahedronGeometry(1,0)
+      ];
+      var WORLD_DEPTH = 130;
+      var shapes = [];
+      for(var i=0;i<22;i++){
+        var isGold = i%3===0;
+        var mat = new THREE.MeshBasicMaterial({
+          color: isGold ? 0xc9a227 : 0xa855ff,
+          wireframe:true, transparent:true, opacity:isGold?0.55:0.42
+        });
+        var mesh = new THREE.Mesh(geoPool[i%geoPool.length], mat);
+        mesh.scale.setScalar(0.6+Math.random()*1.7);
+        mesh.position.set(
+          (Math.random()-0.5)*26,
+          -(i/22)*WORLD_DEPTH - Math.random()*8,
+          (Math.random()-0.5)*18-6
+        );
+        mesh.userData.sx = 0.0015+Math.random()*0.004;
+        mesh.userData.sy = 0.0015+Math.random()*0.004;
+        group.add(mesh);
+        shapes.push(mesh);
+      }
+
+      var PN = 260, positions = new Float32Array(PN*3);
+      for(var j=0;j<PN;j++){
+        positions[j*3]   = (Math.random()-0.5)*40;
+        positions[j*3+1] = -Math.random()*WORLD_DEPTH;
+        positions[j*3+2] = (Math.random()-0.5)*30-8;
+      }
+      var pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+      var points = new THREE.Points(pGeo, new THREE.PointsMaterial({color:0xd0a2ff,size:0.05,transparent:true,opacity:0.55}));
+      scene.add(points);
+
+      function resize3d(){
+        renderer.setSize(innerWidth, innerHeight, false);
+        camera.aspect = innerWidth/innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      resize3d();
+
+      scene3d = {
+        resize: resize3d,
+        render: function(scrollFrac){
+          camera.position.y = -scrollFrac * WORLD_DEPTH;
+          camera.position.x = Math.sin(scrollFrac*Math.PI*2)*1.2;
+          camera.lookAt(0, camera.position.y, 0);
+          camera.rotation.z = Math.sin(scrollFrac*Math.PI)*0.02;
+          for(var k=0;k<shapes.length;k++){
+            shapes[k].rotation.x += shapes[k].userData.sx;
+            shapes[k].rotation.y += shapes[k].userData.sy;
+          }
+          points.rotation.y += 0.0004;
+          renderer.render(scene, camera);
+        }
+      };
     }
-    requestAnimationFrame(drawStars);
+  }catch(e){ scene3d = null; }
+
+  function tick(){
+    if(!reduce){
+      activeRv.forEach(updateRv);
+      sectionEls.forEach(updateSection);
+      if(scene3d) scene3d.render(scrollFraction());
+    }
+    requestAnimationFrame(tick);
   }
-  sizeStars(); drawStars();
+  requestAnimationFrame(tick);
+  if(reduce && scene3d) scene3d.render(0);
 
   /* ---------- holo globe ---------- */
   var offices = [
@@ -825,7 +937,7 @@ footer{
       '&body=' + encodeURIComponent(m + '\n\n— ' + n + '\n' + e);
   });
 
-  window.addEventListener('resize', function(){ sizeStars(); sizeGlobe(); });
+  window.addEventListener('resize', function(){ sizeGlobe(); if(scene3d) scene3d.resize(); });
 })();
 </script>
 </body>
