@@ -526,10 +526,10 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
       <div class="globe-wrap">
         <div class="globe-stage"><canvas id="globe" aria-label="Rotating globe showing office locations"></canvas></div>
         <ul class="offices">
-          <li class="hq" data-lon="90.41"><i class="pin"></i><div><span class="city">Bangladesh</span><span class="desc">Headquarters — project management, design and front-end.</span><span class="cities">Dhaka</span></div></li>
+          <li class="hq" data-lon="-74.17"><i class="pin"></i><div><span class="city">United States</span><span class="desc">Headquarters — client operations, field teams and day-to-day platform users.</span><span class="cities">Newark, NJ · Chicago, IL · Austin, TX</span></div></li>
+          <li data-lon="90.41"><i class="pin"></i><div><span class="city">Bangladesh</span><span class="desc">Project management, design and front-end.</span><span class="cities">Dhaka</span></div></li>
           <li data-lon="77.59"><i class="pin"></i><div><span class="city">India</span><span class="desc">Engineering — platform development and backend delivery.</span><span class="cities">Bengaluru · Hyderabad · Noida</span></div></li>
           <li data-lon="120.98"><i class="pin"></i><div><span class="city">Philippines</span><span class="desc">Operations and support — coverage across the working day.</span><span class="cities">Manila · Cebu · Davao</span></div></li>
-          <li data-lon="-74.17"><i class="pin"></i><div><span class="city">United States</span><span class="desc">Client operations — field teams and day-to-day platform users.</span><span class="cities">Newark, NJ · Chicago, IL · Austin, TX</span></div></li>
           <li data-lon="17.11"><i class="pin"></i><div><span class="city">Slovakia</span><span class="desc">European delivery — QA and front-end support.</span><span class="cities">Bratislava · Košice</span></div></li>
         </ul>
       </div>
@@ -665,14 +665,14 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 
   /* ---------- holo globe ---------- */
   var offices = [
-    {city:'Dhaka',      country:'Bangladesh',    lat:23.81,  lon:90.41,   hub:true, hq:true},
+    {city:'Dhaka',      country:'Bangladesh',    lat:23.81,  lon:90.41,   hub:true},
     {city:'Bengaluru',  country:'India',         lat:12.97,  lon:77.59,   hub:true},
     {city:'Hyderabad',  country:'India',         lat:17.39,  lon:78.49},
     {city:'Noida',      country:'India',         lat:28.54,  lon:77.39},
     {city:'Manila',     country:'Philippines',   lat:14.60,  lon:120.98,  hub:true},
     {city:'Cebu',       country:'Philippines',   lat:10.32,  lon:123.89},
     {city:'Davao',      country:'Philippines',   lat:7.07,   lon:125.61},
-    {city:'Newark, NJ', country:'United States', lat:40.74,  lon:-74.17,  hub:true},
+    {city:'Newark, NJ', country:'United States', lat:40.74,  lon:-74.17,  hub:true, hq:true},
     {city:'Chicago, IL',country:'United States', lat:41.88,  lon:-87.63},
     {city:'Austin, TX', country:'United States', lat:30.27,  lon:-97.74},
     {city:'Bratislava', country:'Slovakia',      lat:48.15,  lon:17.11,   hub:true},
@@ -761,10 +761,10 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
     gx.strokeStyle='rgba(176,38,255,.45)'; gx.lineWidth=1; gx.stroke();
 
     // arcs from HQ
-    var hq = offices[0];
-    for(var i=1;i<offices.length;i++){
+    var hq = offices.filter(function(x){ return x.hq; })[0];
+    for(var i=0;i<offices.length;i++){
       var o = offices[i];
-      if(!o.hub) continue;
+      if(!o.hub || o===hq) continue;
       gx.beginPath(); var open=false;
       for(var t=0;t<=1.0001;t+=0.02){
         var la3 = hq.lat + (o.lat-hq.lat)*t;
