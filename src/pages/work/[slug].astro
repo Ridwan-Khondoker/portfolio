@@ -1,0 +1,112 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Shot from '../../components/Shot.astro';
+import CTA from '../../components/CTA.astro';
+import { getDevProjects, host, type DevProject } from '../../lib/data';
+
+export async function getStaticPaths() {
+  const projects = await getDevProjects();
+  return projects.map((p) => ({ params: { slug: p.id }, props: { project: p } }));
+}
+
+const { project } = Astro.props as { project: DevProject };
+const d = project.data;
+const { Content } = await render(project);
+const modules = await Promise.all(project.children.map(async (c) => ({ entry: c, Content: (await render(c)).Content })));
+---
+<Base title={`${d.title} — Ridwan Khondoker`} description={d.summary}>
+  <section class="section head" data-section-theme="dark" aria-labelledby="cs-title">
+    <div class="wrap">
+      <a class="back" href="/work#development">← All engineering work</a>
+      <p class="label">Case study</p>
+      <h1 id="cs-title" class="h-l">{d.title}</h1>
+      <p class="lede">{d.summary}</p>
+      <dl class="specs">
+        <div><dt>Role</dt><dd>{d.role}</dd></div>
+        <div><dt>Status</dt><dd>{d.status}</dd></div>
+        <div><dt>Stack</dt><dd>{d.stack.join(' · ')}</dd></div>
+        {d.scale && <div><dt>Scale</dt><dd>{d.scale}</dd></div>}
+        {d.place && <div><dt>Base</dt><dd>{d.place}</dd></div>}
+        {d.url && <div><dt>Live</dt><dd><a href={d.url} target="_blank" rel="noopener">{host(d.url)} ↗</a></dd></div>}
+      </dl>
+      <div class="shots">
+        <div class="desk"><Shot slug={d.shot} name={d.title} domain={host(d.url)} sizes="(max-width: 860px) 90vw, 70vw" eager /></div>
+        <div class="phone"><Shot slug={d.shot} view="mobile" name={d.title} sizes="220px" /></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section story" data-section-theme="light" aria-label="Overview">
+    <div class="wrap grid">
+      <p class="label">Overview</p>
+      <div class="prose"><Content /></div>
+    </div>
+  </section>
+
+  {modules.length > 0 && (
+    <section class="section modules" data-section-theme="light" aria-labelledby="mod-title">
+      <div class="wrap">
+        <h2 id="mod-title" class="h-l">Modules & integrations</h2>
+        <ol class="mod-list">
+          {modules.map(({ entry, Content: Body }) => (
+            <li id={entry.id} class="mod">
+              <div class="mod-meta">
+                <p class="status" data-status={entry.data.status}><i aria-hidden="true"></i>{entry.data.status}</p>
+                <p class="mono">{entry.data.role}</p>
+                <p class="mono">{entry.data.stack.join(' · ')}</p>
+              </div>
+              <div>
+                <h3>{entry.data.title}</h3>
+                <p class="mod-sum">{entry.data.summary}</p>
+                <div class="prose"><Body /></div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  <CTA />
+</Base>
+
+<style>
+  .head { padding-top: calc(var(--header-h) + clamp(48px, 9vh, 96px)); }
+  .back { display: block; width: fit-content; margin-bottom: 40px; font: 400 14px/1 var(--font-mono); color: var(--muted); text-decoration: none; }
+  .back:hover, .back:focus-visible { color: var(--fg); }
+  .head .label { margin-bottom: 18px; }
+  .head .h-l { font-size: clamp(40px, 6.4vw, 104px); max-width: 16ch; }
+  .head .lede { margin: 24px 0 40px; }
+  .specs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 0 0 56px; border-top: 1px solid var(--line); }
+  .specs div { padding: 16px 16px 16px 0; border-bottom: 1px solid var(--line); }
+  .specs dt { font: 400 12px/1.6 var(--font-mono); color: var(--muted); }
+  .specs dd { margin: 4px 0 0; font-size: 16px; }
+  .specs a { color: var(--accent-text); }
+  .shots { position: relative; padding-right: clamp(40px, 10vw, 160px); }
+  .desk { aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid var(--line); }
+  .phone {
+    position: absolute; right: 0; bottom: -40px; width: clamp(120px, 16vw, 230px); aspect-ratio: 390 / 844; overflow: hidden;
+    border: 8px solid #1c1526; border-radius: 28px; box-shadow: 0 0 0 1px var(--violet), 0 20px 60px rgba(0, 0, 0, .6);
+  }
+  .story .grid { display: grid; grid-template-columns: 220px 1fr; gap: 40px; }
+  .prose { font-size: clamp(18px, 1.5vw, 21px); max-width: 64ch; }
+  .prose :global(p) { margin: 0 0 1em; }
+  .modules .h-l { margin-bottom: 40px; }
+  .mod-list { list-style: none; margin: 0; padding: 0; }
+  .mod { display: grid; grid-template-columns: 220px 1fr; gap: 40px; padding: 40px 0; border-top: 1px solid var(--line); scroll-margin-top: 100px; }
+  .mod h3 { font-size: clamp(24px, 2.4vw, 36px); margin-bottom: 10px; }
+  .mod-sum { color: var(--muted); font-size: 18px; }
+  .mod .prose { font-size: 17px; }
+  .mod-meta { display: grid; gap: 8px; align-content: start; }
+  .mod-meta p { margin: 0; }
+  .mono { font: 400 13px/1.5 var(--font-mono); color: var(--muted); }
+  .status { display: inline-flex; align-items: center; gap: 8px; font: 400 13px/1 var(--font-mono); }
+  .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .status[data-status='Live'] i { background: #1fa85b; }
+  .status[data-status='In progress'] i { background: #c99a00; }
+  @media (max-width: 860px) {
+    .specs { grid-template-columns: 1fr 1fr; }
+    .story .grid, .mod { grid-template-columns: 1fr; gap: 16px; }
+  }
+</style>

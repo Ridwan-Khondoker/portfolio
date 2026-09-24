@@ -1,0 +1,121 @@
+---
+import Base from '../../layouts/Base.astro';
+import MissionCard from '../../components/MissionCard.astro';
+import ClientGrid from '../../components/ClientGrid.astro';
+import { getDevProjects, getClients } from '../../lib/data';
+
+const projects = await getDevProjects();
+const clientIds = (await getClients()).map((c) => c.id);
+---
+<Base title="Work — Ridwan Khondoker" description="Software engineering and project management work by Ridwan Khondoker.">
+  <section class="section head" data-section-theme="dark" aria-labelledby="work-title">
+    <div class="wrap">
+      <p class="label">Mission log</p>
+      <h1 id="work-title" class="h-xl"><span>Work</span><span class="accent">in the field</span></h1>
+      <p class="lede">Two tracks. The platforms I architect and code, and the brands whose sites, social media and campaigns I run.</p>
+      <div class="tabs" role="tablist" aria-label="Work track" data-tabs data-client-ids={clientIds.join(',')}>
+        <button role="tab" id="tab-development" aria-controls="development" aria-selected="true" type="button">
+          <span class="n">Software engineering</span><span class="c">{projects.reduce((n, p) => n + 1 + p.children.length, 0)} entries</span>
+        </button>
+        <button role="tab" id="tab-management" aria-controls="management" aria-selected="false" type="button" tabindex="-1">
+          <span class="n">Project management</span><span class="c">{clientIds.length} clients</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div id="development" role="tabpanel" aria-labelledby="tab-development" class="panel">
+    <section class="section dev" data-section-theme="light" aria-label="Software engineering">
+      <div class="wrap">
+        {projects.map((p) => (
+          <>
+            <MissionCard entry={p} href={`/work/${p.id}`} size="flagship" />
+            {p.children.length > 0 && (
+              <>
+                <h2 class="sub-title">Inside {p.data.title}: {p.children.length} modules & integrations</h2>
+                <div class="subs">
+                  {p.children.map((c) => <MissionCard entry={c} href={`/work/${p.id}#${c.id}`} />)}
+                </div>
+              </>
+            )}
+          </>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <div id="management" role="tabpanel" aria-labelledby="tab-management" class="panel" hidden>
+    <ClientGrid heading={false} theme="light" />
+  </div>
+</Base>
+
+<style>
+  .head { padding-top: calc(var(--header-h) + clamp(64px, 12vh, 120px)); padding-bottom: 56px; }
+  .head .label { margin-bottom: 24px; }
+  .head .h-xl { display: grid; }
+  .head .accent { color: var(--accent-text); padding-left: .4em; }
+  .head .lede { margin: 32px 0 48px; }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); }
+  .tabs button {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 22px 24px; cursor: pointer;
+    background: none; border: 0; text-align: left; position: relative; overflow: hidden; isolation: isolate; color: var(--muted);
+    transition: color .4s var(--ease);
+  }
+  .tabs button + button { border-left: 1px solid var(--line); }
+  .tabs button::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--accent); clip-path: inset(0 100% 0 0); transition: clip-path .6s var(--ease-in-out); }
+  .tabs button[aria-selected='true'] { color: #fff; }
+  .tabs button[aria-selected='true']::before { clip-path: inset(0 0 0 0); }
+  .tabs button:not([aria-selected='true']):hover { color: var(--fg); }
+  .tabs .n { font: 600 clamp(20px, 2.2vw, 32px)/1.1 var(--font-display); }
+  .tabs .c { font: 400 13px/1 var(--font-mono); }
+  .sub-title { margin: clamp(56px, 8vh, 96px) 0 28px; font-size: clamp(22px, 2.2vw, 32px); }
+  .subs { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 28px); }
+  @media (max-width: 1080px) { .subs { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) {
+    .subs, .tabs { grid-template-columns: 1fr; }
+    .tabs button + button { border-left: 0; border-top: 1px solid var(--line); }
+  }
+</style>
+
+<script>
+  import { ScrollTrigger, getLenis } from '../../scripts/motion/core';
+
+  const list = document.querySelector<HTMLElement>('[data-tabs]')!;
+  const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+  const clientIds = (list.dataset.clientIds ?? '').split(',');
+
+  function select(id: string, focus = false) {
+    tabs.forEach((t) => {
+      const on = t.getAttribute('aria-controls') === id;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on;
+      if (on && focus) t.focus();
+    });
+    history.replaceState(null, '', `#${id}`);
+    ScrollTrigger.refresh();
+  }
+
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(t.getAttribute('aria-controls')!));
+    t.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      select(next.getAttribute('aria-controls')!, true);
+    });
+  });
+
+  // Deep links: #management, or a client's id, opens the management tab (and scrolls to that client).
+  const hash = location.hash.slice(1);
+  if (hash === 'management' || clientIds.includes(hash)) {
+    select('management');
+    if (clientIds.includes(hash)) {
+      history.replaceState(null, '', `#${hash}`);
+      requestAnimationFrame(() => {
+        const el = document.getElementById(hash);
+        const lenis = getLenis();
+        if (el) lenis ? lenis.scrollTo(el, { offset: -100, immediate: true }) : el.scrollIntoView();
+      });
+    }
+  }
+</script>

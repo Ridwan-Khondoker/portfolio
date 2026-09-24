@@ -1,0 +1,67 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Shot from './Shot.astro';
+import { host } from '../lib/data';
+
+interface Props {
+  entry: CollectionEntry<'dev'>;
+  href: string;
+  size?: 'flagship' | 'sub';
+}
+const { entry, href, size = 'sub' } = Astro.props;
+const d = entry.data;
+---
+<article class:list={['mission', size]}>
+  <a href={href}>
+    {size === 'flagship' && (
+      <div class="frame"><Shot slug={d.shot} name={d.title} domain={host(d.url)} sizes="(max-width: 860px) 90vw, 55vw" eager /></div>
+    )}
+    <div class="hud">
+      <p class="status" data-status={d.status}><i aria-hidden="true"></i>{d.status}</p>
+      <h3>{d.title}</h3>
+      <p class="summary">{d.summary}</p>
+      <dl class="specs">
+        <div><dt>Role</dt><dd>{d.role}</dd></div>
+        <div><dt>Stack</dt><dd>{d.stack.join(' · ')}</dd></div>
+        {d.scale && <div><dt>Scale</dt><dd>{d.scale}</dd></div>}
+        {d.place && <div><dt>Base</dt><dd>{d.place}</dd></div>}
+      </dl>
+      <span class="open">{size === 'flagship' ? 'Open case study' : 'Read more'} <span aria-hidden="true">→</span></span>
+    </div>
+  </a>
+</article>
+
+<style>
+  .mission a {
+    display: grid; height: 100%; text-decoration: none; color: inherit; border: 1px solid var(--line); background: var(--surface);
+    position: relative; transition: border-color .3s;
+  }
+  .mission.flagship a { grid-template-columns: 1.3fr 1fr; }
+  /* corner brackets: the "mission card" frame */
+  .mission a::before, .mission a::after {
+    content: ''; position: absolute; width: 16px; height: 16px; border: 2px solid var(--accent); pointer-events: none;
+    transition: width .4s var(--ease), height .4s var(--ease);
+  }
+  .mission a::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .mission a::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+  .mission a:hover::before, .mission a:hover::after, .mission a:focus-visible::before, .mission a:focus-visible::after { width: 44px; height: 44px; }
+  .mission a:hover, .mission a:focus-visible { border-color: var(--accent); }
+  .frame { aspect-ratio: 16 / 10; overflow: hidden; border-right: 1px solid var(--line); }
+  .hud { display: grid; gap: 14px; align-content: start; padding: clamp(20px, 2.4vw, 32px); }
+  .status { margin: 0; display: inline-flex; align-items: center; gap: 8px; font: 400 13px/1 var(--font-mono); color: var(--muted); }
+  .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .status[data-status='Live'] i { background: #3ddc84; box-shadow: 0 0 8px #3ddc84; }
+  .status[data-status='In progress'] i { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .mission h3 { font-size: clamp(22px, 2vw, 30px); }
+  .flagship h3 { font-size: clamp(28px, 3vw, 44px); }
+  .summary { margin: 0; color: var(--muted); }
+  .specs { margin: 0; display: grid; gap: 8px; font-size: 14px; }
+  .specs div { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .specs dt { font: 400 12px/1.6 var(--font-mono); color: var(--muted); }
+  .specs dd { margin: 0; }
+  .open { font: 500 15px/1 var(--font-display); color: var(--accent-text); margin-top: 6px; }
+  @media (max-width: 960px) {
+    .mission.flagship a { grid-template-columns: 1fr; }
+    .frame { border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+</style>
