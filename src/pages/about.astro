@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import Globe from '../components/Globe.astro';
+import CTA from '../components/CTA.astro';
+import { site, stats } from '../data/site';
+---
+<Base title="About — Ridwan Khondoker" description="Software engineer and project manager at Tribe Marketing and Happy to Deliver.">
+  <section class="section head" data-section-theme="dark" aria-labelledby="about-title">
+    <div class="wrap">
+      <p class="label">Personal file</p>
+      <h1 id="about-title" class="h-xl"><span>Engineer</span><span class="accent">& manager</span></h1>
+    </div>
+  </section>
+
+  <section class="section story" data-section-theme="light" aria-label="Story">
+    <div class="wrap grid">
+      <div class="prose">
+        <p class="big">Half developer, half project manager — and that's the point.</p>
+        <p>I'm Ridwan, software engineer and project manager at Tribe Marketing and Happy to Deliver. Most of my work sits where engineering meets delivery: scoping the build, designing the architecture, coding the hard parts, then keeping a distributed team moving until it's live.</p>
+        <p>I've spent {stats.pmYears} years in project management and marketing and {stats.devYears} in software development. Day to day that means Laravel and Vue on the platform side, websites, social media and ad campaigns on the brand side, and the unglamorous work in between: database design, access control, QA plans, budgets, and the client call where all of it has to make sense in plain language.</p>
+        <p>I like projects that are slightly too big for the timeline. That's usually where the interesting decisions live.</p>
+      </div>
+      <aside class="plate" aria-label="Profile">
+        <p class="label">Profile</p>
+        <h2>Khondoker Ridwan Mahin</h2>
+        <dl>
+          <div><dt>Roles</dt><dd>Software engineer · Project manager</dd></div>
+          <div><dt>Companies</dt><dd>{site.companies.join(' · ')}</dd></div>
+          <div><dt>Based in</dt><dd>{site.base}</dd></div>
+          <div><dt>Core stack</dt><dd>Laravel · Vue · Filament · MySQL</dd></div>
+          <div><dt>Team</dt><dd>5 countries</dd></div>
+          <div><dt>Availability</dt><dd>24/7, teams on call</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <Globe />
+  <CTA />
+</Base>
+
+<style>
+  .head { padding-top: calc(var(--header-h) + clamp(64px, 12vh, 120px)); }
+  .head .label { margin-bottom: 24px; }
+  .head .h-xl { display: grid; }
+  .head .accent { color: var(--accent-text); padding-left: .4em; }
+  .grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .prose { font-size: clamp(17px, 1.4vw, 20px); }
+  .prose .big { font: 600 clamp(28px, 3.4vw, 48px)/1.1 var(--font-display); letter-spacing: -.02em; margin-bottom: 1em; }
+  .plate { border: 1px solid var(--line); background: var(--surface); padding: 28px; }
+  .plate h2 { font-size: 24px; margin: 14px 0 12px; }
+  .plate dl { margin: 0; }
+  .plate div { display: flex; justify-content: space-between; gap: 18px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .plate dt { color: var(--muted); }
+  .plate dd { margin: 0; text-align: right; font-weight: 500; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+</style>

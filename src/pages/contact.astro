@@ -1,0 +1,110 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+---
+<Base title="Contact — Ridwan Khondoker" description="Start a project with Ridwan Khondoker.">
+  <section class="section head" data-section-theme="dark" aria-labelledby="contact-title">
+    <div class="wrap">
+      <p class="label">Open channel</p>
+      <h1 id="contact-title" class="h-xl"><span>Start a</span><span class="accent">project</span></h1>
+      <p class="lede">A few lines about what you're building, the deadline, and whether you need a developer, a project manager, or both. You'll get an honest answer about fit.</p>
+    </div>
+  </section>
+
+  <section class="section form-sec" data-section-theme="light" aria-label="Contact form">
+    <div class="wrap grid">
+      <form class="form" data-contact data-to={site.email} novalidate>
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" name="name" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" required />
+        </div>
+        <fieldset class="field">
+          <legend>I need</legend>
+          <div class="chips">
+            <label><input type="radio" name="need" value="Development" /> <span>A developer</span></label>
+            <label><input type="radio" name="need" value="Project management" /> <span>A project manager</span></label>
+            <label><input type="radio" name="need" value="Both" checked /> <span>Both</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="f-msg">Project details</label>
+          <textarea id="f-msg" name="message" rows="6" required placeholder="What you're building, the timeline, and the budget range."></textarea>
+        </div>
+        <button class="btn solid" type="submit">Send message <span class="arrow" aria-hidden="true">→</span></button>
+        <p class="note" data-note role="status">Opens in your email app. Nothing is stored on this site.</p>
+      </form>
+      <aside class="direct">
+        <div><p class="label">Email</p><a href={`mailto:${site.email}`}>{site.email}</a></div>
+        <div><p class="label">Based in</p><p>{site.base}</p></div>
+        <div><p class="label">Availability</p><p>24/7, teams on call across five countries</p></div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: calc(var(--header-h) + clamp(64px, 12vh, 120px)); }
+  .head .label { margin-bottom: 24px; }
+  .head .h-xl { display: grid; }
+  .head .accent { color: var(--accent-text); padding-left: .4em; }
+  .head .lede { margin-top: 32px; }
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .form { display: grid; gap: 22px; }
+  .field { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; }
+  .field > label, legend { font: 400 13px/1.4 var(--font-mono); color: var(--muted); padding: 0; }
+  input:not([type='radio']), textarea {
+    width: 100%; font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); padding: 14px 16px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(176, 38, 255, .18); }
+  [aria-invalid='true'] { border-color: #d11a4f !important; }
+  textarea { resize: vertical; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chips label { cursor: pointer; }
+  .chips input { position: absolute; opacity: 0; }
+  .chips span { display: inline-block; padding: 10px 16px; border: 1px solid var(--line); background: var(--surface); transition: background-color .2s, color .2s, border-color .2s; }
+  .chips input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chips input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .form .btn { width: fit-content; }
+  .note { margin: 0; font-size: 14px; color: var(--muted); }
+  .note[data-error] { color: #d11a4f; }
+  .direct { display: grid; gap: 28px; }
+  .direct .label { display: flex; margin: 0; }
+  .direct p:not(.label) { margin: 8px 0 0; font-size: 18px; }
+  .direct a { display: block; width: fit-content; margin-top: 8px; font-size: 18px; color: var(--accent-text); word-break: break-all; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  // No backend: validate here, then hand the message to the visitor's email app.
+  const form = document.querySelector<HTMLFormElement>('[data-contact]')!;
+  const note = form.querySelector<HTMLElement>('[data-note]')!;
+  const to = form.dataset.to!;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fields = ['name', 'email', 'message'].map((n) => form.elements.namedItem(n) as HTMLInputElement);
+    let firstBad: HTMLInputElement | null = null;
+    fields.forEach((f) => {
+      const ok = f.value.trim() !== '' && f.checkValidity();
+      f.setAttribute('aria-invalid', String(!ok));
+      if (!ok && !firstBad) firstBad = f;
+    });
+    if (firstBad) {
+      note.toggleAttribute('data-error', true);
+      note.textContent = 'Add your name, a valid email and a short project description.';
+      (firstBad as HTMLInputElement).focus();
+      return;
+    }
+    note.toggleAttribute('data-error', false);
+    note.textContent = 'Opening your email app…';
+    const [name, email, message] = fields.map((f) => f.value.trim());
+    const need = (form.elements.namedItem('need') as RadioNodeList).value;
+    const body = `${message}\n\nNeed: ${need}\n\n— ${name}\n${email}`;
+    location.href = `mailto:${to}?subject=${encodeURIComponent(`Project enquiry — ${name}`)}&body=${encodeURIComponent(body)}`;
+  });
+</script>
