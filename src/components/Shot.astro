@@ -1,0 +1,36 @@
+---
+import { Image } from 'astro:assets';
+import { shot } from '../lib/data';
+
+interface Props {
+  slug?: string;
+  view?: 'desktop' | 'mobile';
+  name: string;
+  domain?: string;
+  sizes?: string;
+  eager?: boolean;
+}
+const { slug, view = 'desktop', name, domain, sizes = '(max-width: 860px) 90vw, 40vw', eager = false } = Astro.props;
+const img = shot(slug, view);
+---
+{img ? (
+  <Image src={img} alt={`${name} website`} sizes={sizes} widths={[480, 800, 1200, 1600].filter((w) => w <= img.width)} loading={eager ? 'eager' : 'lazy'} class="shot" />
+) : (
+  // Placeholder until the site can be captured (scripts/capture.mjs)
+  <div class="shot ph" role="img" aria-label={`${name} website`}>
+    <span class="ph-name">{name}</span>
+    {domain && <span class="ph-domain">{domain}</span>}
+  </div>
+)}
+
+<style>
+  .shot { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+  .ph {
+    display: grid; place-content: center; gap: 10px; text-align: center; padding: 24px;
+    background-color: #0c0913; color: #f3ecfc;
+    /* dot-matrix grid drawn with an SVG tile (no gradients) */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Ccircle cx='7' cy='7' r='1.2' fill='%23b026ff' fill-opacity='.5'/%3E%3C/svg%3E");
+  }
+  .ph-name { font: 800 clamp(22px, 2.6vw, 38px)/1.05 var(--font-name); letter-spacing: .02em; }
+  .ph-domain { font: 400 13px/1 var(--font-mono); color: var(--gold); }
+</style>
