@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:"Doto";src:url("assets/fonts/doto-800.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap}
 :root{
   --void:#000000;
   --panel:#07050b;
@@ -26,8 +27,7 @@
   --text-hi:#f3ecfc;
   --display:"Chakra Petch","Bahnschrift","DIN Alternate","Segoe UI Semibold",system-ui,sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --branch:clamp(170px,19vw,290px);
-  --stem:clamp(20px,4vw,70px);
+  --branch:clamp(200px,21vw,320px);
   --content:1200px;
   --gutter:clamp(24px,5vw,88px);
 }
@@ -46,34 +46,48 @@ img{max-width:100%}
 :focus-visible{outline:2px solid var(--violet);outline-offset:3px}
 
 /* ---------- skill-tree nav around the robot ---------- */
+/* each side fans out from a gold root node; items sit on an arc and the panel is
+   turned in perspective so the far edge recedes, wrapping the nav around the robot */
 .tree{
-  --row:22px;--nd:7px;
-  position:absolute;top:30%;z-index:3;width:var(--branch);
-  display:flex;flex-direction:column;gap:34px;
+  --row:22px;--gap:34px;--nd:7px;--fan:clamp(70px,7vw,112px);
+  position:absolute;top:26%;z-index:3;width:var(--branch);
+  display:flex;flex-direction:column;gap:var(--gap);
 }
-.tree-l{left:0}
-.tree-r{right:0}
-/* trunk through the nodes, and a stem reaching in toward the robot */
-.tree::before{content:"";position:absolute;top:calc(var(--row) / 2);bottom:calc(var(--row) / 2);width:1px;background:var(--chrome-lo)}
-.tree::after{content:"";position:absolute;top:50%;width:var(--stem);height:1px;background:var(--chrome-lo)}
-.tree-l::before{right:calc(var(--nd) / 2 - .5px)}
-.tree-r::before{left:calc(var(--nd) / 2 - .5px)}
-.tree-l::after{left:100%}
-.tree-r::after{right:100%}
+.tree-l{left:0;transform:perspective(800px) rotateY(-22deg);transform-origin:100% 50%}
+.tree-r{right:0;transform:perspective(800px) rotateY(22deg);transform-origin:0 50%}
 .tree a{
+  --k:.57;
   display:flex;align-items:center;gap:12px;height:var(--row);text-decoration:none;
   font-family:var(--display);font-size:12px;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;
-  color:var(--chrome-mid);transition:color .2s,text-shadow .2s;
+  color:var(--chrome-mid);transition:color .2s,text-shadow .2s,transform .25s;
 }
-.tree-r a{flex-direction:row-reverse}
+.tree a:nth-of-type(2){--k:.93}
+.tree-l a{margin-right:calc(var(--fan) * var(--k) - var(--nd) / 2)}
+.tree-r a{margin-left:calc(var(--fan) * var(--k) - var(--nd) / 2);flex-direction:row-reverse}
 .tree .ln{flex:1;min-width:16px;height:1px;background:var(--chrome-lo);transition:background .2s,box-shadow .2s}
 .tree .nd{
-  flex:none;width:var(--nd);height:var(--nd);transform:rotate(45deg);position:relative;z-index:1;
+  flex:none;width:var(--nd);height:var(--nd);transform:rotate(45deg);
   border:1px solid var(--chrome-mid);background:var(--void);transition:background .2s,border-color .2s,box-shadow .2s;
 }
+.tree svg{position:absolute;top:0;height:100%;width:var(--fan);overflow:visible;pointer-events:none}
+.tree-l svg{right:0}
+.tree-r svg{left:0;transform:scaleX(-1)}
+.tree svg line{stroke:var(--chrome-lo);stroke-width:1;vector-effect:non-scaling-stroke;transition:stroke .2s,filter .2s}
+.tree .root{
+  position:absolute;top:50%;width:9px;height:9px;margin-top:-4.5px;transform:rotate(45deg);
+  background:var(--gold);box-shadow:0 0 10px rgba(255,196,0,.7);
+}
+.tree-l .root{right:-4.5px}
+.tree-r .root{left:-4.5px}
 .tree a:hover,.tree a:focus-visible{color:var(--violet-hi);text-shadow:0 0 10px rgba(176,38,255,.85),0 0 22px rgba(176,38,255,.45);outline:none}
+.tree-l a:hover,.tree-l a:focus-visible{transform:translateX(-4px)}
+.tree-r a:hover,.tree-r a:focus-visible{transform:translateX(4px)}
 .tree a:hover .ln,.tree a:focus-visible .ln{background:var(--violet);box-shadow:0 0 8px var(--violet)}
 .tree a:hover .nd,.tree a:focus-visible .nd{background:var(--violet);border-color:var(--violet-hi);box-shadow:0 0 10px var(--violet)}
+.tree a:nth-of-type(1):hover~svg .b1,.tree a:nth-of-type(2):hover~svg .b2,.tree a:nth-of-type(3):hover~svg .b3,
+.tree a:nth-of-type(1):focus-visible~svg .b1,.tree a:nth-of-type(2):focus-visible~svg .b2,.tree a:nth-of-type(3):focus-visible~svg .b3{
+  stroke:var(--violet);filter:drop-shadow(0 0 3px var(--violet));
+}
 
 /* ---------- shell ---------- */
 .shell{perspective:1600px;perspective-origin:50% 40%;overflow-x:clip}
@@ -98,7 +112,7 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 }
 .hero>*{position:relative;z-index:1}
 /* Spline robot plays its welcome gesture on load; the greeting fades in beneath it */
-.hero{--stage:min(58vh,600px)}
+.hero{--stage:min(68vh,720px)}
 .hero-3d{width:100%;max-width:var(--content);height:var(--stage);margin:0 auto}
 .hero-3d spline-viewer{width:100%;height:100%;display:block}
 /* the scene's camera crops the legs: the name overlaps them and a soft black shadow hides the edge */
@@ -112,18 +126,18 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
   text-shadow:0 0 12px rgba(255,196,0,.45);margin-bottom:12px;
 }
 .hero h1{
-  font-size:clamp(40px,7.4vw,104px);line-height:.95;letter-spacing:-.03em;font-weight:700;color:var(--chrome-hi);
+  font-family:"Doto",var(--display);font-size:clamp(24px,5.8vw,82px);line-height:1;letter-spacing:.02em;font-weight:800;color:var(--chrome-hi);
   text-shadow:0 0 34px rgba(176,38,255,.35);
 }
 .greet,.hero h1{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
 .hero h1{transition-delay:.2s}
 /* set from <head> so the name is never painted then hidden; removed on greet or after a timeout */
 .greeting-pending .greet,.greeting-pending .hero h1{opacity:0;transform:translateY(14px)}
-.hero-id{font-family:var(--display);font-size:12px;letter-spacing:.3em;color:var(--chrome-mid);margin-top:22px}
+.hero-id{font-family:var(--display);font-size:clamp(13px,1.2vw,16px);letter-spacing:.26em;color:var(--chrome);margin-top:20px}
 .hero-id b{color:var(--violet);font-weight:500;white-space:nowrap}
-.tagline{font-family:var(--display);font-weight:600;color:var(--text-hi);font-size:clamp(24px,3.4vw,44px);line-height:1.1;letter-spacing:-.02em;margin:30px 0 0}
+.tagline{font-family:var(--display);font-weight:600;color:var(--text-hi);font-size:clamp(20px,2.4vw,32px);line-height:1.15;letter-spacing:-.01em;margin:28px 0 0}
 .tagline .line2{color:var(--violet-hi);text-shadow:0 0 22px rgba(176,38,255,.55)}
-.hero-sub{max-width:56ch;margin:22px auto 0;font-size:18px;line-height:1.7}
+.hero-sub{max-width:58ch;margin:18px auto 0;font-size:16px;line-height:1.7}
 .hero-cta{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:36px}
 .btn{
   font-family:var(--display);font-size:13px;letter-spacing:.16em;padding:14px 26px;text-decoration:none;
@@ -294,19 +308,19 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   .meta{grid-column:2;text-align:left;padding-top:0}
 }
 @media (max-width:860px){
-  /* no room beside the robot: branches sit above it, trunks dropping toward its head */
-  .hero-3d{margin-top:124px}
-  .tree{top:-124px;width:calc(50% - 14px);gap:14px}
-  .tree::after{top:calc(100% - var(--row) / 2);width:1px;height:48px}
-  .tree-l::after{left:auto;right:calc(var(--nd) / 2 - .5px)}
-  .tree-r::after{right:auto;left:calc(var(--nd) / 2 - .5px)}
+  /* no room beside the robot: the two fans sit above it */
+  .hero-3d{margin-top:150px}
+  .tree{top:-150px;width:calc(50% - 10px);--fan:64px}
+  .tree-l{transform:perspective(700px) rotateY(-12deg)}
+  .tree-r{transform:perspective(700px) rotateY(12deg)}
   .tree a{font-size:10.5px;letter-spacing:.18em;gap:8px}
+}
 }
 @media (max-width:720px){
   footer{flex-direction:column}
   section{padding:82px 22px}
   .hero{padding-top:24px}
-  .hero{--stage:46vh}
+  .hero{--stage:44vh}
   .stats{grid-template-columns:1fr 1fr;row-gap:20px}
   .stat{border-right:0}
 }
@@ -337,12 +351,16 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
         <a href="#about"><span>Personal info</span><i class="ln"></i><i class="nd"></i></a>
         <a href="#skills"><span>Skills</span><i class="ln"></i><i class="nd"></i></a>
         <a href="#contact"><span>Contact</span><i class="ln"></i><i class="nd"></i></a>
+        <svg viewBox="0 0 112 134" preserveAspectRatio="none" aria-hidden="true"><line class="b1" x1="112" y1="67" x2="48.2" y2="11"/><line class="b2" x1="112" y1="67" x2="7.8" y2="67"/><line class="b3" x1="112" y1="67" x2="48.2" y2="123"/></svg>
+        <i class="root" aria-hidden="true"></i>
       </nav>
       <spline-viewer url="assets/nexbot.splinecode" background="transparent" loading="eager" events-target="global" aria-label="3D robot greeting visitors"></spline-viewer>
       <nav class="tree tree-r" aria-label="My work">
         <a href="#clients"><span>Clients</span><i class="ln"></i><i class="nd"></i></a>
         <a href="#work"><span>Projects</span><i class="ln"></i><i class="nd"></i></a>
         <a href="#current"><span>Current</span><i class="ln"></i><i class="nd"></i></a>
+        <svg viewBox="0 0 112 134" preserveAspectRatio="none" aria-hidden="true"><line class="b1" x1="112" y1="67" x2="48.2" y2="11"/><line class="b2" x1="112" y1="67" x2="7.8" y2="67"/><line class="b3" x1="112" y1="67" x2="48.2" y2="123"/></svg>
+        <i class="root" aria-hidden="true"></i>
       </nav>
     </div>
     <div class="wrap">
