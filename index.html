@@ -46,8 +46,8 @@ img{max-width:100%}
 :focus-visible{outline:2px solid var(--violet);outline-offset:3px}
 
 /* ---------- skill-tree nav around the robot ---------- */
-/* each side fans out from a gold root node; items sit on an arc and the panel is
-   turned in perspective so the far edge recedes, wrapping the nav around the robot */
+/* items sit on an arc and each panel is turned in perspective so the far edge
+   recedes, wrapping the nav around the robot */
 .tree{
   --row:22px;--gap:34px;--nd:7px;--fan:clamp(70px,7vw,112px);
   position:absolute;top:26%;z-index:3;width:var(--branch);
@@ -57,37 +57,21 @@ img{max-width:100%}
 .tree-r{right:0;transform:perspective(800px) rotateY(22deg);transform-origin:0 50%}
 .tree a{
   --k:.57;
-  display:flex;align-items:center;gap:12px;height:var(--row);text-decoration:none;
+  display:flex;align-items:center;justify-content:flex-end;gap:12px;height:var(--row);text-decoration:none;
   font-family:var(--display);font-size:12px;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;
   color:var(--chrome-mid);transition:color .2s,text-shadow .2s,transform .25s;
 }
 .tree a:nth-of-type(2){--k:.93}
 .tree-l a{margin-right:calc(var(--fan) * var(--k) - var(--nd) / 2)}
 .tree-r a{margin-left:calc(var(--fan) * var(--k) - var(--nd) / 2);flex-direction:row-reverse}
-.tree .ln{flex:1;min-width:16px;height:1px;background:var(--chrome-lo);transition:background .2s,box-shadow .2s}
 .tree .nd{
   flex:none;width:var(--nd);height:var(--nd);transform:rotate(45deg);
   border:1px solid var(--chrome-mid);background:var(--void);transition:background .2s,border-color .2s,box-shadow .2s;
 }
-.tree svg{position:absolute;top:0;height:100%;width:var(--fan);overflow:visible;pointer-events:none}
-.tree-l svg{right:0}
-.tree-r svg{left:0;transform:scaleX(-1)}
-.tree svg line{stroke:var(--chrome-lo);stroke-width:1;vector-effect:non-scaling-stroke;transition:stroke .2s,filter .2s}
-.tree .root{
-  position:absolute;top:50%;width:9px;height:9px;margin-top:-4.5px;transform:rotate(45deg);
-  background:var(--gold);box-shadow:0 0 10px rgba(255,196,0,.7);
-}
-.tree-l .root{right:-4.5px}
-.tree-r .root{left:-4.5px}
 .tree a:hover,.tree a:focus-visible{color:var(--violet-hi);text-shadow:0 0 10px rgba(176,38,255,.85),0 0 22px rgba(176,38,255,.45);outline:none}
 .tree-l a:hover,.tree-l a:focus-visible{transform:translateX(-4px)}
 .tree-r a:hover,.tree-r a:focus-visible{transform:translateX(4px)}
-.tree a:hover .ln,.tree a:focus-visible .ln{background:var(--violet);box-shadow:0 0 8px var(--violet)}
 .tree a:hover .nd,.tree a:focus-visible .nd{background:var(--violet);border-color:var(--violet-hi);box-shadow:0 0 10px var(--violet)}
-.tree a:nth-of-type(1):hover~svg .b1,.tree a:nth-of-type(2):hover~svg .b2,.tree a:nth-of-type(3):hover~svg .b3,
-.tree a:nth-of-type(1):focus-visible~svg .b1,.tree a:nth-of-type(2):focus-visible~svg .b2,.tree a:nth-of-type(3):focus-visible~svg .b3{
-  stroke:var(--violet);filter:drop-shadow(0 0 3px var(--violet));
-}
 
 /* ---------- shell ---------- */
 .shell{perspective:1600px;perspective-origin:50% 40%;overflow-x:clip}
@@ -112,8 +96,8 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 }
 .hero>*{position:relative;z-index:1}
 /* Spline robot plays its welcome gesture on load; the greeting fades in beneath it */
-.hero{--stage:min(68vh,720px)}
-.hero-3d{width:100%;max-width:var(--content);height:var(--stage);margin:0 auto}
+.hero{--stage:min(82vh,880px)}
+.hero-3d{width:100%;max-width:var(--content);height:var(--stage);margin:calc(var(--stage) * -.08) auto 0}
 .hero-3d spline-viewer{width:100%;height:100%;display:block}
 /* the scene's camera crops the legs: the name overlaps them and a soft black shadow hides the edge */
 .hello{position:relative;isolation:isolate;margin-top:calc(var(--stage) * -.22);padding:30px 0 8px}
@@ -348,19 +332,15 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   <section class="hero">
     <div class="hero-3d">
       <nav class="tree tree-l" aria-label="About me">
-        <a href="#about"><span>Personal info</span><i class="ln"></i><i class="nd"></i></a>
-        <a href="#skills"><span>Skills</span><i class="ln"></i><i class="nd"></i></a>
-        <a href="#contact"><span>Contact</span><i class="ln"></i><i class="nd"></i></a>
-        <svg viewBox="0 0 112 134" preserveAspectRatio="none" aria-hidden="true"><line class="b1" x1="112" y1="67" x2="48.2" y2="11"/><line class="b2" x1="112" y1="67" x2="7.8" y2="67"/><line class="b3" x1="112" y1="67" x2="48.2" y2="123"/></svg>
-        <i class="root" aria-hidden="true"></i>
+        <a href="#about"><span>Personal info</span><i class="nd"></i></a>
+        <a href="#skills"><span>Skills</span><i class="nd"></i></a>
+        <a href="#contact"><span>Contact</span><i class="nd"></i></a>
       </nav>
       <spline-viewer url="assets/nexbot.splinecode" background="transparent" loading="eager" events-target="global" aria-label="3D robot greeting visitors"></spline-viewer>
       <nav class="tree tree-r" aria-label="My work">
-        <a href="#clients"><span>Clients</span><i class="ln"></i><i class="nd"></i></a>
-        <a href="#work"><span>Projects</span><i class="ln"></i><i class="nd"></i></a>
-        <a href="#current"><span>Current</span><i class="ln"></i><i class="nd"></i></a>
-        <svg viewBox="0 0 112 134" preserveAspectRatio="none" aria-hidden="true"><line class="b1" x1="112" y1="67" x2="48.2" y2="11"/><line class="b2" x1="112" y1="67" x2="7.8" y2="67"/><line class="b3" x1="112" y1="67" x2="48.2" y2="123"/></svg>
-        <i class="root" aria-hidden="true"></i>
+        <a href="#clients"><span>Clients</span><i class="nd"></i></a>
+        <a href="#work"><span>Projects</span><i class="nd"></i></a>
+        <a href="#current"><span>Current</span><i class="nd"></i></a>
       </nav>
     </div>
     <div class="wrap">
