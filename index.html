@@ -26,7 +26,8 @@
   --text-hi:#f3ecfc;
   --display:"Chakra Petch","Bahnschrift","DIN Alternate","Segoe UI Semibold",system-ui,sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --rail:96px;
+  --branch:clamp(170px,19vw,290px);
+  --stem:clamp(20px,4vw,70px);
   --content:1200px;
   --gutter:clamp(24px,5vw,88px);
 }
@@ -44,36 +45,38 @@ img{max-width:100%}
 ::selection{background:rgba(176,38,255,.35);color:#fff}
 :focus-visible{outline:2px solid var(--violet);outline-offset:3px}
 
-/* ---------- left spine ---------- */
-.spine{
-  position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:50;
-  border-right:1px solid var(--line);
-  background:var(--panel);
-  display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:22px 0;
+/* ---------- skill-tree nav around the robot ---------- */
+.tree{
+  --row:22px;--nd:7px;
+  position:absolute;top:30%;z-index:3;width:var(--branch);
+  display:flex;flex-direction:column;gap:34px;
 }
-.spine .mark{
-  font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.06em;
-  color:var(--chrome-hi);text-shadow:0 0 14px rgba(176,38,255,.6);text-decoration:none;
+.tree-l{left:0}
+.tree-r{right:0}
+/* trunk through the nodes, and a stem reaching in toward the robot */
+.tree::before{content:"";position:absolute;top:calc(var(--row) / 2);bottom:calc(var(--row) / 2);width:1px;background:var(--chrome-lo)}
+.tree::after{content:"";position:absolute;top:50%;width:var(--stem);height:1px;background:var(--chrome-lo)}
+.tree-l::before{right:calc(var(--nd) / 2 - .5px)}
+.tree-r::before{left:calc(var(--nd) / 2 - .5px)}
+.tree-l::after{left:100%}
+.tree-r::after{right:100%}
+.tree a{
+  display:flex;align-items:center;gap:12px;height:var(--row);text-decoration:none;
+  font-family:var(--display);font-size:12px;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;
+  color:var(--chrome-mid);transition:color .2s,text-shadow .2s;
 }
-.spine nav{display:flex;flex-direction:column;gap:20px;align-items:center}
-.tick{
-  width:26px;height:2px;background:var(--chrome-lo);position:relative;display:block;
-  transition:background .2s,box-shadow .2s,width .2s;
+.tree-r a{flex-direction:row-reverse}
+.tree .ln{flex:1;min-width:16px;height:1px;background:var(--chrome-lo);transition:background .2s,box-shadow .2s}
+.tree .nd{
+  flex:none;width:var(--nd);height:var(--nd);transform:rotate(45deg);position:relative;z-index:1;
+  border:1px solid var(--chrome-mid);background:var(--void);transition:background .2s,border-color .2s,box-shadow .2s;
 }
-.tick:hover,.tick.on{background:var(--violet);width:40px;box-shadow:0 0 10px var(--violet)}
-.tick span{
-  position:absolute;left:38px;top:-9px;white-space:nowrap;font-family:var(--display);
-  font-size:11px;letter-spacing:.14em;color:var(--chrome);opacity:0;transform:translateX(-6px);
-  transition:opacity .18s,transform .18s;pointer-events:none;background:rgba(5,5,7,.9);padding:2px 8px;border:1px solid var(--line);
-}
-.tick:hover span{opacity:1;transform:translateX(0)}
-.spine .vert{
-  writing-mode:vertical-rl;font-family:var(--display);font-size:11px;letter-spacing:.3em;
-  color:var(--chrome-lo);
-}
+.tree a:hover,.tree a:focus-visible{color:var(--violet-hi);text-shadow:0 0 10px rgba(176,38,255,.85),0 0 22px rgba(176,38,255,.45);outline:none}
+.tree a:hover .ln,.tree a:focus-visible .ln{background:var(--violet);box-shadow:0 0 8px var(--violet)}
+.tree a:hover .nd,.tree a:focus-visible .nd{background:var(--violet);border-color:var(--violet-hi);box-shadow:0 0 10px var(--violet)}
 
 /* ---------- shell ---------- */
-.shell{margin-left:var(--rail);perspective:1600px;perspective-origin:50% 40%;overflow-x:clip}
+.shell{perspective:1600px;perspective-origin:50% 40%;overflow-x:clip}
 section{padding:120px var(--gutter);position:relative;transform-style:preserve-3d;will-change:transform,opacity}
 .wrap{width:100%;max-width:var(--content);margin-inline:auto;transform-style:preserve-3d}
 .eyebrow{
@@ -265,7 +268,7 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 .direct a,.direct span{color:var(--text-hi);text-decoration:none;font-size:16px}
 .direct a:hover{color:var(--violet-hi)}
 footer{
-  margin-left:var(--rail);border-top:1px solid var(--line);padding:26px max(var(--gutter),calc((100% - var(--rail) - var(--content)) / 2));
+  border-top:1px solid var(--line);padding:26px max(var(--gutter),calc((100% - var(--content)) / 2));
   display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
   font-family:var(--display);font-size:11.5px;letter-spacing:.16em;color:var(--chrome-lo);
 }
@@ -290,17 +293,17 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   .proj{grid-template-columns:44px 1fr;gap:16px}
   .meta{grid-column:2;text-align:left;padding-top:0}
 }
+@media (max-width:860px){
+  /* no room beside the robot: branches sit above it, trunks dropping toward its head */
+  .hero-3d{margin-top:124px}
+  .tree{top:-124px;width:calc(50% - 14px);gap:14px}
+  .tree::after{top:calc(100% - var(--row) / 2);width:1px;height:48px}
+  .tree-l::after{left:auto;right:calc(var(--nd) / 2 - .5px)}
+  .tree-r::after{right:auto;left:calc(var(--nd) / 2 - .5px)}
+  .tree a{font-size:10.5px;letter-spacing:.18em;gap:8px}
+}
 @media (max-width:720px){
-  :root{--rail:0px}
-  .spine{
-    width:100%;height:56px;bottom:auto;flex-direction:row;padding:0 16px;border-right:0;border-bottom:1px solid var(--line);
-    background:rgba(6,5,10,.92);backdrop-filter:blur(8px);
-  }
-  .spine nav{flex-direction:row;gap:12px}
-  .spine .vert{display:none}
-  .tick span{display:none}
-  .shell{margin-left:0;padding-top:56px}
-  footer{margin-left:0;flex-direction:column}
+  footer{flex-direction:column}
   section{padding:82px 22px}
   .hero{padding-top:24px}
   .hero{--stage:46vh}
@@ -311,7 +314,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   *{animation:none!important;transition:none!important;scroll-behavior:auto}
   .rv{opacity:1;transform:none}
   section{transform:none}
-  .hero-3d{display:none}
+  .hero-3d spline-viewer{display:none}
 }
 </style>
 <script>
@@ -325,26 +328,22 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 </head>
 <body>
 
-<aside class="spine">
-  <a href="#top" class="mark">RK</a>
-  <nav aria-label="Sections">
-    <a class="tick" href="#about"><span>ABOUT</span></a>
-    <a class="tick" href="#clients"><span>CLIENTS</span></a>
-    <a class="tick" href="#skills"><span>SKILLS</span></a>
-    <a class="tick" href="#work"><span>WORK</span></a>
-    <a class="tick" href="#current"><span>CURRENT</span></a>
-    <a class="tick" href="#network"><span>NETWORK</span></a>
-    <a class="tick" href="#contact"><span>CONTACT</span></a>
-  </nav>
-  <div class="vert">DHAKA · BD</div>
-</aside>
-
 <main class="shell" id="top">
 
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="hero-3d">
+      <nav class="tree tree-l" aria-label="About me">
+        <a href="#about"><span>Personal info</span><i class="ln"></i><i class="nd"></i></a>
+        <a href="#skills"><span>Skills</span><i class="ln"></i><i class="nd"></i></a>
+        <a href="#contact"><span>Contact</span><i class="ln"></i><i class="nd"></i></a>
+      </nav>
       <spline-viewer url="assets/nexbot.splinecode" background="transparent" loading="eager" events-target="global" aria-label="3D robot greeting visitors"></spline-viewer>
+      <nav class="tree tree-r" aria-label="My work">
+        <a href="#clients"><span>Clients</span><i class="ln"></i><i class="nd"></i></a>
+        <a href="#work"><span>Projects</span><i class="ln"></i><i class="nd"></i></a>
+        <a href="#current"><span>Current</span><i class="ln"></i><i class="nd"></i></a>
+      </nav>
     </div>
     <div class="wrap">
       <div class="hello">
@@ -666,18 +665,6 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   },{threshold:.2});
   var rvEls = Array.prototype.slice.call(document.querySelectorAll('.rv'));
   rvEls.forEach(function(el){ fillIO.observe(el); });
-
-  /* ---------- spine active state ---------- */
-  var ticks = Array.prototype.slice.call(document.querySelectorAll('.tick'));
-  var secs = ticks.map(function(t){ return document.querySelector(t.getAttribute('href')); });
-  var spy = new IntersectionObserver(function(entries){
-    entries.forEach(function(en){
-      if(!en.isIntersecting) return;
-      var i = secs.indexOf(en.target);
-      ticks.forEach(function(t,j){ t.classList.toggle('on', j===i); });
-    });
-  },{rootMargin:'-45% 0px -50% 0px'});
-  secs.forEach(function(s){ if(s) spy.observe(s); });
 
   /* ---------- 3D scroll-linked reveal engine ---------- */
   var activeRv = new Set();
