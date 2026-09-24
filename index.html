@@ -44,11 +44,6 @@ img{max-width:100%}
 ::selection{background:rgba(176,38,255,.35);color:#fff}
 :focus-visible{outline:2px solid var(--violet);outline-offset:3px}
 
-/* ---------- chrome text ---------- */
-.chrome-text{
-  color:var(--chrome-hi);
-}
-
 /* ---------- left spine ---------- */
 .spine{
   position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:50;
@@ -91,22 +86,37 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 .rule{height:1px;background:var(--line);width:min(var(--content),calc(100% - 2 * var(--gutter)));margin-inline:auto}
 
 /* ---------- hero ---------- */
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:90px;padding-bottom:90px}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:40px;padding-bottom:90px;text-align:center}
 .hero::after{
-  content:"";position:absolute;right:-8vw;top:10%;width:46vw;height:46vw;border-radius:50%;
-  background:var(--violet-lo);opacity:.16;filter:blur(140px);
+  content:"";position:absolute;left:50%;top:2%;width:min(56vw,720px);height:min(56vw,720px);
+  margin-left:calc(min(56vw,720px) / -2);border-radius:50%;
+  background:var(--violet-lo);opacity:.3;filter:blur(120px);
   z-index:0;pointer-events:none;
 }
 .hero>*{position:relative;z-index:1}
-.hero-id{font-family:var(--display);font-size:12px;letter-spacing:.3em;color:var(--chrome-mid);margin-bottom:26px}
-.hero-id b{color:var(--violet);font-weight:500;white-space:nowrap}
-.hero h1{
-  font-size:clamp(46px,9vw,118px);line-height:.92;letter-spacing:-.035em;font-weight:700;
-  filter:drop-shadow(0 0 34px rgba(176,38,255,.28));
+/* Spline robot plays its welcome gesture on load; the greeting fades in beneath it */
+.hero-3d{width:100%;max-width:var(--content);height:min(58vh,600px);margin:0 auto 34px}
+.hero-3d spline-viewer{width:100%;height:100%;display:block}
+/* the scene's camera crops the legs; a neon stage line makes that edge deliberate */
+.hero-3d::after{content:"";position:absolute;left:50%;bottom:0;width:min(520px,80%);height:2px;transform:translateX(-50%);background:var(--violet);box-shadow:0 0 14px var(--violet),0 0 34px rgba(176,38,255,.6)}
+.greet{
+  display:block;font-family:var(--display);font-size:13px;letter-spacing:.34em;color:var(--gold);
+  text-shadow:0 0 12px rgba(255,196,0,.45);margin-bottom:12px;
 }
-.hero h1 .line2{display:block;color:var(--violet-hi);text-shadow:0 0 26px rgba(176,38,255,.55);background:none;-webkit-text-fill-color:currentColor}
-.hero-sub{max-width:56ch;margin-top:28px;font-size:18px;line-height:1.7}
-.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
+.hero h1{
+  font-size:clamp(40px,7.4vw,104px);line-height:.95;letter-spacing:-.03em;font-weight:700;color:var(--chrome-hi);
+  text-shadow:0 0 34px rgba(176,38,255,.35);
+}
+.greet,.hero h1{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
+.hero h1{transition-delay:.2s}
+/* set from <head> so the name is never painted then hidden; removed on greet or after a timeout */
+.greeting-pending .greet,.greeting-pending .hero h1{opacity:0;transform:translateY(14px)}
+.hero-id{font-family:var(--display);font-size:12px;letter-spacing:.3em;color:var(--chrome-mid);margin-top:22px}
+.hero-id b{color:var(--violet);font-weight:500;white-space:nowrap}
+.tagline{font-family:var(--display);font-weight:600;color:var(--text-hi);font-size:clamp(24px,3.4vw,44px);line-height:1.1;letter-spacing:-.02em;margin:30px 0 0}
+.tagline .line2{color:var(--violet-hi);text-shadow:0 0 22px rgba(176,38,255,.55)}
+.hero-sub{max-width:56ch;margin:22px auto 0;font-size:18px;line-height:1.7}
+.hero-cta{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:36px}
 .btn{
   font-family:var(--display);font-size:13px;letter-spacing:.16em;padding:14px 26px;text-decoration:none;
   border:1px solid var(--violet);color:#fff;background:rgba(176,38,255,.16);
@@ -119,8 +129,8 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 }
 .btn.ghost:hover{border-color:var(--chrome);color:#fff;box-shadow:0 0 20px rgba(212,198,232,.14)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-top:64px;border-top:1px solid var(--line)}
-.stat{padding:20px 24px 0 0;margin-right:24px;border-right:1px solid var(--line)}
-.stat:last-child{border-right:0;margin-right:0}
+.stat{padding:20px 12px 0;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
 .stat b{display:block;font-family:var(--display);font-size:34px;color:var(--chrome-hi);line-height:1;font-weight:600}
 .stat span{font-size:12.5px;letter-spacing:.06em;color:var(--chrome-mid)}
 
@@ -287,6 +297,8 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   .shell{margin-left:0;padding-top:56px}
   footer{margin-left:0;flex-direction:column}
   section{padding:82px 22px}
+  .hero{padding-top:24px}
+  .hero-3d{height:46vh}
   .stats{grid-template-columns:1fr 1fr;row-gap:20px}
   .stat{border-right:0}
 }
@@ -294,8 +306,17 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   *{animation:none!important;transition:none!important;scroll-behavior:auto}
   .rv{opacity:1;transform:none}
   section{transform:none}
+  .hero-3d{display:none}
 }
 </style>
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var r = document.documentElement;
+  r.classList.add('greeting-pending');
+  setTimeout(function(){ r.classList.remove('greeting-pending'); }, 6000);
+})();
+</script>
 </head>
 <body>
 
@@ -317,10 +338,15 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 
   <!-- ============ HERO ============ -->
   <section class="hero">
+    <div class="hero-3d">
+      <spline-viewer url="assets/nexbot.splinecode" background="transparent" loading="eager" events-target="global" aria-label="3D robot greeting visitors"></spline-viewer>
+    </div>
     <div class="wrap">
-      <div class="hero-id">RIDWAN KHONDOKER &nbsp;/&nbsp; <b>SYSTEMS ONLINE</b></div>
-      <h1><span class="chrome-text">I build and ship</span><span class="line2">web systems.</span></h1>
-      <p class="hero-sub">Senior developer and project manager. I take products from an empty repository to a platform real people use every day — writing the code, running the team, and staying on the hook after launch.</p>
+      <span class="greet">HELLO, I&rsquo;M</span>
+      <h1>Ridwan Khondoker</h1>
+      <div class="hero-id">SENIOR DEVELOPER &amp; PROJECT MANAGER &nbsp;/&nbsp; <b>SYSTEMS ONLINE</b></div>
+      <p class="tagline">I build and ship <span class="line2">web systems.</span></p>
+      <p class="hero-sub">I take products from an empty repository to a platform real people use every day — writing the code, running the team, and staying on the hook after launch.</p>
       <div class="hero-cta">
         <a class="btn" href="#work">See the work</a>
         <a class="btn ghost" href="#contact">Start a project</a>
@@ -572,9 +598,19 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   <span>BANGLADESH · INDIA · PHILIPPINES · USA · SLOVAKIA</span>
 </footer>
 
+<script type="module" src="https://cdn.jsdelivr.net/npm/@splinetool/viewer@2.0.57/build/spline-viewer.js"></script>
 <script>
 (function(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- hero greeting ---------- */
+  // The robot's start animation opens its arms ~1.2s after the scene loads; reveal the name with it.
+  var bot = document.querySelector('.hero-3d spline-viewer');
+  if(bot){
+    bot.addEventListener('load-complete', function(){
+      setTimeout(function(){ document.documentElement.classList.remove('greeting-pending'); }, 1200);
+    });
+  }
 
   /* ---------- skill bars ---------- */
   var skills = [
