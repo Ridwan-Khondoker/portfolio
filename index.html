@@ -10,20 +10,20 @@
 <style>
 :root{
   --void:#000000;
-  --panel:#0b0a11;
-  --panel-2:#121019;
-  --line:#241f33;
-  --chrome-hi:#eef1f6;
-  --chrome:#c3c8d2;
-  --chrome-mid:#878d9a;
-  --chrome-lo:#4a4f5b;
-  --violet:#a855ff;
-  --violet-lo:#7b2ff7;
-  --violet-hi:#d0a2ff;
-  --gold:#c9a227;
-  --gold-hi:#f0cf6b;
-  --text:#9aa0ad;
-  --text-hi:#e6e9ef;
+  --panel:#07050b;
+  --panel-2:#0c0913;
+  --line:#2b1840;
+  --chrome-hi:#f6f0ff;
+  --chrome:#d4c6e8;
+  --chrome-mid:#8f80a6;
+  --chrome-lo:#4d3f63;
+  --violet:#b026ff;
+  --violet-lo:#8a00e6;
+  --violet-hi:#d98cff;
+  --gold:#ffc400;
+  --gold-hi:#ffd84d;
+  --text:#ab9fc0;
+  --text-hi:#f3ecfc;
   --display:"Chakra Petch","Bahnschrift","DIN Alternate","Segoe UI Semibold",system-ui,sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --rail:96px;
@@ -35,35 +35,28 @@ body{
   font-family:var(--body);font-size:16px;line-height:1.65;
   -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
-  background:repeating-linear-gradient(to bottom,rgba(168,85,255,.035) 0 1px,transparent 1px 3px);
-  mix-blend-mode:screen;opacity:.5;
-}
-#scene3d{position:fixed;inset:0;z-index:-1;display:block;outline:none;pointer-events:none}
 h1,h2,h3,h4{font-family:var(--display);color:var(--text-hi);margin:0;font-weight:600;letter-spacing:-.01em}
 p{margin:0 0 1.1rem}
 a{color:inherit}
 img{max-width:100%}
-::selection{background:rgba(168,85,255,.35);color:#fff}
+::selection{background:rgba(176,38,255,.35);color:#fff}
 :focus-visible{outline:2px solid var(--violet);outline-offset:3px}
 
 /* ---------- chrome text ---------- */
 .chrome-text{
-  background:linear-gradient(178deg,#ffffff 0%,var(--chrome) 34%,#6a6f7b 52%,#f2f5fa 62%,#9aa0ac 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  color:var(--chrome-hi);
 }
 
 /* ---------- left spine ---------- */
 .spine{
   position:fixed;left:0;top:0;bottom:0;width:var(--rail);z-index:50;
   border-right:1px solid var(--line);
-  background:linear-gradient(90deg,#08070c,#0d0b13 60%,#08070c);
+  background:var(--panel);
   display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:22px 0;
 }
 .spine .mark{
   font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.06em;
-  color:var(--chrome-hi);text-shadow:0 0 14px rgba(168,85,255,.6);text-decoration:none;
+  color:var(--chrome-hi);text-shadow:0 0 14px rgba(176,38,255,.6);text-decoration:none;
 }
 .spine nav{display:flex;flex-direction:column;gap:20px;align-items:center}
 .tick{
@@ -83,22 +76,23 @@ img{max-width:100%}
 }
 
 /* ---------- shell ---------- */
-.shell{margin-left:var(--rail);perspective:1600px;perspective-origin:50% 40%}
-section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;transform-style:preserve-3d;will-change:transform,opacity}
+.shell{margin-left:var(--rail);perspective:1600px;perspective-origin:50% 40%;overflow-x:clip}
+section{padding:120px clamp(24px,5vw,88px);position:relative;transform-style:preserve-3d;will-change:transform,opacity}
+.wrap{max-width:calc(1280px - 2 * clamp(24px,5vw,88px));transform-style:preserve-3d}
 .eyebrow{
   font-family:var(--display);font-size:12px;letter-spacing:.28em;color:var(--violet);
   display:flex;align-items:center;gap:12px;margin-bottom:18px;
 }
-.eyebrow::before{content:"";width:28px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.eyebrow::before{content:"";width:28px;height:1px;background:var(--gold);box-shadow:0 0 8px var(--gold)}
 .h2{font-size:clamp(28px,3.6vw,46px);line-height:1.08;margin-bottom:20px;letter-spacing:-.02em}
 .lede{max-width:62ch;font-size:17px;color:var(--text)}
-.rule{height:1px;background:linear-gradient(90deg,var(--line) 0%,var(--violet) 35%,var(--gold) 65%,var(--line) 100%);opacity:.55;margin:0 clamp(24px,5vw,88px);max-width:1280px}
+.rule{height:1px;background:var(--line);margin:0 clamp(24px,5vw,88px);max-width:calc(1280px - 2 * clamp(24px,5vw,88px))}
 
 /* ---------- hero ---------- */
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:90px;padding-bottom:90px;overflow:hidden}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:90px;padding-bottom:90px}
 .hero::after{
-  content:"";position:absolute;right:-14%;top:6%;width:58vw;height:58vw;border-radius:50%;
-  background:radial-gradient(circle at 50% 50%,rgba(123,47,247,.20),rgba(123,47,247,.05) 45%,transparent 68%);
+  content:"";position:absolute;right:-8vw;top:10%;width:46vw;height:46vw;border-radius:50%;
+  background:var(--violet-lo);opacity:.16;filter:blur(140px);
   z-index:0;pointer-events:none;
 }
 .hero>*{position:relative;z-index:1}
@@ -106,22 +100,22 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 .hero-id b{color:var(--violet);font-weight:500}
 .hero h1{
   font-size:clamp(46px,9vw,118px);line-height:.92;letter-spacing:-.035em;font-weight:700;
-  filter:drop-shadow(0 0 34px rgba(168,85,255,.28));
+  filter:drop-shadow(0 0 34px rgba(176,38,255,.28));
 }
-.hero h1 .line2{display:block;color:var(--violet-hi);text-shadow:0 0 26px rgba(168,85,255,.55);background:none;-webkit-text-fill-color:currentColor}
+.hero h1 .line2{display:block;color:var(--violet-hi);text-shadow:0 0 26px rgba(176,38,255,.55);background:none;-webkit-text-fill-color:currentColor}
 .hero-sub{max-width:56ch;margin-top:28px;font-size:18px;line-height:1.7}
 .hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
 .btn{
   font-family:var(--display);font-size:13px;letter-spacing:.16em;padding:14px 26px;text-decoration:none;
-  border:1px solid var(--violet);color:#fff;background:linear-gradient(180deg,rgba(168,85,255,.22),rgba(123,47,247,.06));
-  box-shadow:0 0 0 1px rgba(168,85,255,.12) inset,0 0 22px rgba(123,47,247,.25);
+  border:1px solid var(--violet);color:#fff;background:rgba(176,38,255,.16);
+  box-shadow:0 0 0 1px rgba(176,38,255,.12) inset,0 0 22px rgba(138,0,230,.25);
   transition:box-shadow .2s,transform .12s,background .2s;
 }
-.btn:hover{box-shadow:0 0 0 1px rgba(168,85,255,.3) inset,0 0 34px rgba(168,85,255,.55);transform:translateY(-1px)}
+.btn:hover{box-shadow:0 0 0 1px rgba(176,38,255,.3) inset,0 0 34px rgba(176,38,255,.55);transform:translateY(-1px)}
 .btn.ghost{
-  border-color:var(--chrome-lo);color:var(--chrome);background:linear-gradient(180deg,rgba(195,200,210,.09),transparent);box-shadow:none;
+  border-color:var(--chrome-lo);color:var(--chrome);background:transparent;box-shadow:none;
 }
-.btn.ghost:hover{border-color:var(--chrome);color:#fff;box-shadow:0 0 20px rgba(195,200,210,.14)}
+.btn.ghost:hover{border-color:var(--chrome);color:#fff;box-shadow:0 0 20px rgba(212,198,232,.14)}
 .stats{display:flex;flex-wrap:wrap;gap:0;margin-top:64px;border-top:1px solid var(--line);max-width:880px}
 .stat{padding:20px 30px 0 0;margin-right:30px;border-right:1px solid var(--line);min-width:150px}
 .stat:last-child{border-right:0}
@@ -131,12 +125,12 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 /* ---------- about ---------- */
 .about-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,72px);align-items:start}
 .plate{
-  border:1px solid var(--line);background:linear-gradient(160deg,var(--panel-2),var(--panel) 60%);
+  border:1px solid var(--line);background:var(--panel);
   position:relative;padding:30px 28px;
 }
 .plate::before{
   content:"";position:absolute;left:-1px;top:18px;bottom:18px;width:2px;
-  background:linear-gradient(180deg,transparent,var(--violet),transparent);
+  background:var(--violet);box-shadow:0 0 10px var(--violet);
 }
 .plate h4{font-size:15px;letter-spacing:.02em;margin-bottom:6px}
 .plate .k{font-family:var(--display);font-size:11px;letter-spacing:.22em;color:var(--chrome-mid);margin-bottom:14px}
@@ -148,10 +142,10 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 /* ---------- clients ---------- */
 .clients{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:44px}
 .client{
-  border:1px solid var(--line);padding:22px 20px;background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 70%);
+  border:1px solid var(--line);padding:22px 20px;background:var(--panel);
   position:relative;transition:border-color .2s,background .2s;
 }
-.client:hover{border-color:rgba(168,85,255,.6);background:linear-gradient(180deg,rgba(168,85,255,.1),transparent 70%)}
+.client:hover{border-color:rgba(176,38,255,.6);background:rgba(176,38,255,.08)}
 .client:hover .cname{color:#fff}
 .cname{font-family:var(--display);font-size:19px;color:var(--chrome);display:block;margin-bottom:5px;transition:color .2s}
 .crole{font-size:13px;color:var(--chrome-mid)}
@@ -161,10 +155,10 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 .ceiling{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
 .ceil{
   border:1px solid var(--line);padding:26px 24px 24px;
-  background:linear-gradient(165deg,rgba(255,255,255,.05),rgba(5,5,7,0) 55%),var(--panel);
+  background:var(--panel);
   position:relative;
 }
-.ceil .notch{width:34px;height:3px;background:var(--gold);box-shadow:0 0 12px rgba(201,162,39,.6);margin-bottom:18px}
+.ceil .notch{width:34px;height:3px;background:var(--gold);box-shadow:0 0 12px rgba(255,196,0,.6);margin-bottom:18px}
 .ceil h3{font-size:19px;margin-bottom:10px}
 .ceil p{font-size:14.5px;margin:0;color:var(--text)}
 .ceil .cap{
@@ -177,17 +171,13 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 .bar-row .nm{font-family:var(--display);font-size:15px;color:var(--text-hi);letter-spacing:.01em}
 .bar-row .pc{font-family:var(--display);font-size:13px;color:var(--violet-hi)}
 .track{
-  height:10px;background:linear-gradient(180deg,#16131f,#0a090e);border:1px solid var(--line);position:relative;overflow:hidden;
-}
-.track .grid{
-  position:absolute;inset:0;
-  background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(255,255,255,.1) calc(10% - 1px) 10%);
+  height:10px;background:var(--panel-2);border:1px solid var(--line);position:relative;overflow:hidden;
 }
 .fill{
-  height:100%;width:0;background:linear-gradient(90deg,var(--violet-lo),var(--violet) 70%,var(--violet-hi));
-  box-shadow:0 0 14px rgba(168,85,255,.75);transition:width 1.1s cubic-bezier(.2,.8,.2,1);position:relative;
+  height:100%;width:0;background:var(--violet);
+  box-shadow:0 0 14px rgba(176,38,255,.75);transition:width 1.1s cubic-bezier(.2,.8,.2,1);position:relative;
 }
-.cap-mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold);box-shadow:0 0 8px rgba(201,162,39,.8);opacity:.9}
+.cap-mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold);box-shadow:0 0 8px rgba(255,196,0,.8);opacity:.9}
 .eff{font-size:12.5px;color:var(--chrome-mid);margin-top:7px;display:block}
 
 /* ---------- projects ---------- */
@@ -196,14 +186,14 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
   display:grid;grid-template-columns:64px 1fr 220px;gap:26px;padding:30px 0;border-bottom:1px solid var(--line);
   align-items:start;transition:background .25s;
 }
-.proj:hover{background:linear-gradient(90deg,rgba(168,85,255,.07),transparent 60%)}
+.proj:hover{background:rgba(176,38,255,.06)}
 .proj .idx{font-family:var(--display);font-size:13px;color:var(--violet);padding-top:4px}
 .proj h3{font-size:clamp(20px,2.2vw,27px);margin-bottom:8px}
 .proj p{font-size:14.5px;margin:0;max-width:64ch}
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
 .tag{
   font-family:var(--display);font-size:11px;letter-spacing:.1em;padding:4px 10px;
-  border:1px solid rgba(195,200,210,.22);color:var(--chrome-mid);
+  border:1px solid rgba(212,198,232,.22);color:var(--chrome-mid);
 }
 .meta{font-family:var(--display);font-size:12px;letter-spacing:.1em;color:var(--chrome-mid);text-align:right;padding-top:6px}
 .meta .done{color:var(--chrome)}
@@ -215,28 +205,23 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 }
 .card::after{
   content:"";position:absolute;inset:auto 0 0 0;height:1px;
-  background:linear-gradient(90deg,var(--violet),transparent);
+  background:var(--violet);
 }
 .live{
   display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-size:11px;letter-spacing:.18em;
   color:var(--violet-hi);margin-bottom:14px;
 }
-.dot{width:7px;height:7px;border-radius:50%;background:var(--violet);box-shadow:0 0 10px var(--violet);animation:pulse 2.4s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--violet);box-shadow:0 0 10px var(--violet)}
 .card h3{font-size:20px;margin-bottom:9px}
 .card p{font-size:14.5px;margin-bottom:16px}
 .prog-mini{height:4px;background:#15121d;border:1px solid var(--line);position:relative}
-.prog-mini i{display:block;height:100%;background:linear-gradient(90deg,var(--violet-lo),var(--violet-hi));box-shadow:0 0 10px rgba(168,85,255,.6)}
+.prog-mini i{display:block;height:100%;background:var(--violet);box-shadow:0 0 10px rgba(176,38,255,.6)}
 .prog-label{display:flex;justify-content:space-between;font-family:var(--display);font-size:11px;letter-spacing:.12em;color:var(--chrome-mid);margin-top:8px}
 
 /* ---------- globe ---------- */
 .globe-wrap{display:grid;grid-template-columns:1fr 380px;gap:clamp(24px,4vw,56px);align-items:center;margin-top:36px}
 .globe-stage{position:relative;aspect-ratio:1/1;max-width:620px;width:100%;margin:0 auto}
 #globe{width:100%;height:100%;display:block}
-.globe-stage::after{
-  content:"";position:absolute;inset:12%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 50% 55%,rgba(123,47,247,.14),transparent 62%);
-}
 .offices{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .offices li{padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start;cursor:default}
 .offices li .pin{width:9px;height:9px;margin-top:7px;border-radius:50%;background:var(--violet);box-shadow:0 0 10px var(--violet);flex:none}
@@ -248,7 +233,6 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
 .offices li:hover .cities{color:var(--violet)}
 
 /* ---------- contact ---------- */
-.contact{background:linear-gradient(180deg,transparent,rgba(123,47,247,.07))}
 .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,70px);margin-top:40px}
 .field{margin-bottom:18px}
 .field label{display:block;font-family:var(--display);font-size:11px;letter-spacing:.2em;color:var(--chrome-mid);margin-bottom:7px}
@@ -256,7 +240,7 @@ section{padding:120px clamp(24px,5vw,88px);position:relative;max-width:1280px;tr
   width:100%;background:#0a0910;border:1px solid var(--line);color:var(--text-hi);
   padding:12px 14px;font-family:var(--body);font-size:15px;transition:border-color .2s,box-shadow .2s;
 }
-.field input:focus,.field textarea:focus{border-color:var(--violet);box-shadow:0 0 0 1px rgba(168,85,255,.3),0 0 18px rgba(123,47,247,.25);outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--violet);box-shadow:0 0 0 1px rgba(176,38,255,.3),0 0 18px rgba(138,0,230,.25);outline:none}
 .field textarea{min-height:130px;resize:vertical}
 .direct li{list-style:none;padding:16px 0;border-bottom:1px solid var(--line)}
 .direct{padding:0;margin:0 0 24px}
@@ -307,13 +291,10 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   *{animation:none!important;transition:none!important;scroll-behavior:auto}
   .rv{opacity:1;transform:none}
   section{transform:none}
-  #scene3d{display:none}
 }
 </style>
 </head>
 <body>
-
-<canvas id="scene3d" aria-hidden="true"></canvas>
 
 <aside class="spine">
   <a href="#top" class="mark">RM</a>
@@ -333,44 +314,48 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 
   <!-- ============ HERO ============ -->
   <section class="hero">
-    <div class="hero-id">RIDWAN MAHIN &nbsp;/&nbsp; <b>SYSTEMS ONLINE</b></div>
-    <h1><span class="chrome-text">I build and ship</span><span class="line2">web systems.</span></h1>
-    <p class="hero-sub">Senior developer and project manager. I take products from an empty repository to a platform real people use every day — writing the code, running the team, and staying on the hook after launch.</p>
-    <div class="hero-cta">
-      <a class="btn" href="#work">See the work</a>
-      <a class="btn ghost" href="#contact">Start a project</a>
-    </div>
-    <div class="stats">
-      <div class="stat"><b>7+</b><span>Years building for the web</span></div>
-      <div class="stat"><b>20+</b><span>Projects delivered</span></div>
-      <div class="stat"><b>5</b><span>Countries the team spans</span></div>
-      <div class="stat"><b>2</b><span>Companies I lead delivery for</span></div>
+    <div class="wrap">
+      <div class="hero-id">RIDWAN MAHIN &nbsp;/&nbsp; <b>SYSTEMS ONLINE</b></div>
+      <h1><span class="chrome-text">I build and ship</span><span class="line2">web systems.</span></h1>
+      <p class="hero-sub">Senior developer and project manager. I take products from an empty repository to a platform real people use every day — writing the code, running the team, and staying on the hook after launch.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#work">See the work</a>
+        <a class="btn ghost" href="#contact">Start a project</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>7+</b><span>Years building for the web</span></div>
+        <div class="stat"><b>20+</b><span>Projects delivered</span></div>
+        <div class="stat"><b>5</b><span>Countries the team spans</span></div>
+        <div class="stat"><b>2</b><span>Companies I lead delivery for</span></div>
+      </div>
     </div>
   </section>
   <div class="rule"></div>
 
   <!-- ============ ABOUT ============ -->
   <section id="about">
-    <div class="eyebrow">About me</div>
-    <div class="about-grid">
-      <div class="rv">
-        <h2 class="h2">Half developer, half project manager, and that is the point.</h2>
-        <p class="lede">I am Ridwan — Senior Developer and Project Manager at Tribe Marketing and Happy to Deliver. Most of my work sits where engineering meets delivery: scoping the build, writing the architecture, coding the hard parts, then keeping a distributed team moving until it is live.</p>
-        <p class="lede">Day to day that means Laravel and Vue on the platform side, Next.js on the marketing side, and the unglamorous work in between — database design, access control, QA plans, cost estimates, and the client call where all of it has to make sense in plain language.</p>
-        <p class="lede">I like projects that are slightly too big for the timeline. That is usually where the interesting architecture decisions live.</p>
-      </div>
-      <div class="plate rv">
-        <div class="k">PROFILE</div>
-        <h4>Khondoker Ridwan Mahin</h4>
-        <ul class="facts">
-          <li><span>Role</span><b>Senior Developer &amp; PM</b></li>
-          <li><span>Currently at</span><b>Tribe Marketing &amp; Happy to Deliver</b></li>
-          <li><span>Based in</span><b>Dhaka, Bangladesh</b></li>
-          <li><span>Building since</span><b>2019</b></li>
-          <li><span>Core stack</span><b>Laravel · Vue · Next</b></li>
-          <li><span>Team</span><b>5 countries</b></li>
-          <li><span>Availability</span><b>Selective</b></li>
-        </ul>
+    <div class="wrap">
+      <div class="eyebrow">About me</div>
+      <div class="about-grid">
+        <div class="rv">
+          <h2 class="h2">Half developer, half project manager, and that is the point.</h2>
+          <p class="lede">I am Ridwan — Senior Developer and Project Manager at Tribe Marketing and Happy to Deliver. Most of my work sits where engineering meets delivery: scoping the build, writing the architecture, coding the hard parts, then keeping a distributed team moving until it is live.</p>
+          <p class="lede">Day to day that means Laravel and Vue on the platform side, Next.js on the marketing side, and the unglamorous work in between — database design, access control, QA plans, cost estimates, and the client call where all of it has to make sense in plain language.</p>
+          <p class="lede">I like projects that are slightly too big for the timeline. That is usually where the interesting architecture decisions live.</p>
+        </div>
+        <div class="plate rv">
+          <div class="k">PROFILE</div>
+          <h4>Khondoker Ridwan Mahin</h4>
+          <ul class="facts">
+            <li><span>Role</span><b>Senior Developer &amp; PM</b></li>
+            <li><span>Currently at</span><b>Tribe Marketing &amp; Happy to Deliver</b></li>
+            <li><span>Based in</span><b>Dhaka, Bangladesh</b></li>
+            <li><span>Building since</span><b>2019</b></li>
+            <li><span>Core stack</span><b>Laravel · Vue · Next</b></li>
+            <li><span>Team</span><b>5 countries</b></li>
+            <li><span>Availability</span><b>Selective</b></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -378,147 +363,155 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 
   <!-- ============ CLIENTS ============ -->
   <section id="clients">
-    <div class="eyebrow">Previous clients</div>
-    <h2 class="h2">Who I have built for.</h2>
-    <p class="lede">A mix of product companies, agencies and brands — some for a single launch, most for years.</p>
-    <div class="clients">
-      <div class="client rv"><i class="corner"></i><span class="cname">Happy to Deliver</span><span class="crole">Package logistics platform · USA</span></div>
-      <div class="client rv"><i class="corner"></i><span class="cname">Tribe Marketing</span><span class="crole">Web &amp; campaign delivery</span></div>
-      <div class="client rv"><i class="corner"></i><span class="cname">Dhaka Bank PLC</span><span class="crole">Product campaign strategy</span></div>
-      <div class="client rv"><i class="corner"></i><span class="cname">United Custom Clothing</span><span class="crole">Custom apparel storefront</span></div>
-      <div class="client rv"><i class="corner"></i><span class="cname">Synch Soft Technologies</span><span class="crole">Engineering partner · India</span></div>
-      <div class="client rv"><i class="corner"></i><span class="cname">Your brand</span><span class="crole">Open for the next one</span></div>
+    <div class="wrap">
+      <div class="eyebrow">Previous clients</div>
+      <h2 class="h2">Who I have built for.</h2>
+      <p class="lede">A mix of product companies, agencies and brands — some for a single launch, most for years.</p>
+      <div class="clients">
+        <div class="client rv"><i class="corner"></i><span class="cname">Happy to Deliver</span><span class="crole">Package logistics platform · USA</span></div>
+        <div class="client rv"><i class="corner"></i><span class="cname">Tribe Marketing</span><span class="crole">Web &amp; campaign delivery</span></div>
+        <div class="client rv"><i class="corner"></i><span class="cname">Dhaka Bank PLC</span><span class="crole">Product campaign strategy</span></div>
+        <div class="client rv"><i class="corner"></i><span class="cname">United Custom Clothing</span><span class="crole">Custom apparel storefront</span></div>
+        <div class="client rv"><i class="corner"></i><span class="cname">Synch Soft Technologies</span><span class="crole">Engineering partner · India</span></div>
+        <div class="client rv"><i class="corner"></i><span class="cname">Your brand</span><span class="crole">Open for the next one</span></div>
+      </div>
     </div>
   </section>
   <div class="rule"></div>
 
   <!-- ============ SKILLS ============ -->
   <section id="skills">
-    <div class="eyebrow">Skill ceiling</div>
-    <h2 class="h2">How far I can take a project before I need help.</h2>
-    <p class="lede">The gold mark on each bar below is my ceiling in that skill — the point where I stop being the best person for the job and bring in a specialist.</p>
+    <div class="wrap">
+      <div class="eyebrow">Skill ceiling</div>
+      <h2 class="h2">How far I can take a project before I need help.</h2>
+      <p class="lede">The gold mark on each bar below is my ceiling in that skill — the point where I stop being the best person for the job and bring in a specialist.</p>
 
-    <div class="ceiling">
-      <div class="ceil rv">
-        <div class="notch"></div>
-        <h3>Architecture &amp; delivery</h3>
-        <p>Design the data model, the access rules and the release plan for a multi-tenant platform, then own it through to production.</p>
-        <span class="cap">CEILING — ENTERPRISE SCALE</span>
+      <div class="ceiling">
+        <div class="ceil rv">
+          <div class="notch"></div>
+          <h3>Architecture &amp; delivery</h3>
+          <p>Design the data model, the access rules and the release plan for a multi-tenant platform, then own it through to production.</p>
+          <span class="cap">CEILING — ENTERPRISE SCALE</span>
+        </div>
+        <div class="ceil rv">
+          <div class="notch"></div>
+          <h3>Full-stack engineering</h3>
+          <p>Ship the backend, the admin panel and the client app myself. Hand off only deep infra, native mobile and heavy data work.</p>
+          <span class="cap">CEILING — LEAD DEVELOPER</span>
+        </div>
+        <div class="ceil rv">
+          <div class="notch"></div>
+          <h3>Team &amp; client leadership</h3>
+          <p>Run a distributed team across time zones, hold the budget, and translate engineering reality for founders and stakeholders.</p>
+          <span class="cap">CEILING — DELIVERY LEAD</span>
+        </div>
       </div>
-      <div class="ceil rv">
-        <div class="notch"></div>
-        <h3>Full-stack engineering</h3>
-        <p>Ship the backend, the admin panel and the client app myself. Hand off only deep infra, native mobile and heavy data work.</p>
-        <span class="cap">CEILING — LEAD DEVELOPER</span>
-      </div>
-      <div class="ceil rv">
-        <div class="notch"></div>
-        <h3>Team &amp; client leadership</h3>
-        <p>Run a distributed team across time zones, hold the budget, and translate engineering reality for founders and stakeholders.</p>
-        <span class="cap">CEILING — DELIVERY LEAD</span>
-      </div>
-    </div>
 
-    <div class="eyebrow" style="margin-top:80px">Skill set</div>
-    <h2 class="h2">Where the hours have gone.</h2>
-    <div class="bars" id="bars">
-      <!-- bar rows injected -->
+      <div class="eyebrow" style="margin-top:80px">Skill set</div>
+      <h2 class="h2">Where the hours have gone.</h2>
+      <div class="bars" id="bars">
+        <!-- bar rows injected -->
+      </div>
     </div>
   </section>
   <div class="rule"></div>
 
   <!-- ============ WORK ============ -->
   <section id="work">
-    <div class="eyebrow">Selected work</div>
-    <h2 class="h2">Projects I have worked on.</h2>
-    <div class="projects">
+    <div class="wrap">
+      <div class="eyebrow">Selected work</div>
+      <h2 class="h2">Projects I have worked on.</h2>
+      <div class="projects">
 
-      <article class="proj rv">
-        <div class="idx">01</div>
-        <div>
-          <h3>Happy to Deliver — delivery platform</h3>
-          <p>Replaced a legacy no-code app with a Laravel 12 monolith: 49 tables, region-to-building access scoping, passwordless email and OTP login, an admin panel in Filament, and a Vue 3 operations app used by couriers in the field.</p>
-          <div class="tags"><span class="tag">LARAVEL 12</span><span class="tag">VUE 3</span><span class="tag">MYSQL</span><span class="tag">FILAMENT</span><span class="tag">S3</span></div>
-        </div>
-        <div class="meta"><span class="done">DONE</span><br>Lead developer</div>
-      </article>
+        <article class="proj rv">
+          <div class="idx">01</div>
+          <div>
+            <h3>Happy to Deliver — delivery platform</h3>
+            <p>Replaced a legacy no-code app with a Laravel 12 monolith: 49 tables, region-to-building access scoping, passwordless email and OTP login, an admin panel in Filament, and a Vue 3 operations app used by couriers in the field.</p>
+            <div class="tags"><span class="tag">LARAVEL 12</span><span class="tag">VUE 3</span><span class="tag">MYSQL</span><span class="tag">FILAMENT</span><span class="tag">S3</span></div>
+          </div>
+          <div class="meta"><span class="done">DONE</span><br>Lead developer</div>
+        </article>
 
-      <article class="proj rv">
-        <div class="idx">02</div>
-        <div>
-          <h3>United Custom Clothing</h3>
-          <p>A custom apparel storefront built on Next.js — product configurator, order flow and a content layer the client can run without a developer on call.</p>
-          <div class="tags"><span class="tag">NEXT.JS</span><span class="tag">REACT</span><span class="tag">STOREFRONT</span></div>
-        </div>
-        <div class="meta"><span class="done">DONE</span><br>Build &amp; launch</div>
-      </article>
+        <article class="proj rv">
+          <div class="idx">02</div>
+          <div>
+            <h3>United Custom Clothing</h3>
+            <p>A custom apparel storefront built on Next.js — product configurator, order flow and a content layer the client can run without a developer on call.</p>
+            <div class="tags"><span class="tag">NEXT.JS</span><span class="tag">REACT</span><span class="tag">STOREFRONT</span></div>
+          </div>
+          <div class="meta"><span class="done">DONE</span><br>Build &amp; launch</div>
+        </article>
 
-      <article class="proj rv">
-        <div class="idx">03</div>
-        <div>
-          <h3>Dhaka Bank — BNPL campaign</h3>
-          <p>Full marketing strategy and an 18-slide pitch deck for a buy-now-pay-later device product, from positioning through to channel plan and launch creative.</p>
-          <div class="tags"><span class="tag">STRATEGY</span><span class="tag">CAMPAIGN</span><span class="tag">PITCH</span></div>
-        </div>
-        <div class="meta"><span class="done">DONE</span><br>Strategy lead</div>
-      </article>
+        <article class="proj rv">
+          <div class="idx">03</div>
+          <div>
+            <h3>Dhaka Bank — BNPL campaign</h3>
+            <p>Full marketing strategy and an 18-slide pitch deck for a buy-now-pay-later device product, from positioning through to channel plan and launch creative.</p>
+            <div class="tags"><span class="tag">STRATEGY</span><span class="tag">CAMPAIGN</span><span class="tag">PITCH</span></div>
+          </div>
+          <div class="meta"><span class="done">DONE</span><br>Strategy lead</div>
+        </article>
 
-      <article class="proj rv">
-        <div class="idx">04</div>
-        <div>
-          <h3>QA programme &amp; cost model</h3>
-          <p>A twelve-page test plan and three-tier budget covering API testing, end-to-end coverage, static analysis and application monitoring — so a founder could choose a quality level with the price attached.</p>
-          <div class="tags"><span class="tag">CYPRESS</span><span class="tag">POSTMAN</span><span class="tag">SONARQUBE</span><span class="tag">PEST</span></div>
-        </div>
-        <div class="meta"><span class="done">DONE</span><br>Author</div>
-      </article>
+        <article class="proj rv">
+          <div class="idx">04</div>
+          <div>
+            <h3>QA programme &amp; cost model</h3>
+            <p>A twelve-page test plan and three-tier budget covering API testing, end-to-end coverage, static analysis and application monitoring — so a founder could choose a quality level with the price attached.</p>
+            <div class="tags"><span class="tag">CYPRESS</span><span class="tag">POSTMAN</span><span class="tag">SONARQUBE</span><span class="tag">PEST</span></div>
+          </div>
+          <div class="meta"><span class="done">DONE</span><br>Author</div>
+        </article>
 
-      <article class="proj rv">
-        <div class="idx">05</div>
-        <div>
-          <h3>Production starter template</h3>
-          <p>An internal Next.js 15 and Supabase starter with auth, database access and deployment wired up, so new client builds start at week three instead of week one.</p>
-          <div class="tags"><span class="tag">NEXT.JS 15</span><span class="tag">SUPABASE</span><span class="tag">VERCEL</span><span class="tag">AWS</span></div>
-        </div>
-        <div class="meta"><span class="done">DONE</span><br>Author</div>
-      </article>
+        <article class="proj rv">
+          <div class="idx">05</div>
+          <div>
+            <h3>Production starter template</h3>
+            <p>An internal Next.js 15 and Supabase starter with auth, database access and deployment wired up, so new client builds start at week three instead of week one.</p>
+            <div class="tags"><span class="tag">NEXT.JS 15</span><span class="tag">SUPABASE</span><span class="tag">VERCEL</span><span class="tag">AWS</span></div>
+          </div>
+          <div class="meta"><span class="done">DONE</span><br>Author</div>
+        </article>
 
+      </div>
     </div>
   </section>
   <div class="rule"></div>
 
   <!-- ============ CURRENT ============ -->
   <section id="current">
-    <div class="eyebrow">Current projects</div>
-    <h2 class="h2">On my desk right now.</h2>
-    <div class="now">
-      <div class="card rv">
-        <span class="live"><i class="dot"></i>IN PROGRESS</span>
-        <h3>Yardi integration</h3>
-        <p>A read-only sync of resident, unit and lease data into the delivery platform, replacing fragile email matching with a real property-system link.</p>
-        <div class="prog-mini"><i style="width:45%"></i></div>
-        <div class="prog-label"><span>SCOPING &amp; API CALLS</span><span>45%</span></div>
-      </div>
-      <div class="card rv">
-        <span class="live"><i class="dot"></i>IN PROGRESS</span>
-        <h3>Security &amp; compliance review</h3>
-        <p>Closing the gaps that would fail an audit — hashed one-time codes, a documented backup policy, and a decision on whether formal certification is worth it yet.</p>
-        <div class="prog-mini"><i style="width:60%"></i></div>
-        <div class="prog-label"><span>REMEDIATION</span><span>60%</span></div>
-      </div>
-      <div class="card rv">
-        <span class="live"><i class="dot"></i>IN PROGRESS</span>
-        <h3>Notification reliability</h3>
-        <p>Tracing why some residents never receive a delivery alert, and giving them a self-service route to fix carrier-level blocks without waiting on support.</p>
-        <div class="prog-mini"><i style="width:70%"></i></div>
-        <div class="prog-label"><span>FIX IN REVIEW</span><span>70%</span></div>
-      </div>
-      <div class="card rv">
-        <span class="live"><i class="dot"></i>PLANNING</span>
-        <h3>Team &amp; budget build-out</h3>
-        <p>A company-wide budget model and two new hires, so delivery capacity grows without the quality dropping.</p>
-        <div class="prog-mini"><i style="width:30%"></i></div>
-        <div class="prog-label"><span>APPROVALS</span><span>30%</span></div>
+    <div class="wrap">
+      <div class="eyebrow">Current projects</div>
+      <h2 class="h2">On my desk right now.</h2>
+      <div class="now">
+        <div class="card rv">
+          <span class="live"><i class="dot"></i>IN PROGRESS</span>
+          <h3>Yardi integration</h3>
+          <p>A read-only sync of resident, unit and lease data into the delivery platform, replacing fragile email matching with a real property-system link.</p>
+          <div class="prog-mini"><i style="width:45%"></i></div>
+          <div class="prog-label"><span>SCOPING &amp; API CALLS</span><span>45%</span></div>
+        </div>
+        <div class="card rv">
+          <span class="live"><i class="dot"></i>IN PROGRESS</span>
+          <h3>Security &amp; compliance review</h3>
+          <p>Closing the gaps that would fail an audit — hashed one-time codes, a documented backup policy, and a decision on whether formal certification is worth it yet.</p>
+          <div class="prog-mini"><i style="width:60%"></i></div>
+          <div class="prog-label"><span>REMEDIATION</span><span>60%</span></div>
+        </div>
+        <div class="card rv">
+          <span class="live"><i class="dot"></i>IN PROGRESS</span>
+          <h3>Notification reliability</h3>
+          <p>Tracing why some residents never receive a delivery alert, and giving them a self-service route to fix carrier-level blocks without waiting on support.</p>
+          <div class="prog-mini"><i style="width:70%"></i></div>
+          <div class="prog-label"><span>FIX IN REVIEW</span><span>70%</span></div>
+        </div>
+        <div class="card rv">
+          <span class="live"><i class="dot"></i>PLANNING</span>
+          <h3>Team &amp; budget build-out</h3>
+          <p>A company-wide budget model and two new hires, so delivery capacity grows without the quality dropping.</p>
+          <div class="prog-mini"><i style="width:30%"></i></div>
+          <div class="prog-label"><span>APPROVALS</span><span>30%</span></div>
+        </div>
       </div>
     </div>
   </section>
@@ -526,41 +519,45 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 
   <!-- ============ NETWORK ============ -->
   <section id="network">
-    <div class="eyebrow">Global network</div>
-    <h2 class="h2">Where the work happens.</h2>
-    <p class="lede">Offices and team across five countries and a dozen cities — which means something is always moving on your project. Hover a country to spin the globe to it.</p>
-    <div class="globe-wrap">
-      <div class="globe-stage"><canvas id="globe" aria-label="Rotating globe showing office locations"></canvas></div>
-      <ul class="offices">
-        <li class="hq" data-lon="90.41"><i class="pin"></i><div><span class="city">Bangladesh</span><span class="desc">Headquarters — project management, design and front-end.</span><span class="cities">Dhaka</span></div></li>
-        <li data-lon="77.59"><i class="pin"></i><div><span class="city">India</span><span class="desc">Engineering — platform development and backend delivery.</span><span class="cities">Bengaluru · Hyderabad · Noida</span></div></li>
-        <li data-lon="120.98"><i class="pin"></i><div><span class="city">Philippines</span><span class="desc">Operations and support — coverage across the working day.</span><span class="cities">Manila · Cebu · Davao</span></div></li>
-        <li data-lon="-74.17"><i class="pin"></i><div><span class="city">United States</span><span class="desc">Client operations — field teams and day-to-day platform users.</span><span class="cities">Newark, NJ · Chicago, IL · Austin, TX</span></div></li>
-        <li data-lon="17.11"><i class="pin"></i><div><span class="city">Slovakia</span><span class="desc">European delivery — QA and front-end support.</span><span class="cities">Bratislava · Košice</span></div></li>
-      </ul>
+    <div class="wrap">
+      <div class="eyebrow">Global network</div>
+      <h2 class="h2">Where the work happens.</h2>
+      <p class="lede">Offices and team across five countries and a dozen cities — which means something is always moving on your project. Hover a country to spin the globe to it.</p>
+      <div class="globe-wrap">
+        <div class="globe-stage"><canvas id="globe" aria-label="Rotating globe showing office locations"></canvas></div>
+        <ul class="offices">
+          <li class="hq" data-lon="90.41"><i class="pin"></i><div><span class="city">Bangladesh</span><span class="desc">Headquarters — project management, design and front-end.</span><span class="cities">Dhaka</span></div></li>
+          <li data-lon="77.59"><i class="pin"></i><div><span class="city">India</span><span class="desc">Engineering — platform development and backend delivery.</span><span class="cities">Bengaluru · Hyderabad · Noida</span></div></li>
+          <li data-lon="120.98"><i class="pin"></i><div><span class="city">Philippines</span><span class="desc">Operations and support — coverage across the working day.</span><span class="cities">Manila · Cebu · Davao</span></div></li>
+          <li data-lon="-74.17"><i class="pin"></i><div><span class="city">United States</span><span class="desc">Client operations — field teams and day-to-day platform users.</span><span class="cities">Newark, NJ · Chicago, IL · Austin, TX</span></div></li>
+          <li data-lon="17.11"><i class="pin"></i><div><span class="city">Slovakia</span><span class="desc">European delivery — QA and front-end support.</span><span class="cities">Bratislava · Košice</span></div></li>
+        </ul>
+      </div>
     </div>
   </section>
   <div class="rule"></div>
 
   <!-- ============ CONTACT ============ -->
-  <section id="contact" class="contact">
-    <div class="eyebrow">Contact</div>
-    <h2 class="h2">Tell me what you are building.</h2>
-    <div class="contact-grid">
-      <div>
-        <ul class="direct">
-          <li><span class="k">EMAIL</span><a href="mailto:hello@ridwanmahin.com">hello@ridwanmahin.com</a></li>
-          <li><span class="k">BASED IN</span><span>Dhaka, Bangladesh — GMT+6</span></li>
-          <li><span class="k">RESPONSE TIME</span><span>Within one working day</span></li>
-        </ul>
-        <p class="lede">Send a few lines about the project, the deadline you are working to, and whether you need a developer, a project manager, or both. I will come back with an honest answer about whether I am the right fit.</p>
-      </div>
-      <div>
-        <div class="field"><label for="nm">YOUR NAME</label><input id="nm" type="text" placeholder="Jane Okafor"></div>
-        <div class="field"><label for="em">EMAIL</label><input id="em" type="email" placeholder="jane@company.com"></div>
-        <div class="field"><label for="ms">PROJECT DETAILS</label><textarea id="ms" placeholder="What you are building, the timeline, and the budget range."></textarea></div>
-        <button class="btn" id="send" type="button">Send message</button>
-        <p id="formnote" style="font-size:13px;margin-top:14px;color:var(--chrome-mid)">Opens in your email app. Nothing is stored here.</p>
+  <section id="contact">
+    <div class="wrap">
+      <div class="eyebrow">Contact</div>
+      <h2 class="h2">Tell me what you are building.</h2>
+      <div class="contact-grid">
+        <div>
+          <ul class="direct">
+            <li><span class="k">EMAIL</span><a href="mailto:hello@ridwanmahin.com">hello@ridwanmahin.com</a></li>
+            <li><span class="k">BASED IN</span><span>Dhaka, Bangladesh — GMT+6</span></li>
+            <li><span class="k">RESPONSE TIME</span><span>Within one working day</span></li>
+          </ul>
+          <p class="lede">Send a few lines about the project, the deadline you are working to, and whether you need a developer, a project manager, or both. I will come back with an honest answer about whether I am the right fit.</p>
+        </div>
+        <div>
+          <div class="field"><label for="nm">YOUR NAME</label><input id="nm" type="text" placeholder="Jane Okafor"></div>
+          <div class="field"><label for="em">EMAIL</label><input id="em" type="email" placeholder="jane@company.com"></div>
+          <div class="field"><label for="ms">PROJECT DETAILS</label><textarea id="ms" placeholder="What you are building, the timeline, and the budget range."></textarea></div>
+          <button class="btn" id="send" type="button">Send message</button>
+          <p id="formnote" style="font-size:13px;margin-top:14px;color:var(--chrome-mid)">Opens in your email app. Nothing is stored here.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -572,7 +569,6 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   <span>BANGLADESH · INDIA · PHILIPPINES · USA · SLOVAKIA</span>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script>
 (function(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -596,7 +592,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
     d.className = 'bar-row rv';
     d.innerHTML =
       '<div class="top"><span class="nm">'+s.n+'</span><span class="pc">'+s.v+'%</span></div>'+
-      '<div class="track"><div class="grid"></div><div class="fill" data-v="'+s.v+'"></div>'+
+      '<div class="track"><div class="fill" data-v="'+s.v+'"></div>'+
       '<div class="cap-mark" style="left:'+s.cap+'%"></div></div>'+
       '<span class="eff">'+s.e+'</span>';
     wrap.appendChild(d);
@@ -658,100 +654,14 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
     el.style.setProperty('--spabs', Math.abs(sp));
   }
 
-  function scrollFraction(){
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    if(max<=0) return 0;
-    var f = window.scrollY / max;
-    return f<0?0:(f>1?1:f);
-  }
-
-  /* ---------- ambient 3D backdrop (Three.js) ---------- */
-  var scene3d = null;
-  try{
-    if(typeof THREE !== 'undefined'){
-      var canvas = document.getElementById('scene3d');
-      var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true});
-      renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 200);
-      camera.position.set(0,0,18);
-
-      var group = new THREE.Group();
-      scene.add(group);
-
-      var geoPool = [
-        new THREE.IcosahedronGeometry(1,0),
-        new THREE.OctahedronGeometry(1,0),
-        new THREE.TorusGeometry(0.8,0.26,8,22),
-        new THREE.TetrahedronGeometry(1,0)
-      ];
-      var WORLD_DEPTH = 130;
-      var shapes = [];
-      for(var i=0;i<22;i++){
-        var isGold = i%3===0;
-        var mat = new THREE.MeshBasicMaterial({
-          color: isGold ? 0xc9a227 : 0xa855ff,
-          wireframe:true, transparent:true, opacity:isGold?0.55:0.42
-        });
-        var mesh = new THREE.Mesh(geoPool[i%geoPool.length], mat);
-        mesh.scale.setScalar(0.6+Math.random()*1.7);
-        mesh.position.set(
-          (Math.random()-0.5)*26,
-          -(i/22)*WORLD_DEPTH - Math.random()*8,
-          (Math.random()-0.5)*18-6
-        );
-        mesh.userData.sx = 0.0015+Math.random()*0.004;
-        mesh.userData.sy = 0.0015+Math.random()*0.004;
-        group.add(mesh);
-        shapes.push(mesh);
-      }
-
-      var PN = 260, positions = new Float32Array(PN*3);
-      for(var j=0;j<PN;j++){
-        positions[j*3]   = (Math.random()-0.5)*40;
-        positions[j*3+1] = -Math.random()*WORLD_DEPTH;
-        positions[j*3+2] = (Math.random()-0.5)*30-8;
-      }
-      var pGeo = new THREE.BufferGeometry();
-      pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
-      var points = new THREE.Points(pGeo, new THREE.PointsMaterial({color:0xd0a2ff,size:0.05,transparent:true,opacity:0.55}));
-      scene.add(points);
-
-      function resize3d(){
-        renderer.setSize(innerWidth, innerHeight, false);
-        camera.aspect = innerWidth/innerHeight;
-        camera.updateProjectionMatrix();
-      }
-      resize3d();
-
-      scene3d = {
-        resize: resize3d,
-        render: function(scrollFrac){
-          camera.position.y = -scrollFrac * WORLD_DEPTH;
-          camera.position.x = Math.sin(scrollFrac*Math.PI*2)*1.2;
-          camera.lookAt(0, camera.position.y, 0);
-          camera.rotation.z = Math.sin(scrollFrac*Math.PI)*0.02;
-          for(var k=0;k<shapes.length;k++){
-            shapes[k].rotation.x += shapes[k].userData.sx;
-            shapes[k].rotation.y += shapes[k].userData.sy;
-          }
-          points.rotation.y += 0.0004;
-          renderer.render(scene, camera);
-        }
-      };
-    }
-  }catch(e){ scene3d = null; }
-
   function tick(){
     if(!reduce){
       activeRv.forEach(updateRv);
       sectionEls.forEach(updateSection);
-      if(scene3d) scene3d.render(scrollFraction());
     }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-  if(reduce && scene3d) scene3d.render(0);
 
   /* ---------- holo globe ---------- */
   var offices = [
@@ -811,13 +721,6 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
     var R = Math.min(GW,GH)*0.38;
     gx.clearRect(0,0,GW,GH);
 
-    // limb glow
-    var g = gx.createRadialGradient(GW/2,GH/2,R*0.72,GW/2,GH/2,R*1.16);
-    g.addColorStop(0,'rgba(123,47,247,0)');
-    g.addColorStop(.65,'rgba(140,70,255,.18)');
-    g.addColorStop(1,'rgba(123,47,247,0)');
-    gx.fillStyle=g; gx.beginPath(); gx.arc(GW/2,GH/2,R*1.16,0,6.283); gx.fill();
-
     // graticule
     gx.lineWidth = 1;
     for(var lat=-60; lat<=60; lat+=30){
@@ -827,7 +730,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
         if(p.z>0){ if(!started){gx.moveTo(p.x,p.y);started=true;} else gx.lineTo(p.x,p.y); }
         else started=false;
       }
-      gx.strokeStyle='rgba(168,85,255,.16)'; gx.stroke();
+      gx.strokeStyle='rgba(176,38,255,.16)'; gx.stroke();
     }
     for(var lo=-180; lo<180; lo+=30){
       gx.beginPath(); var st=false;
@@ -836,7 +739,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
         if(q.z>0){ if(!st){gx.moveTo(q.x,q.y);st=true;} else gx.lineTo(q.x,q.y); }
         else st=false;
       }
-      gx.strokeStyle='rgba(168,85,255,.12)'; gx.stroke();
+      gx.strokeStyle='rgba(176,38,255,.12)'; gx.stroke();
     }
 
     // land dots
@@ -848,14 +751,14 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
         if(pt.z<=0.02) continue;
         gx.beginPath();
         gx.arc(pt.x,pt.y,1.1,0,6.283);
-        gx.fillStyle='rgba(206,170,255,'+(0.16+pt.z*0.5)+')';
+        gx.fillStyle='rgba(217,140,255,'+(0.16+pt.z*0.5)+')';
         gx.fill();
       }
     }
 
     // rim
     gx.beginPath(); gx.arc(GW/2,GH/2,R,0,6.283);
-    gx.strokeStyle='rgba(200,205,215,.35)'; gx.lineWidth=1; gx.stroke();
+    gx.strokeStyle='rgba(176,38,255,.45)'; gx.lineWidth=1; gx.stroke();
 
     // arcs from HQ
     var hq = offices[0];
@@ -871,14 +774,14 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
         if(a.z>0){ if(!open){gx.moveTo(a.x,a.y);open=true;} else gx.lineTo(a.x,a.y); }
         else open=false;
       }
-      gx.strokeStyle='rgba(201,162,39,.42)'; gx.lineWidth=1; gx.stroke();
+      gx.strokeStyle='rgba(255,196,0,.42)'; gx.lineWidth=1; gx.stroke();
     }
 
     // markers
     for(var m=0;m<offices.length;m++){
       var o2 = offices[m], pm = project(o2.lat,o2.lon,R);
       if(pm.z<=0.04) continue;
-      var col = o2.hq ? '201,162,39' : '168,85,255';
+      var col = o2.hq ? '255,196,0' : '176,38,255';
 
       if(!o2.hub){
         gx.beginPath(); gx.arc(pm.x,pm.y,2,0,6.283);
@@ -927,7 +830,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
     var note = document.getElementById('formnote');
     if(!n || !e || !m){
       note.textContent = 'Add your name, email and a short project description before sending.';
-      note.style.color = '#d0a2ff';
+      note.style.color = '#d98cff';
       return;
     }
     note.textContent = 'Opens in your email app. Nothing is stored here.';
@@ -937,7 +840,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
       '&body=' + encodeURIComponent(m + '\n\n— ' + n + '\n' + e);
   });
 
-  window.addEventListener('resize', function(){ sizeGlobe(); if(scene3d) scene3d.resize(); });
+  window.addEventListener('resize', function(){ sizeGlobe(); });
 })();
 </script>
 </body>
