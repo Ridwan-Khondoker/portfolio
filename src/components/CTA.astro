@@ -1,0 +1,26 @@
+---
+import { site } from '../data/site';
+---
+<section class="section cta" data-section-theme="dark" aria-labelledby="cta-title">
+  <div class="wrap">
+    <p class="label">Open channel</p>
+    <h2 id="cta-title" class="h-xl"><span>Got a project?</span><span class="accent">Let's ship it.</span></h2>
+    <div class="row">
+      <p class="lede">Tell me what you're building, the deadline, and whether you need a developer, a project manager, or both. I reply within a working day.</p>
+      <div class="actions">
+        <a class="btn solid" href="/contact">Start a project <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn" href={`mailto:${site.email}`}>Email me</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta .label { margin-bottom: 28px; }
+  .cta .h-xl { display: grid; font-size: clamp(52px, 9vw, 150px); }
+  .cta .accent { color: var(--accent-text); }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end; margin-top: 48px; }
+  .row .lede { margin: 0; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  @media (max-width: 860px) { .row { grid-template-columns: 1fr; } }
+</style>

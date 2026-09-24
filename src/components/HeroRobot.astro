@@ -1,0 +1,154 @@
+---
+import { site } from '../data/site';
+
+const left = [
+  { href: '/about', label: 'About' },
+  { href: '#build', label: 'Capabilities' },
+  { href: '/contact', label: 'Contact' },
+];
+const right = [
+  { href: '/work#development', label: 'Engineering' },
+  { href: '/work#management', label: 'Management' },
+  { href: '#featured', label: 'Featured work' },
+];
+---
+<section class="hero" data-section-theme="dark" aria-labelledby="hero-name">
+  <div class="stage">
+    <nav class="tree tree-l hero-ui" aria-label="About me">
+      {left.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <!-- url is set by the preloader (from a blob it already downloaded), so the scene is fetched once -->
+    <spline-viewer
+      data-src="/assets/nexbot.splinecode"
+      background="transparent"
+      loading="eager"
+      events-target="global"
+      aria-label="3D robot greeting visitors"></spline-viewer>
+    <nav class="tree tree-r hero-ui" aria-label="My work">
+      {right.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+  </div>
+
+  <div class="hello">
+    <p class="greet hero-ui">Hello, I'm</p>
+    <h1 id="hero-name" class="name hero-ui">{site.name}</h1>
+  </div>
+  <div class="intro hero-ui">
+    <p class="role">
+      <span>Software engineer</span><i aria-hidden="true">/</i><span>Project manager</span>
+    </p>
+    <p class="lede">I build the platform, then run the team that ships it — from a delivery network in New Jersey to brand launches and campaigns.</p>
+  </div>
+
+  <div class="marquee hero-ui" aria-hidden="true">
+    <div class="marquee-row" data-marquee>
+      <span>Build</span><b>✦</b><span>Manage</span><b>✦</b><span>Ship</span><b>✦</b>
+      <span>Build</span><b>✦</b><span>Manage</span><b>✦</b><span>Ship</span><b>✦</b>
+      <span>Build</span><b>✦</b><span>Manage</span><b>✦</b><span>Ship</span><b>✦</b>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    --stage: min(82vh, 880px);
+    --branch: clamp(200px, 21vw, 320px);
+    position: relative; min-height: 100vh; padding: 0 var(--gutter) 40px; text-align: center; overflow: clip;
+  }
+  /* violet glow behind the robot — a blurred solid disc, no gradient */
+  .hero::before {
+    content: ''; position: absolute; left: 50%; top: 2%; width: min(56vw, 720px); aspect-ratio: 1;
+    transform: translateX(-50%); border-radius: 50%; background: var(--violet-deep); opacity: .3; filter: blur(120px);
+    pointer-events: none;
+  }
+  .stage { position: relative; z-index: 1; width: 100%; max-width: var(--content); height: var(--stage); margin: calc(var(--stage) * -.02) auto 0; }
+  spline-viewer { width: 100%; height: 100%; display: block; }
+
+  /* orbit nav: items on an arc, each side turned in perspective so it wraps around the robot */
+  .tree {
+    --row: 28px; --gap: calc(var(--stage) * .21 - var(--row)); --fan: clamp(70px, 7vw, 112px);
+    --out: min(260px, max(0px, (100vw - 2 * var(--gutter) - var(--content)) / 2));
+    position: absolute; top: 22%; z-index: 3; width: var(--branch);
+    display: flex; flex-direction: column; gap: var(--gap);
+  }
+  .tree-l { left: calc(-1 * var(--out)); transform: perspective(800px) rotateY(-22deg); transform-origin: 100% 50%; }
+  .tree-r { right: calc(-1 * var(--out)); transform: perspective(800px) rotateY(22deg); transform-origin: 0 50%; }
+  .tree a {
+    --k: .57;
+    display: flex; align-items: center; justify-content: flex-end; height: var(--row); text-decoration: none; white-space: nowrap;
+    font: 500 clamp(15px, 1.25vw, 19px)/1 var(--font-display); color: var(--muted);
+    transition: color .2s, text-shadow .2s, transform .25s var(--ease);
+  }
+  .tree a:nth-child(2) { --k: .93; }
+  .tree-l a { margin-right: calc(var(--fan) * var(--k)); }
+  .tree-r a { margin-left: calc(var(--fan) * var(--k)); flex-direction: row-reverse; }
+  .tree a:hover, .tree a:focus-visible { color: var(--violet-hi); text-shadow: 0 0 10px rgba(176, 38, 255, .85), 0 0 22px rgba(176, 38, 255, .45); outline: none; }
+  .tree-l a:hover, .tree-l a:focus-visible { transform: translateX(-4px); }
+  .tree-r a:hover, .tree-r a:focus-visible { transform: translateX(4px); }
+
+  /* the scene's camera crops the robot's legs: the name overlaps them and a soft black shadow hides the edge */
+  .hello { position: relative; z-index: 2; isolation: isolate; margin-top: calc(var(--stage) * -.22); padding: 30px 0 8px; }
+  .hello::before {
+    content: ''; position: absolute; left: 50%; top: 0; bottom: -80px; width: min(1500px, 100vw); transform: translateX(-50%);
+    background: #000; border-radius: 50%; filter: blur(30px); z-index: -1; pointer-events: none;
+  }
+  .greet { margin: 0 0 10px; font: 500 16px/1 var(--font-mono); color: var(--gold); text-shadow: 0 0 12px rgba(255, 196, 0, .45); }
+  .name { font: 800 clamp(30px, 6.2vw, 96px)/1 var(--font-name); letter-spacing: .02em; color: var(--fg); text-shadow: 0 0 34px rgba(176, 38, 255, .35); }
+  .greet, .name { transition: opacity .9s var(--ease), transform .9s var(--ease), visibility 0s; }
+  .name { transition-delay: .15s; }
+  :global(html.intro-pending) .greet, :global(html.intro-pending) .name { transform: translateY(14px); }
+
+  .intro { position: relative; z-index: 2; margin-top: 18px; }
+  .role { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: .5em; margin: 0; font: 500 clamp(18px, 1.8vw, 26px)/1.2 var(--font-display); }
+  .role i { font-style: normal; color: var(--accent-text); }
+  .intro .lede { margin: 14px auto 0; font-size: 16px; }
+
+  /* scroll-linked (not looping) marquee */
+  .marquee { position: relative; z-index: 2; margin: clamp(48px, 9vh, 96px) calc(-1 * var(--gutter)) 0; overflow: hidden; }
+  .marquee-row {
+    display: flex; gap: .35em; align-items: center; white-space: nowrap; width: max-content; will-change: transform;
+    font: 700 clamp(64px, 11vw, 190px)/.9 var(--font-display); text-transform: uppercase; letter-spacing: -.04em;
+  }
+  .marquee-row span { color: transparent; -webkit-text-stroke: 1px var(--muted); }
+  .marquee-row span:nth-of-type(3n + 2) { color: var(--fg); -webkit-text-stroke: 0; }
+  .marquee-row b { font-size: .35em; color: var(--gold); }
+
+  @media (max-width: 860px) {
+    .hero { --stage: 44vh; padding-top: var(--header-h); }
+    /* no room beside the robot: the menu sits above it */
+    .stage { margin-top: 150px; }
+    .tree { top: -150px; width: calc(50% - 10px); --fan: 64px; --row: 22px; --gap: 34px; --out: 0px; }
+    .tree-l { transform: perspective(700px) rotateY(-12deg); }
+    .tree-r { transform: perspective(700px) rotateY(12deg); }
+    .tree a { font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    spline-viewer { display: none; }
+  }
+</style>
+
+<script>
+  import '@splinetool/viewer';
+  import { gsap, reduceMotion } from '../scripts/motion/core';
+
+  // Spline free-plan badge lives in the viewer's shadow root; hidden until the account is upgraded.
+  const bot = document.querySelector<HTMLElement>('.hero spline-viewer');
+  function hideBadge() {
+    const root = bot?.shadowRoot;
+    if (!root || root.querySelector('style[data-no-badge]')) return;
+    const st = document.createElement('style');
+    st.setAttribute('data-no-badge', '');
+    st.textContent = '#logo{display:none!important}';
+    root.appendChild(st);
+  }
+  bot?.addEventListener('load-complete', hideBadge);
+
+  // Marquee drifts with scroll position rather than looping on its own.
+  const row = document.querySelector<HTMLElement>('[data-marquee]');
+  if (row && !reduceMotion) {
+    gsap.fromTo(row, { xPercent: 0 }, {
+      xPercent: -33.333, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 },
+    });
+  }
+</script>

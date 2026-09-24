@@ -1,0 +1,36 @@
+---
+import ClientCard from './ClientCard.astro';
+import { getClients } from '../lib/data';
+
+interface Props { heading?: boolean; theme?: 'dark' | 'light' }
+const { heading = true, theme = 'dark' } = Astro.props;
+const clients = await getClients();
+---
+<section class="section roster" data-section-theme={theme} aria-labelledby={heading ? 'roster-title' : undefined} aria-label={heading ? undefined : 'Clients'}>
+  <div class="wrap">
+    {heading && (
+      <header class="head">
+        <h2 id="roster-title" class="h-l">Client roster</h2>
+        <p class="lede">Websites, social media and ad campaigns — built, launched and run for reach and revenue.</p>
+      </header>
+    )}
+    <div class="grid">
+      {clients.map((c) => <ClientCard client={c} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .head { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: end; margin-bottom: clamp(40px, 6vh, 72px); }
+  .head .lede { margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 2.4vw, 36px) clamp(16px, 2vw, 28px); }
+  @media (max-width: 1080px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } .head { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  // Touch has no hover: a tap toggles the reveal instead.
+  document.querySelectorAll<HTMLButtonElement>('[data-reveal]').forEach((b) => {
+    b.addEventListener('click', () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')));
+  });
+</script>

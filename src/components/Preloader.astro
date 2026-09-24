@@ -1,0 +1,120 @@
+---
+---
+<div class="preloader" aria-hidden="true" data-preloader>
+  <div class="boot">
+    <p class="big"><span>Boot</span> <span class="who">Ridwan</span></p>
+    <div class="bar"><i data-bar></i></div>
+    <ol class="log">
+      <li data-step="fonts"><span>Typefaces</span><b>…</b></li>
+      <li data-step="model"><span>Robot model</span><b data-pct>0%</b></li>
+      <li data-step="scene"><span>Systems</span><b>…</b></li>
+    </ol>
+  </div>
+  <i class="scan" data-scan></i>
+</div>
+
+<style>
+  .preloader {
+    position: fixed; inset: 0; z-index: 150; background: #000; color: #f3ecfc;
+    display: grid; place-items: center; padding: var(--gutter);
+  }
+  :global(html:not(.intro-pending)) .preloader { display: none; }
+  .boot { width: min(560px, 100%); }
+  .big { margin: 0 0 22px; font: 800 clamp(44px, 8vw, 96px)/1 var(--font-name); letter-spacing: .02em; }
+  .big .who { color: var(--violet-hi); text-shadow: 0 0 24px rgba(176, 38, 255, .6); }
+  .bar { height: 2px; background: #2b1840; margin-bottom: 18px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--gold); box-shadow: 0 0 10px var(--gold); transition: width .3s linear; }
+  .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font: 400 14px/1.4 var(--font-mono); color: #a99fbb; }
+  .log li { display: flex; justify-content: space-between; gap: 16px; opacity: .45; transition: opacity .3s; }
+  .log li[data-active], .log li[data-done] { opacity: 1; }
+  .log li[data-done] b { color: var(--violet-hi); }
+  .log b { font-weight: 400; }
+  .scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--violet); box-shadow: 0 0 18px 2px var(--violet); opacity: 0; }
+</style>
+
+<script>
+  import { gsap, reduceMotion } from '../scripts/motion/core';
+
+  const root = document.documentElement;
+  const el = document.querySelector<HTMLElement>('[data-preloader]')!;
+  const bot = document.querySelector<HTMLElement & { url?: string }>('.hero spline-viewer');
+  const bar = el.querySelector<HTMLElement>('[data-bar]')!;
+  const pct = el.querySelector<HTMLElement>('[data-pct]')!;
+  const step = (name: string, state: 'active' | 'done', text?: string) => {
+    const li = el.querySelector<HTMLElement>(`[data-step="${name}"]`)!;
+    li.toggleAttribute('data-active', state === 'active');
+    li.toggleAttribute('data-done', state === 'done');
+    if (text) li.querySelector('b')!.textContent = text;
+  };
+  const progress = (p: number) => { bar.style.width = `${Math.round(p * 100)}%`; };
+
+  // The camera settles and the robot opens its arms ~1.4s after the scene loads; the UI comes in then.
+  const revealUI = () => root.classList.remove('intro-pending');
+  let exited = false;
+  function exit() {
+    if (exited) return;
+    exited = true;
+    const scan = el.querySelector<HTMLElement>('[data-scan]')!;
+    gsap.timeline({ onComplete: () => { el.remove(); } })
+      .set(scan, { opacity: 1 })
+      .to(scan, { top: '100%', duration: .7, ease: 'power3.inOut' }, 0)
+      .to(el, { clipPath: 'inset(100% 0 0 0)', duration: .7, ease: 'power3.inOut' }, 0);
+    setTimeout(revealUI, 1400);
+  }
+
+  async function loadScene(src: string) {
+    step('model', 'active');
+    const res = await fetch(src);
+    const total = Number(res.headers.get('content-length')) || 0;
+    const reader = res.body?.getReader();
+    if (!reader || !total) {
+      const blob = await res.blob();
+      step('model', 'done', 'ok');
+      progress(.9);
+      return URL.createObjectURL(blob);
+    }
+    const chunks: Uint8Array<ArrayBuffer>[] = [];
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      got += value.length;
+      pct.textContent = `${Math.round((got / total) * 100)}%`;
+      progress(.15 + (got / total) * .75);
+    }
+    step('model', 'done', 'ok');
+    return URL.createObjectURL(new Blob(chunks));
+  }
+
+  async function boot() {
+    const src = bot?.dataset.src;
+    if (!bot || !src) return;
+    if (reduceMotion) return; // no robot, no boot sequence
+
+    // A repeat visit in the same session skips the log, not the robot's entrance.
+    let seen = false;
+    try { seen = sessionStorage.getItem('booted') === '1'; } catch { /* storage blocked: show the full boot */ }
+    if (seen) el.style.visibility = 'hidden';
+
+    bot.addEventListener('load-complete', () => {
+      step('scene', 'done', 'online');
+      progress(1);
+      try { sessionStorage.setItem('booted', '1'); } catch { /* ignore */ }
+      setTimeout(exit, seen ? 0 : 350);
+    });
+    setTimeout(exit, 8000); // slow network or no WebGL: never trap the visitor behind the preloader
+
+    step('fonts', 'active');
+    document.fonts.ready.then(() => { step('fonts', 'done', 'ok'); progress(.15); });
+
+    try {
+      const url = await loadScene(src);
+      step('scene', 'active');
+      bot.setAttribute('url', url);
+    } catch {
+      bot.setAttribute('url', src);
+    }
+  }
+  boot();
+</script>

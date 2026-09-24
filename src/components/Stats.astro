@@ -1,0 +1,55 @@
+---
+import { stats } from '../data/site';
+import { projectCount } from '../lib/data';
+
+const items = [
+  { n: stats.pmYears, suffix: '', label: 'Years in project management & marketing' },
+  { n: stats.devYears, suffix: '', label: 'Years in software development' },
+  { n: await projectCount(), suffix: '', label: 'Projects, integrations & client builds in the log' },
+  { n: stats.companies, suffix: '', label: 'Companies I lead delivery for' },
+];
+---
+<section class="section stats" data-section-theme="light" aria-label="In numbers">
+  <div class="wrap">
+    <p class="label">Telemetry</p>
+    <dl class="grid">
+      {items.map((s) => (
+        <div class="stat">
+          <dt>{s.label}</dt>
+          <dd><span data-count={s.n}>{s.n}</span>{s.suffix}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .stats .label { margin-bottom: 32px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; border-top: 1px solid var(--line); }
+  .stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 12px; padding: 28px 24px 0 0; border-right: 1px solid var(--line); }
+  .stat + .stat { padding-left: 24px; }
+  .stat:last-child { border-right: 0; }
+  dd { margin: 0; font: 700 clamp(64px, 8vw, 128px)/.9 var(--font-display); letter-spacing: -.05em; }
+  dt { color: var(--muted); font-size: 15px; max-width: 22ch; }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr 1fr; row-gap: 32px; }
+    .stat, .stat + .stat { border-right: 0; padding-left: 0; }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, reduceMotion } from '../scripts/motion/core';
+
+  // Numbers tick up once, the first time the row comes into view.
+  if (!reduceMotion) {
+    document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const target = Number(el.dataset.count);
+      const obj = { v: 0 };
+      el.textContent = '0';
+      ScrollTrigger.create({
+        trigger: el.closest('dl'), start: 'top 85%', once: true,
+        onEnter: () => gsap.to(obj, { v: target, duration: 1.4, ease: 'power3.out', onUpdate: () => { el.textContent = String(Math.round(obj.v)); } }),
+      });
+    });
+  }
+</script>

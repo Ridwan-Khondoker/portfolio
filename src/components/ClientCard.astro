@@ -1,0 +1,51 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Shot from './Shot.astro';
+import { shot, host } from '../lib/data';
+
+interface Props { client: CollectionEntry<'clients'> }
+const { client } = Astro.props;
+const { name, url, scope, result } = client.data;
+const domain = host(url);
+const hasMobile = !!shot(client.id, 'mobile');
+---
+<article class="client" id={client.id}>
+  <button class="face" type="button" aria-label={`${name}: show ${hasMobile ? 'mobile view' : 'scope'}`} aria-pressed="false" data-reveal>
+    <div class="base"><Shot slug={client.id} name={name} domain={domain} sizes="(max-width: 860px) 90vw, 30vw" /></div>
+    <div class="over" aria-hidden="true">
+      {hasMobile ? (
+        <div class="phone"><Shot slug={client.id} view="mobile" name={name} sizes="200px" /></div>
+      ) : (
+        <p class="scope-big">{scope}</p>
+      )}
+    </div>
+  </button>
+  <div class="meta">
+    <h3>{name}</h3>
+    {domain ? <a href={url} target="_blank" rel="noopener">{domain} <span aria-hidden="true">↗</span></a> : <span class="pending">Link coming soon</span>}
+    <p>{scope}</p>
+    {result && <p class="result">{result}</p>}
+  </div>
+</article>
+
+<style>
+  .client { display: grid; gap: 16px; }
+  .face { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 1px solid var(--line); background: none; cursor: pointer; overflow: hidden; }
+  .base { position: absolute; inset: 0; }
+  /* hover image arrives behind a mask that wipes up from the bottom */
+  .over {
+    position: absolute; inset: 0; display: grid; place-items: center; padding: 20px;
+    background: #0c0913; color: #f3ecfc;
+    clip-path: inset(100% 0 0 0); transition: clip-path .7s var(--ease-in-out);
+  }
+  .face:hover .over, .face:focus-visible .over, .face[aria-pressed='true'] .over { clip-path: inset(0 0 0 0); }
+  .phone { height: 100%; aspect-ratio: 390 / 844; border: 6px solid #1c1526; border-radius: 22px; overflow: hidden; box-shadow: 0 0 0 1px var(--violet), 0 0 28px rgba(176, 38, 255, .35); }
+  .phone :global(.shot) { object-position: top; }
+  .scope-big { margin: 0; font: 600 clamp(18px, 1.6vw, 24px)/1.25 var(--font-display); text-align: left; }
+  .meta { display: grid; gap: 4px; }
+  .meta h3 { font-size: clamp(20px, 1.8vw, 26px); }
+  .meta a, .pending { font: 400 13px/1.4 var(--font-mono); color: var(--accent-text); width: fit-content; }
+  .pending { color: var(--muted); }
+  .meta p { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+  .meta .result { color: var(--gold-text); }
+</style>
