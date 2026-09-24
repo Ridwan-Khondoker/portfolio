@@ -95,10 +95,15 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 }
 .hero>*{position:relative;z-index:1}
 /* Spline robot plays its welcome gesture on load; the greeting fades in beneath it */
-.hero-3d{width:100%;max-width:var(--content);height:min(58vh,600px);margin:0 auto 34px}
+.hero{--stage:min(58vh,600px)}
+.hero-3d{width:100%;max-width:var(--content);height:var(--stage);margin:0 auto}
 .hero-3d spline-viewer{width:100%;height:100%;display:block}
-/* the scene's camera crops the legs; a neon stage line makes that edge deliberate */
-.hero-3d::after{content:"";position:absolute;left:50%;bottom:0;width:min(520px,80%);height:2px;transform:translateX(-50%);background:var(--violet);box-shadow:0 0 14px var(--violet),0 0 34px rgba(176,38,255,.6)}
+/* the scene's camera crops the legs: the name overlaps them and a soft black shadow hides the edge */
+.hello{position:relative;isolation:isolate;margin-top:calc(var(--stage) * -.22);padding:30px 0 8px}
+.hello::before{
+  content:"";position:absolute;left:50%;top:0;bottom:-12px;width:min(1120px,100%);transform:translateX(-50%);
+  background:#000;border-radius:50%;filter:blur(30px);z-index:-1;pointer-events:none;
+}
 .greet{
   display:block;font-family:var(--display);font-size:13px;letter-spacing:.34em;color:var(--gold);
   text-shadow:0 0 12px rgba(255,196,0,.45);margin-bottom:12px;
@@ -298,7 +303,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   footer{margin-left:0;flex-direction:column}
   section{padding:82px 22px}
   .hero{padding-top:24px}
-  .hero-3d{height:46vh}
+  .hero{--stage:46vh}
   .stats{grid-template-columns:1fr 1fr;row-gap:20px}
   .stat{border-right:0}
 }
@@ -342,8 +347,10 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
       <spline-viewer url="assets/nexbot.splinecode" background="transparent" loading="eager" events-target="global" aria-label="3D robot greeting visitors"></spline-viewer>
     </div>
     <div class="wrap">
-      <span class="greet">HELLO, I&rsquo;M</span>
-      <h1>Ridwan Khondoker</h1>
+      <div class="hello">
+        <span class="greet">HELLO, I&rsquo;M</span>
+        <h1>Ridwan Khondoker</h1>
+      </div>
       <div class="hero-id">SENIOR DEVELOPER &amp; PROJECT MANAGER &nbsp;/&nbsp; <b>SYSTEMS ONLINE</b></div>
       <p class="tagline">I build and ship <span class="line2">web systems.</span></p>
       <p class="hero-sub">I take products from an empty repository to a platform real people use every day — writing the code, running the team, and staying on the hook after launch.</p>
@@ -606,8 +613,19 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   /* ---------- hero greeting ---------- */
   // The robot's start animation opens its arms ~1.2s after the scene loads; reveal the name with it.
   var bot = document.querySelector('.hero-3d spline-viewer');
+  // Spline free-plan badge lives in the viewer's shadow root; hidden until the account is upgraded.
+  function hideBadge(){
+    var root = bot.shadowRoot;
+    if(!root || root.querySelector('style[data-no-badge]')) return;
+    var st = document.createElement('style');
+    st.setAttribute('data-no-badge','');
+    st.textContent = '#logo{display:none!important}';
+    root.appendChild(st);
+  }
   if(bot){
+    hideBadge();
     bot.addEventListener('load-complete', function(){
+      hideBadge();
       setTimeout(function(){ document.documentElement.classList.remove('greeting-pending'); }, 1200);
     });
   }
