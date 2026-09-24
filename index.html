@@ -49,7 +49,7 @@ img{max-width:100%}
 /* items sit on an arc and each panel is turned in perspective so the far edge
    recedes, wrapping the nav around the robot */
 .tree{
-  --row:22px;--gap:34px;--nd:7px;--fan:clamp(70px,7vw,112px);
+  --row:22px;--gap:34px;--fan:clamp(70px,7vw,112px);
   position:absolute;top:26%;z-index:3;width:var(--branch);
   display:flex;flex-direction:column;gap:var(--gap);
 }
@@ -62,16 +62,11 @@ img{max-width:100%}
   color:var(--chrome-mid);transition:color .2s,text-shadow .2s,transform .25s;
 }
 .tree a:nth-of-type(2){--k:.93}
-.tree-l a{margin-right:calc(var(--fan) * var(--k) - var(--nd) / 2)}
-.tree-r a{margin-left:calc(var(--fan) * var(--k) - var(--nd) / 2);flex-direction:row-reverse}
-.tree .nd{
-  flex:none;width:var(--nd);height:var(--nd);transform:rotate(45deg);
-  border:1px solid var(--chrome-mid);background:var(--void);transition:background .2s,border-color .2s,box-shadow .2s;
-}
+.tree-l a{margin-right:calc(var(--fan) * var(--k))}
+.tree-r a{margin-left:calc(var(--fan) * var(--k));flex-direction:row-reverse}
 .tree a:hover,.tree a:focus-visible{color:var(--violet-hi);text-shadow:0 0 10px rgba(176,38,255,.85),0 0 22px rgba(176,38,255,.45);outline:none}
 .tree-l a:hover,.tree-l a:focus-visible{transform:translateX(-4px)}
 .tree-r a:hover,.tree-r a:focus-visible{transform:translateX(4px)}
-.tree a:hover .nd,.tree a:focus-visible .nd{background:var(--violet);border-color:var(--violet-hi);box-shadow:0 0 10px var(--violet)}
 
 /* ---------- shell ---------- */
 .shell{perspective:1600px;perspective-origin:50% 40%;overflow-x:clip}
@@ -95,6 +90,11 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
   z-index:0;pointer-events:none;
 }
 .hero>*{position:relative;z-index:1}
+/* keep the text layer (and the shadow that hides the scene's bottom edge) above the robot;
+   inside the scroll effect's 3D context DOM order alone doesn't guarantee that */
+.hero>.wrap{z-index:2;transform-style:flat}
+/* positioned so the lines under the name paint above the name's shadow */
+.hero .wrap>*{position:relative}
 /* Spline robot plays its welcome gesture on load; the greeting fades in beneath it */
 .hero{--stage:min(82vh,880px)}
 .hero-3d{width:100%;max-width:var(--content);height:var(--stage);margin:calc(var(--stage) * -.08) auto 0}
@@ -102,7 +102,7 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
 /* the scene's camera crops the legs: the name overlaps them and a soft black shadow hides the edge */
 .hello{position:relative;isolation:isolate;margin-top:calc(var(--stage) * -.22);padding:30px 0 8px}
 .hello::before{
-  content:"";position:absolute;left:50%;top:0;bottom:-12px;width:min(1120px,100%);transform:translateX(-50%);
+  content:"";position:absolute;left:50%;top:0;bottom:-80px;width:min(1500px,100vw);transform:translateX(-50%);
   background:#000;border-radius:50%;filter:blur(30px);z-index:-1;pointer-events:none;
 }
 .greet{
@@ -113,8 +113,15 @@ section{padding:120px var(--gutter);position:relative;transform-style:preserve-3
   font-family:"Doto",var(--display);font-size:clamp(24px,5.8vw,82px);line-height:1;letter-spacing:.02em;font-weight:800;color:var(--chrome-hi);
   text-shadow:0 0 34px rgba(176,38,255,.35);
 }
+/* intro: while the camera pulls back from the robot, only the robot shows; then the
+   greeting, the nav, and everything else fade in, in that order */
 .greet,.hero h1{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
 .hero h1{transition-delay:.2s}
+.tree,.hero .wrap>:not(.hello),.shell>:not(.hero),footer{transition:opacity .8s ease .6s,visibility 0s}
+.tree{transition-delay:.45s}
+.greeting-pending .tree,.greeting-pending .hero .wrap>:not(.hello),.greeting-pending .shell>:not(.hero),.greeting-pending footer{
+  opacity:0;visibility:hidden;transition:none;
+}
 /* set from <head> so the name is never painted then hidden; removed on greet or after a timeout */
 .greeting-pending .greet,.greeting-pending .hero h1{opacity:0;transform:translateY(14px)}
 .hero-id{font-family:var(--display);font-size:clamp(13px,1.2vw,16px);letter-spacing:.26em;color:var(--chrome);margin-top:20px}
@@ -332,15 +339,15 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   <section class="hero">
     <div class="hero-3d">
       <nav class="tree tree-l" aria-label="About me">
-        <a href="#about"><span>Personal info</span><i class="nd"></i></a>
-        <a href="#skills"><span>Skills</span><i class="nd"></i></a>
-        <a href="#contact"><span>Contact</span><i class="nd"></i></a>
+        <a href="#about"><span>Personal info</span></a>
+        <a href="#skills"><span>Skills</span></a>
+        <a href="#contact"><span>Contact</span></a>
       </nav>
       <spline-viewer url="assets/nexbot.splinecode" background="transparent" loading="eager" events-target="global" aria-label="3D robot greeting visitors"></spline-viewer>
       <nav class="tree tree-r" aria-label="My work">
-        <a href="#clients"><span>Clients</span><i class="nd"></i></a>
-        <a href="#work"><span>Projects</span><i class="nd"></i></a>
-        <a href="#current"><span>Current</span><i class="nd"></i></a>
+        <a href="#clients"><span>Clients</span></a>
+        <a href="#work"><span>Projects</span></a>
+        <a href="#current"><span>Current</span></a>
       </nav>
     </div>
     <div class="wrap">
@@ -608,7 +615,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- hero greeting ---------- */
-  // The robot's start animation opens its arms ~1.2s after the scene loads; reveal the name with it.
+  // The camera settles and the robot opens its arms ~1.4s after the scene loads; reveal the page then.
   var bot = document.querySelector('.hero-3d spline-viewer');
   // Spline free-plan badge lives in the viewer's shadow root; hidden until the account is upgraded.
   function hideBadge(){
@@ -623,7 +630,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
     hideBadge();
     bot.addEventListener('load-complete', function(){
       hideBadge();
-      setTimeout(function(){ document.documentElement.classList.remove('greeting-pending'); }, 1200);
+      setTimeout(function(){ document.documentElement.classList.remove('greeting-pending'); }, 1400);
     });
   }
 
