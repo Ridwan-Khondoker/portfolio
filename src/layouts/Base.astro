@@ -1,0 +1,67 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Home runs the boot intro: everything but the robot stays hidden until it settles. */
+  intro?: boolean;
+}
+const {
+  title = 'Ridwan Khondoker — Software engineer & project manager',
+  description = 'Ridwan Khondoker builds web platforms and runs the teams that ship them.',
+  intro = false,
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {intro && (
+      <script is:inline>
+        // Set before first paint so nothing flashes in and back out; the preloader removes it.
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('intro-pending');
+          setTimeout(function () { document.documentElement.classList.remove('intro-pending'); }, 9000);
+        }
+      </script>
+    )}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import { startLenis } from '../scripts/motion/core';
+      import { initThemeSwitch } from '../scripts/motion/theme';
+      import { initMenu } from '../scripts/menu';
+      startLenis();
+      initThemeSwitch();
+      initMenu();
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  /* intro: only the hero robot is visible until the preloader hands over */
+  html.intro-pending .site-header,
+  html.intro-pending main > :not(.hero, .preloader),
+  html.intro-pending .site-footer,
+  html.intro-pending .hero-ui {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .site-header, main > :not(.preloader), .site-footer, .hero-ui {
+    transition: opacity .9s var(--ease) .15s, visibility 0s;
+  }
+</style>

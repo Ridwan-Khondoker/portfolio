@@ -1,0 +1,121 @@
+@import '@fontsource/chakra-petch/500.css';
+@import '@fontsource/chakra-petch/600.css';
+@import '@fontsource/chakra-petch/700.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/doto/800.css';
+
+/* ---------- tokens ---------- */
+:root {
+  --violet: #b026ff;
+  --violet-deep: #7a00c9;
+  --violet-hi: #d98cff;
+  --gold: #ffc400;
+
+  --font-display: 'Chakra Petch', 'Bahnschrift', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-name: 'Doto', var(--font-display);
+
+  --content: 1200px;
+  --gutter: clamp(20px, 5vw, 88px);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --ease-in-out: cubic-bezier(.76, 0, .24, 1);
+  --header-h: 72px;
+}
+
+/* The page flips between two themes as sections pass the middle of the viewport.
+   Sections declare data-section-theme; motion/theme.ts writes html[data-theme]. */
+:root,
+html[data-theme='dark'] {
+  --bg: #000;
+  --fg: #f3ecfc;
+  --muted: #a99fbb;
+  --line: #2b1840;
+  --surface: #0c0913;
+  --accent: var(--violet);
+  --accent-text: var(--violet-hi);
+  --gold-text: var(--gold);
+  color-scheme: dark;
+}
+html[data-theme='light'] {
+  --bg: #f4f1f8;
+  --fg: #0b0712;
+  --muted: #5e5470;
+  --line: #d6cce4;
+  --surface: #fff;
+  --accent: #8a00e6;
+  --accent-text: #7200bf;
+  --gold-text: #7d5e00;
+  color-scheme: light;
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.65 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+  transition: background-color .7s var(--ease), color .7s var(--ease);
+}
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; margin: 0; line-height: 1.05; letter-spacing: -.02em; }
+p { margin: 0 0 1.1em; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+button { font: inherit; color: inherit; }
+::selection { background: rgba(176, 38, 255, .35); color: #fff; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 200; padding: 10px 14px;
+  background: var(--fg); color: var(--bg); text-decoration: none; font-weight: 500;
+}
+.skip:focus { top: 12px; }
+
+.wrap { width: 100%; max-width: var(--content); margin-inline: auto; }
+.section { position: relative; padding: clamp(96px, 14vh, 160px) var(--gutter); }
+
+/* HUD label: sentence case, monospace, normal tracking — a readout, not an eyebrow */
+.label {
+  font: 400 13px/1.4 var(--font-mono);
+  color: var(--muted);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.label::before { content: ''; width: 7px; height: 7px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+.h-xl { font-size: clamp(56px, 11vw, 180px); line-height: .88; letter-spacing: -.045em; text-transform: uppercase; font-weight: 700; }
+.h-l { font-size: clamp(34px, 5vw, 72px); line-height: .98; letter-spacing: -.03em; }
+.lede { font-size: clamp(17px, 1.5vw, 20px); color: var(--muted); max-width: 58ch; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 12px; padding: 16px 26px; text-decoration: none;
+  font: 500 15px/1 var(--font-display); letter-spacing: .02em;
+  border: 1px solid var(--accent); color: var(--fg); background: transparent; cursor: pointer;
+  position: relative; overflow: hidden; isolation: isolate;
+  transition: color .45s var(--ease), border-color .3s;
+}
+/* fill wipes up from the bottom on hover */
+.btn::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; background: var(--accent);
+  clip-path: inset(100% 0 0 0); transition: clip-path .45s var(--ease-in-out);
+}
+.btn:hover::before, .btn:focus-visible::before { clip-path: inset(0 0 0 0); }
+.btn:hover, .btn:focus-visible { color: #fff; }
+.btn .arrow { transition: transform .45s var(--ease); }
+.btn:hover .arrow { transform: translateX(4px); }
+.btn.solid { background: var(--accent); color: #fff; }
+.btn.solid::before { background: var(--gold); }
+.btn.solid:hover { color: #000; }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

@@ -1,0 +1,95 @@
+---
+import { site } from '../data/site';
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/work', label: 'Work' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+<header class="site-header">
+  <a href="/" class="mark" aria-label="Ridwan Khondoker, home">RK</a>
+  <div class="actions">
+    <a href="/contact" class="btn start">Start a project</a>
+    <button class="menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="site-menu">
+      <span data-menu-label>Menu</span>
+      <span class="bars" aria-hidden="true"><i></i><i></i></span>
+    </button>
+  </div>
+</header>
+
+<nav id="site-menu" class="menu" aria-label="Site">
+  <ul class="menu-links">
+    {links.map((l) => (
+      <li>
+        <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>
+          <span class="t">{l.label}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <div class="menu-side">
+    <p class="label">Work tracks</p>
+    <a href="/work#development">Software engineering</a>
+    <a href="/work#management">Project management</a>
+    <p class="label">Direct line</p>
+    <a href={`mailto:${site.email}`}>{site.email}</a>
+    {site.socials.map((s) => <a href={s.href} rel="me noopener" target="_blank">{s.label}</a>)}
+  </div>
+</nav>
+
+<style>
+  .site-header {
+    position: fixed; inset: 0 0 auto 0; z-index: 90; height: var(--header-h);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 var(--gutter);
+    color: var(--fg); transition: color .7s var(--ease);
+    pointer-events: none;
+  }
+  .site-header > * { pointer-events: auto; }
+  .mark { font: 800 26px/1 var(--font-name); text-decoration: none; letter-spacing: .02em; }
+  .actions { display: flex; align-items: center; gap: 14px; }
+  .start { padding: 12px 18px; font-size: 14px; }
+  .menu-btn {
+    display: inline-flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer;
+    background: var(--fg); color: var(--bg); border: 0; font: 500 14px/1 var(--font-display);
+    transition: background-color .7s var(--ease), color .7s var(--ease);
+  }
+  .bars { display: grid; gap: 5px; width: 18px; }
+  .bars i { height: 2px; background: currentColor; transition: transform .4s var(--ease); }
+  .menu-btn[aria-expanded='true'] .bars i:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .menu-btn[aria-expanded='true'] .bars i:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+  :global(html.menu-open) .site-header { color: #f3ecfc; }
+  :global(html.menu-open) .menu-btn { background: #f3ecfc; color: #000; }
+
+  .menu {
+    position: fixed; inset: 0; z-index: 80; background: #000; color: #f3ecfc;
+    display: grid; grid-template-columns: 1.4fr 1fr; align-items: end; gap: 40px;
+    padding: calc(var(--header-h) + 40px) var(--gutter) 56px;
+    clip-path: inset(0 0 100% 0); transition: clip-path .75s var(--ease-in-out);
+    --muted: #a99fbb; --accent: #b026ff;
+  }
+  .menu[data-open] { clip-path: inset(0 0 0 0); }
+  .menu-links { list-style: none; margin: 0; padding: 0; }
+  .menu-links a {
+    display: block; overflow: hidden; text-decoration: none;
+    font: 700 clamp(48px, 9vw, 132px)/.92 var(--font-display); text-transform: uppercase; letter-spacing: -.04em;
+  }
+  .menu-links .t { display: inline-block; transform: translateY(105%); transition: transform .8s var(--ease), color .25s; }
+  .menu[data-open] .t { transform: none; }
+  .menu[data-open] li:nth-child(2) .t { transition-delay: .06s; }
+  .menu[data-open] li:nth-child(3) .t { transition-delay: .12s; }
+  .menu[data-open] li:nth-child(4) .t { transition-delay: .18s; }
+  .menu-links a:hover .t, .menu-links a:focus-visible .t, .menu-links a[aria-current] .t { color: var(--violet-hi); }
+  .menu-links a[aria-current] .t::after { content: ''; display: inline-block; width: .16em; height: .16em; margin-left: .15em; background: var(--gold); vertical-align: .6em; }
+  .menu-side { display: grid; gap: 10px; align-content: end; font-size: 17px; }
+  .menu-side .label { margin: 18px 0 2px; }
+  .menu-side a { text-decoration: none; width: fit-content; border-bottom: 1px solid transparent; }
+  .menu-side a:hover, .menu-side a:focus-visible { border-color: currentColor; }
+
+  @media (max-width: 720px) {
+    .start { display: none; }
+    .menu { grid-template-columns: 1fr; align-content: space-between; }
+  }
+</style>

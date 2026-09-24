@@ -1,0 +1,51 @@
+---
+import { site } from '../data/site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer" data-section-theme="dark">
+  <div class="wrap">
+    <p class="sign" aria-label="Always shipping.">
+      <span>Always</span>
+      <span class="accent">shipping<i>.</i></span>
+    </p>
+    <div class="cols">
+      <div>
+        <p class="label">Pages</p>
+        <a href="/">Home</a><a href="/work">Work</a><a href="/about">About</a><a href="/contact">Contact</a>
+      </div>
+      <div>
+        <p class="label">Work tracks</p>
+        <a href="/work#development">Software engineering</a>
+        <a href="/work#management">Project management</a>
+      </div>
+      <div>
+        <p class="label">Direct line</p>
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+        {site.socials.map((s) => <a href={s.href} rel="me noopener" target="_blank">{s.label}</a>)}
+      </div>
+    </div>
+    <div class="base">
+      <span>© {year} {site.name}</span>
+      <span>{site.companies.join(' · ')}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { padding: clamp(96px, 16vh, 180px) var(--gutter) 32px; border-top: 1px solid var(--line); }
+  .sign {
+    margin: 0 0 clamp(56px, 10vh, 120px); display: grid;
+    font: 700 clamp(64px, 14vw, 230px)/.84 var(--font-display); text-transform: uppercase; letter-spacing: -.05em;
+  }
+  .sign .accent { color: var(--accent-text); padding-left: .6em; }
+  .sign i { font-style: normal; color: var(--gold-text); }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .cols div { display: grid; gap: 8px; align-content: start; }
+  .cols a { text-decoration: none; width: fit-content; color: var(--fg); border-bottom: 1px solid transparent; }
+  .cols a:hover, .cols a:focus-visible { border-color: currentColor; }
+  .base {
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 64px; padding-top: 20px;
+    border-top: 1px solid var(--line); font: 400 13px/1.4 var(--font-mono); color: var(--muted);
+  }
+  @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } .sign .accent { padding-left: .3em; } }
+</style>
