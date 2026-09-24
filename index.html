@@ -49,16 +49,18 @@ img{max-width:100%}
 /* items sit on an arc and each panel is turned in perspective so the far edge
    recedes, wrapping the nav around the robot */
 .tree{
-  --row:22px;--gap:34px;--fan:clamp(70px,7vw,112px);
-  position:absolute;top:26%;z-index:3;width:var(--branch);
+  --row:28px;--gap:calc(var(--stage) * .21 - var(--row));--fan:clamp(70px,7vw,112px);
+  /* on wide screens reach out past the content column into the free margin */
+  --out:min(260px,max(0px,(100vw - 2 * var(--gutter) - var(--content)) / 2));
+  position:absolute;top:22%;z-index:3;width:var(--branch);
   display:flex;flex-direction:column;gap:var(--gap);
 }
-.tree-l{left:0;transform:perspective(800px) rotateY(-22deg);transform-origin:100% 50%}
-.tree-r{right:0;transform:perspective(800px) rotateY(22deg);transform-origin:0 50%}
+.tree-l{left:calc(-1 * var(--out));transform:perspective(800px) rotateY(-22deg);transform-origin:100% 50%}
+.tree-r{right:calc(-1 * var(--out));transform:perspective(800px) rotateY(22deg);transform-origin:0 50%}
 .tree a{
   --k:.57;
   display:flex;align-items:center;justify-content:flex-end;gap:12px;height:var(--row);text-decoration:none;
-  font-family:var(--display);font-size:12px;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;
+  font-family:var(--display);font-size:clamp(13px,1.1vw,17px);letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
   color:var(--chrome-mid);transition:color .2s,text-shadow .2s,transform .25s;
 }
 .tree a:nth-of-type(2){--k:.93}
@@ -301,7 +303,7 @@ section{--sp:0;--spabs:0;transform:translateZ(calc(var(--sp) * -70px)) scale(cal
 @media (max-width:860px){
   /* no room beside the robot: the two fans sit above it */
   .hero-3d{margin-top:150px}
-  .tree{top:-150px;width:calc(50% - 10px);--fan:64px}
+  .tree{top:-150px;width:calc(50% - 10px);--fan:64px;--row:22px;--gap:34px;--out:0px}
   .tree-l{transform:perspective(700px) rotateY(-12deg)}
   .tree-r{transform:perspective(700px) rotateY(12deg)}
   .tree a{font-size:10.5px;letter-spacing:.18em;gap:8px}
