@@ -38,7 +38,8 @@ const portrait = found?.default;
 <style>
   .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 6vw, 96px); align-items: center; }
   .portrait { margin: 0; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid var(--line); }
-  .portrait :global(img) { width: 100%; height: 100%; object-fit: cover; }
+  /* keep the face in frame when the photo is cropped to 4:5 */
+  .portrait :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
   /* placeholder: dot-matrix tile (SVG, no gradient) with the monogram */
   .ph {
     width: 100%; height: 100%; display: grid; place-content: center; gap: 14px; text-align: center;
