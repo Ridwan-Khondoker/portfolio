@@ -4,6 +4,7 @@ import { site } from '../data/site';
 const links = [
   { href: '/', label: 'Home' },
   { href: '/work', label: 'Work' },
+  { href: '/technologies', label: 'Technologies' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -74,13 +75,14 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
   .menu-links { list-style: none; margin: 0; padding: 0; }
   .menu-links a {
     display: block; overflow: hidden; text-decoration: none;
-    font: 700 clamp(48px, 9vw, 132px)/.92 var(--font-display); text-transform: uppercase; letter-spacing: -.04em;
+    font: 700 clamp(40px, min(7.4vw, 11vh), 112px)/.92 var(--font-display); text-transform: uppercase; letter-spacing: -.04em;
   }
   .menu-links .t { display: inline-block; transform: translateY(105%); transition: transform .8s var(--ease), color .25s; }
   .menu[data-open] .t { transform: none; }
   .menu[data-open] li:nth-child(2) .t { transition-delay: .06s; }
   .menu[data-open] li:nth-child(3) .t { transition-delay: .12s; }
   .menu[data-open] li:nth-child(4) .t { transition-delay: .18s; }
+  .menu[data-open] li:nth-child(5) .t { transition-delay: .24s; }
   .menu-links a:hover .t, .menu-links a:focus-visible .t, .menu-links a[aria-current] .t { color: var(--violet-hi); }
   .menu-links a[aria-current] .t::after { content: ''; display: inline-block; width: .16em; height: .16em; margin-left: .15em; background: var(--gold); vertical-align: .6em; }
   .menu-side { display: grid; gap: 10px; align-content: end; font-size: 17px; }

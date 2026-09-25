@@ -23,7 +23,8 @@ npm run capture      # screenshot client sites into src/assets/shots (needs thei
 ## Where things live
 - `src/content/dev/*.md`: development work. The flagship has no `parent`; sub-apps and integrations set `parent: <flagship id>` and render nested inside its case study. `draft: true` means Ridwan hasn't confirmed the write-up yet.
 - `src/content/clients/*.json`: project-management / marketing clients (light grid, not deep dives).
-- `src/data/site.ts`: name, email, socials, stats. Add socials there and the menu and footer pick them up.
+- `src/data/tech.ts`: the logos on the /technologies sphere (simple-icons; add or remove entries there).
+- `src/data/site.ts`: name, email, socials, profile facts, stats. Add socials there and the menu and footer pick them up.
 - `src/assets/shots/<slug>-{desktop,mobile}.webp`: written by `scripts/capture.mjs`. A card without a shot shows a styled placeholder.
 - `public/assets/nexbot.splinecode`: the robot scene. The preloader downloads it once and hands the viewer a blob URL.
 

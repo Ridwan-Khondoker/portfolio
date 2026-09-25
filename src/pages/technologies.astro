@@ -1,0 +1,76 @@
+---
+import Base from '../layouts/Base.astro';
+import { technologies } from '../data/tech';
+---
+<Base title="Technologies — Ridwan Khondoker" description="The languages, frameworks and tools Ridwan Khondoker builds with." theme="dark">
+  <section class="tech" data-section-theme="dark" aria-labelledby="tech-title">
+    <canvas class="field" aria-hidden="true" data-field></canvas>
+    <header class="head">
+      <p class="label">Toolkit</p>
+      <h1 id="tech-title" class="h-l">Technologies</h1>
+      <p class="lede">Drag to spin the sphere, click to give it a push. Hover a logo to see what it is.</p>
+    </header>
+
+    <div class="stage" data-sphere>
+      <ul class="orb" aria-label="Technologies I work with">
+        {technologies.map((t) => (
+          <li class="item" data-tech>
+            {t.path ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d={t.path} /></svg>
+            ) : (
+              <span class="wordmark" aria-hidden="true">{t.name}</span>
+            )}
+            <span class="name">{t.name}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .tech {
+    position: relative; min-height: 100vh; min-height: 100svh; overflow: clip; isolation: isolate;
+    display: grid; grid-template-rows: auto 1fr; justify-items: center;
+    padding: calc(var(--header-h) + clamp(24px, 5vh, 56px)) var(--gutter) 32px;
+  }
+  .field { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .head { position: relative; z-index: 2; text-align: center; display: grid; gap: 12px; justify-items: center; pointer-events: none; }
+  .head .lede { margin: 0; font-size: 16px; }
+
+  .stage {
+    position: relative; z-index: 1; width: min(760px, 100%, calc(100vh - 290px)); aspect-ratio: 1; align-self: center;
+    cursor: grab; touch-action: none; user-select: none;
+  }
+  .stage:active { cursor: grabbing; }
+  .orb { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+  .item {
+    position: absolute; left: 50%; top: 50%; width: clamp(40px, 6vw, 64px); height: clamp(40px, 6vw, 64px);
+    display: grid; place-items: center; color: #e9e3f2; will-change: transform, opacity;
+  }
+  .item svg { width: 100%; height: 100%; fill: currentColor; transition: fill .2s, filter .2s; }
+  .wordmark {
+    font: 700 clamp(11px, 1.2vw, 15px)/1 var(--font-display); white-space: nowrap; padding: 8px 10px;
+    border: 2px solid currentColor; border-radius: 10px; transition: color .2s, border-color .2s;
+  }
+  .item:hover { color: var(--gold); }
+  .item:hover svg { filter: drop-shadow(0 0 10px rgba(255, 196, 0, .55)); }
+  .name {
+    position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    font: 400 12px/1 var(--font-mono); color: var(--gold); white-space: nowrap;
+    opacity: 0; transition: opacity .2s; pointer-events: none;
+  }
+  .item:hover .name { opacity: 1; }
+  @media (hover: none) { .name { opacity: .8; font-size: 10px; color: var(--muted); } }
+</style>
+
+<script>
+  import { initField } from '../scripts/field';
+  import { initSphere } from '../scripts/sphere';
+
+  const field = document.querySelector<HTMLCanvasElement>('[data-field]');
+  // light dots on black; they warm to violet and scatter near the pointer
+  if (field) initField(field, null, { dot: [205, 196, 220] });
+  const stage = document.querySelector<HTMLElement>('[data-sphere]');
+  if (stage) initSphere(stage);
+</script>

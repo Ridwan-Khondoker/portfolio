@@ -26,10 +26,17 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
 
-export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasElement) {
+type Options = {
+  /** Resting dot colour (RGB); defaults to ink for light pages. */
+  dot?: readonly [number, number, number];
+};
+
+/** `barsCanvas` is optional: pages without it get the dots only. */
+export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasElement | null = null, opts: Options = {}) {
   const ctx = canvas.getContext('2d');
-  const bctx = barsCanvas.getContext('2d');
-  if (!ctx || !bctx) return;
+  const bctx = barsCanvas?.getContext('2d') ?? null;
+  if (!ctx) return;
+  const dotRGB = opts.dot ?? COLORS.dot;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W = 0, H = 0, cell = 40, cols = 0, rows = 0;
@@ -60,8 +67,9 @@ export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasEleme
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = r.width; H = r.height;
     for (const [c, x] of [[canvas, ctx], [barsCanvas, bctx]] as const) {
+      if (!c || !x) continue;
       c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
-      x!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      x.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     cell = W < 700 ? 30 : 40;
     cols = Math.ceil(W / cell); rows = Math.ceil(H / cell);
@@ -69,7 +77,7 @@ export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasEleme
     dots = [];
     for (let y = 0; y <= rows; y++) for (let x = 0; x <= cols; x++) dots.push({ x: x * cell, y: y * cell, ox: 0, oy: 0, heat: 0, seed: Math.random() * 2 - 1 });
 
-    const count = Math.round((cols * rows) / (W < 700 ? 110 : 85));
+    const count = bctx ? Math.round((cols * rows) / (W < 700 ? 110 : 85)) : 0;
     bars = Array.from({ length: count }, () => {
       const [cx, cy] = freeCell();
       return {
@@ -99,7 +107,7 @@ export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasEleme
 
   function draw() {
     ctx!.clearRect(0, 0, W, H);
-    bctx!.clearRect(0, 0, W, H);
+    bctx?.clearRect(0, 0, W, H);
 
     // dots: a slow swirling wave keeps the grid alive; the pointer scatters them (fast out,
     // slow back) so the pattern visibly breaks up and re-forms, warming to violet near it
@@ -122,7 +130,7 @@ export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasEleme
       const out = Math.hypot(tx, ty) > Math.hypot(d.ox, d.oy);
       const k = out ? 0.28 : 0.045;
       d.ox += (tx - d.ox) * k; d.oy += (ty - d.oy) * k; d.heat += (heat - d.heat) * (out ? 0.25 : 0.06);
-      const c = COLORS.dot.map((v, i) => Math.round(v + (COLORS.dotHot[i] - v) * d.heat));
+      const c = dotRGB.map((v, i) => Math.round(v + (COLORS.dotHot[i] - v) * d.heat));
       ctx!.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${0.55 + d.heat * 0.45})`;
       ctx!.beginPath();
       ctx!.arc(px + d.ox, py + d.oy, 1.1 + d.heat * 1.6, 0, Math.PI * 2);
