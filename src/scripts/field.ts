@@ -1,5 +1,5 @@
-// Hero background: a dot grid that reacts to the pointer, small bars that blink and
-// glide one grid step at a time, and an RK tile that pulses and hops between cells.
+// Hero background: a dot grid that reacts to the pointer, and small bars that blink and
+// glide one grid step at a time.
 // Canvas 2D, drawn only while the hero is on screen; a single static frame for reduced motion.
 
 type Bar = {
@@ -17,8 +17,6 @@ const COLORS = {
   dotHot: [176, 38, 255] as const,
   bar: 'rgba(170, 156, 196, .55)',
   barViolet: 'rgba(176, 38, 255, .55)',
-  gold: '#ffc400',
-  ink: '#0b0712',
 };
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -33,11 +31,10 @@ export function initField(canvas: HTMLCanvasElement) {
   let W = 0, H = 0, cell = 40, cols = 0, rows = 0;
   let dots: { x: number; y: number; ox: number; oy: number; heat: number }[] = [];
   let bars: Bar[] = [];
-  const tile = { cx: 0, cy: 0, tx: 0, ty: 0, t: 0, gliding: false, wait: 3, pulse: 0 };
   const pointer = { x: -9999, y: -9999, active: false };
 
   // Keep the robot column, the header strip and the name/text band (which sits under a soft
-  // page-coloured shadow) free of bars and the tile; dots still cover everything.
+  // page-coloured shadow) free of bars; dots still cover everything.
   const busy = (cx: number, cy: number) => {
     const x = cx / cols, y = cy / rows;
     // below 861px the orbit nav sits in a band above the robot (~220px); keep that clear too
@@ -69,8 +66,6 @@ export function initField(canvas: HTMLCanvasElement) {
       const [cx, cy] = freeCell();
       return { cx, cy, tx: cx, ty: cy, vertical: Math.random() < 0.35, violet: Math.random() < 0.22, phase: 'idle' as const, t: 0, wait: rand(0.5, 5) };
     });
-    [tile.cx, tile.cy] = freeCell();
-    tile.tx = tile.cx; tile.ty = tile.cy;
   }
 
   function stepBars(dt: number) {
@@ -87,16 +82,6 @@ export function initField(canvas: HTMLCanvasElement) {
       } else if (b.phase === 'glide' && b.t > 0.7) {
         b.cx = b.tx; b.cy = b.ty; b.phase = 'idle'; b.t = 0; b.wait = rand(1.5, 6);
       }
-    }
-    tile.t += dt; tile.pulse += dt;
-    if (!tile.gliding && tile.t > tile.wait) {
-      const opts = [[2, 0], [-2, 0], [0, 2], [0, -2], [2, 2], [-2, -2]]
-        .map(([dx, dy]) => [tile.cx + dx, tile.cy + dy])
-        .filter(([x, y]) => x > 0 && y > 0 && x < cols - 2 && y < rows - 2 && !busy(x, y));
-      if (opts.length) { [tile.tx, tile.ty] = pick(opts); tile.gliding = true; }
-      tile.t = 0;
-    } else if (tile.gliding && tile.t > 1.1) {
-      tile.cx = tile.tx; tile.cy = tile.ty; tile.gliding = false; tile.t = 0; tile.wait = rand(3, 6); tile.pulse = 0;
     }
   }
 
@@ -134,26 +119,6 @@ export function initField(canvas: HTMLCanvasElement) {
       ctx!.fillRect(x * cell - w / 2, y * cell - h / 2, w, h);
     }
     ctx!.globalAlpha = 1;
-
-    // RK tile: gold square with the monogram; glides two cells, with a pulse ring on arrival
-    const k = tile.gliding ? ease(Math.min(tile.t / 1.1, 1)) : 0;
-    const tx = (tile.cx + (tile.tx - tile.cx) * k) * cell, ty = (tile.cy + (tile.ty - tile.cy) * k) * cell;
-    const s = cell * 1.1;
-    if (!tile.gliding && tile.pulse < 1.2) {
-      const p = tile.pulse / 1.2;
-      ctx!.strokeStyle = `rgba(255, 196, 0, ${0.6 * (1 - p)})`;
-      ctx!.lineWidth = 2;
-      const g = s / 2 + p * cell * 0.9;
-      ctx!.strokeRect(tx - g, ty - g, g * 2, g * 2);
-    }
-    ctx!.fillStyle = COLORS.gold;
-    ctx!.beginPath();
-    ctx!.roundRect(tx - s / 2, ty - s / 2, s, s, 6);
-    ctx!.fill();
-    ctx!.fillStyle = COLORS.ink;
-    ctx!.font = `800 ${Math.round(s * 0.42)}px Doto, 'JetBrains Mono', monospace`;
-    ctx!.textAlign = 'center'; ctx!.textBaseline = 'middle';
-    ctx!.fillText('RK', tx, ty + 1);
   }
 
   let last = 0, visible = false, running = false;
@@ -171,7 +136,7 @@ export function initField(canvas: HTMLCanvasElement) {
   }
 
   layout();
-  document.fonts.ready.then(() => draw());
+  draw();
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }).observe(canvas);
   new ResizeObserver(() => { layout(); if (reduce || !running) draw(); }).observe(canvas);
 
