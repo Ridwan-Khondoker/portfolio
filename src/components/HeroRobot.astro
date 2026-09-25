@@ -63,7 +63,9 @@ const right = [
      dots and bars (3) · text (4) · orbit nav (5) */
   .field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 3; }
   .stage { position: relative; width: 100%; max-width: var(--content); height: var(--stage); margin: 0 auto; }
-  spline-viewer { position: relative; z-index: 1; width: 100%; height: 100%; display: block; }
+  /* the robot's canvas spans the full viewport width (the stage stays content-width for the nav),
+     so shoulders and arms leave at the screen edge instead of being cut on a line */
+  spline-viewer { position: absolute; z-index: 1; top: 0; left: 50%; width: 100vw; height: 100%; transform: translateX(-50%); display: block; }
 
   /* orbit nav: items on an arc, each side turned in perspective so it wraps around the robot */
   .tree {
@@ -136,8 +138,7 @@ const right = [
   @media (max-width: 860px) {
     .hero { --stage: calc(100vh - 170px - var(--header-h)); --stage: calc(100svh - 170px - var(--header-h)); padding-top: var(--header-h); }
     /* no room beside the robot: the menu sits above it */
-    /* full-bleed, so the robot's arms leave the screen edge instead of ending on a line */
-    .stage { margin-top: 170px; width: auto; margin-inline: calc(-1 * var(--gutter)); }
+    .stage { margin-top: 170px; }
     .tree { top: -170px; width: calc(50% - 8px); --fan: 34px; --row: 38px; --gap: 12px; --out: 0px; }
     .tree-l { transform: perspective(700px) rotateY(-12deg); }
     .tree-r { transform: perspective(700px) rotateY(12deg); }
