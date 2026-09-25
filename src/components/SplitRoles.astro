@@ -1,0 +1,145 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+// Drop a photo at src/assets/portrait/face.(png|webp|jpg) — ideally a cut-out on a transparent
+// background, facing the camera and centred — and it replaces the split placeholder.
+const found = Object.values(import.meta.glob<{ default: ImageMetadata }>('/src/assets/portrait/face.{png,webp,avif,jpg,jpeg}', { eager: true }))[0];
+const face = found?.default;
+
+const sides = [
+  {
+    key: 'build',
+    title: 'Build',
+    role: 'Software engineer / developer',
+    text: 'Architecture, data models and the hard parts of the code: Laravel and Vue platforms, integrations with the systems clients already run, and admin tools their teams can operate.',
+    points: ['Laravel · Vue · Filament · MySQL', 'Property-system integrations', 'Auth, access control, notifications'],
+    href: '/work#development',
+    cta: 'Engineering work',
+  },
+  {
+    key: 'projects',
+    title: 'Projects',
+    role: 'Project manager',
+    text: 'Scope, budget and a distributed team across five countries, plus the marketing side: sites, social media and ad campaigns that bring in reach and revenue.',
+    points: ['Delivery across 5 countries', 'Websites, social & paid ads', 'Coaching and client communication'],
+    href: '/work#management',
+    cta: 'Management work',
+  },
+] as const;
+---
+<section id="build" class="split" data-section-theme="split" data-split-roles aria-label="What I do">
+  {sides.map((s) => (
+    <article class:list={['side', s.key]} data-side={s.key} data-side-theme={s.key === 'build' ? 'dark' : 'light'} aria-labelledby={`${s.key}-title`}>
+      {/* this side's half of the face; each half greys out with its side */}
+      <div class="half" aria-hidden="true">
+        <div class="face">
+          {face ? (
+            <Image src={face} alt="" widths={[360, 560, 840]} sizes="(max-width: 900px) 70vw, 28vw" />
+          ) : (
+            <div class="ph"><span>RK</span></div>
+          )}
+        </div>
+      </div>
+      <div class="copy">
+        <p class="role">{s.role}</p>
+        <h2 id={`${s.key}-title`} class="title">{s.title}</h2>
+        <p class="text">{s.text}</p>
+        <ul>{s.points.map((p) => <li>{p}</li>)}</ul>
+        <a class="cta" href={s.href}>{s.cta} <span aria-hidden="true">→</span></a>
+      </div>
+    </article>
+  ))}
+</section>
+
+<style>
+  .split {
+    --face-w: clamp(240px, 27vw, 440px);
+    --gap: clamp(20px, 3vw, 48px);
+    position: relative; display: flex; min-height: 100vh; min-height: 100svh; overflow: hidden;
+  }
+  .side {
+    position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: center; overflow: hidden;
+    padding: calc(var(--header-h) + 40px) var(--gutter) 64px;
+    transition: flex-grow .7s var(--ease), filter .6s var(--ease), opacity .6s var(--ease);
+  }
+  .build { background: #000; color: #f3ecfc; --accent: #ffc400; --soft: #bba98a; }
+  .projects { background: #f4f1f8; color: #0b0712; --accent: #8a00e6; --soft: #5e5470; }
+
+  /* the active side widens a little; the other greys out */
+  .split[data-active='build'] .build, .split[data-active='projects'] .projects { flex-grow: 1.25; }
+  .split[data-active='build'] .projects, .split[data-active='projects'] .build { filter: grayscale(1); opacity: .45; }
+
+  /* face: the same image in both halves, each clipped to its side of the seam */
+  .half { position: absolute; top: 50%; width: calc(var(--face-w) / 2); aspect-ratio: 1 / 2.5; transform: translateY(-50%); overflow: hidden; pointer-events: none; }
+  .build .half { right: 0; }
+  .projects .half { left: 0; }
+  .face { position: absolute; top: 0; width: var(--face-w); height: 100%; }
+  .build .face { left: 0; }
+  .projects .face { right: 0; }
+  .face :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .ph {
+    width: 100%; height: 100%; display: grid; place-items: center; border-radius: 48% 48% 44% 44% / 38% 38% 30% 30%;
+    border: 2px solid var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Ccircle cx='7' cy='7' r='1.3' fill='%23888' fill-opacity='.5'/%3E%3C/svg%3E");
+  }
+  .ph span { font: 800 clamp(56px, 7vw, 120px)/1 var(--font-name); color: var(--accent); letter-spacing: .04em; }
+
+  .copy { position: relative; z-index: 1; display: grid; gap: 16px; width: min(440px, 100%); min-width: 0; }
+  .build .copy { margin-right: calc(var(--face-w) / 2 + var(--gap)); margin-left: auto; }
+  .projects .copy { margin-left: calc(var(--face-w) / 2 + var(--gap)); margin-right: auto; }
+  .role { margin: 0; font: 400 14px/1.3 var(--font-mono); color: var(--accent); }
+  .title { font: 700 clamp(40px, 4.6vw, 88px)/.86 var(--font-display); text-transform: uppercase; letter-spacing: -.045em; margin: 0; }
+  .build .title { color: #ffc400; }
+  .projects .title { color: #8a00e6; }
+  .text { margin: 0; color: var(--soft); font-size: clamp(15px, 1.2vw, 18px); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font: 400 14px/1.4 var(--font-mono); }
+  li::before { content: '+ '; color: var(--accent); }
+  .cta {
+    width: fit-content; margin-top: 6px; padding: 14px 22px; text-decoration: none; font: 500 15px/1 var(--font-display);
+    border: 1px solid var(--accent); color: inherit; transition: background-color .3s, color .3s;
+  }
+  .build .cta:hover, .build .cta:focus-visible { background: #ffc400; color: #000; }
+  .projects .cta:hover, .projects .cta:focus-visible { background: #8a00e6; color: #fff; }
+  .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* phones and small tablets: stack, and split the face across the horizontal seam */
+  @media (max-width: 900px) {
+    .split { flex-direction: column; }
+    .side { min-height: 80svh; padding: calc(var(--header-h) + 24px) var(--gutter) 48px; }
+    .build { align-items: flex-start; padding-bottom: calc(var(--face-w) * .62 + 32px); }
+    .projects { align-items: flex-end; padding-top: calc(var(--face-w) * .62 + 32px); }
+    .half { top: auto; left: 50%; width: var(--face-w); height: calc(var(--face-w) * .62); aspect-ratio: auto; transform: translateX(-50%); }
+    .build .half, .projects .half { left: 50%; right: auto; }
+    .build .half { bottom: 0; }
+    .projects .half { top: 0; }
+    .face { left: 0; right: auto; width: 100%; height: calc(var(--face-w) * 1.24); }
+    .build .face { top: 0; }
+    .projects .face { top: auto; bottom: 0; }
+    .build .copy, .projects .copy { margin: 0; }
+    .title { font-size: clamp(48px, 15vw, 88px); }
+  }
+</style>
+
+<script>
+  // Hover or focus a side to make it active (desktop); on touch, whichever side fills the
+  // middle of the screen is active.
+  const section = document.querySelector<HTMLElement>('[data-split-roles]');
+  if (section) {
+    const sides = Array.from(section.querySelectorAll<HTMLElement>('[data-side]'));
+    const set = (key?: string) => { if (key) section.dataset.active = key; else delete section.dataset.active; };
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    sides.forEach((s) => {
+      s.addEventListener('focusin', () => set(s.dataset.side));
+      if (canHover) s.addEventListener('pointerenter', () => set(s.dataset.side));
+    });
+    section.addEventListener('focusout', (e) => { if (!section.contains(e.relatedTarget as Node)) set(); });
+    if (canHover) section.addEventListener('pointerleave', () => set());
+    else {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => { if (en.isIntersecting) set((en.target as HTMLElement).dataset.side); });
+      }, { rootMargin: '-45% 0px -45% 0px' });
+      sides.forEach((s) => io.observe(s));
+    }
+  }
+</script>

@@ -39,6 +39,23 @@ html[data-theme='dark'] {
   --gold-text: var(--gold);
   color-scheme: dark;
 }
+/* split: the header's logo sits over the black half, its buttons over the white half */
+html[data-theme='split'] {
+  --bg: #000;
+  --fg: #f3ecfc;
+  --muted: #a99fbb;
+  --line: #2b1840;
+  --surface: #0c0913;
+  --accent: var(--violet);
+  --accent-text: var(--violet-hi);
+  --gold-text: var(--gold);
+}
+html[data-theme='split'] .site-header .actions {
+  --fg: #0b0712;
+  --bg: #f4f1f8;
+  --accent: #8a00e6;
+  color: #0b0712;
+}
 html[data-theme='light'] {
   --bg: #f4f1f8;
   --fg: #0b0712;
