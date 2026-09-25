@@ -8,8 +8,11 @@ const items = [
   { n: await projectCount(), suffix: '', label: 'Projects, integrations & client builds in the log' },
   { n: stats.companies, suffix: '', label: 'Companies I lead delivery for' },
 ];
+
+interface Props { theme?: 'dark' | 'light' }
+const { theme = 'dark' } = Astro.props;
 ---
-<section class="section stats" data-section-theme="dark" aria-label="In numbers">
+<section class="section stats" data-section-theme={theme} aria-label="In numbers">
   <div class="wrap">
     <p class="label">Telemetry</p>
     <dl class="grid">
