@@ -8,6 +8,19 @@ export const site = {
   socials: [] as { label: string; href: string }[],
 };
 
+// Profile facts shown on the home page (About section) and the About page.
+export const profile = {
+  fullName: 'Khondoker Ridwan Mahin',
+  facts: [
+    ['Roles', 'Software engineer · Project manager'],
+    ['Companies', 'Tribe Marketing · Happy to Deliver'],
+    ['Based in', 'Dhaka, Bangladesh'],
+    ['Core stack', 'Laravel · Vue · Filament · MySQL'],
+    ['Team', '5 countries'],
+    ['Availability', '24/7, teams on call'],
+  ] as const,
+};
+
 export const stats = {
   pmYears: 7,
   devYears: 3,

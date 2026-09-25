@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Globe from '../components/Globe.astro';
 import CTA from '../components/CTA.astro';
-import { site, stats } from '../data/site';
+import { profile, stats } from '../data/site';
 ---
 <Base title="About — Ridwan Khondoker" description="Software engineer and project manager at Tribe Marketing and Happy to Deliver.">
   <section class="section head" data-section-theme="dark" aria-labelledby="about-title">
@@ -22,14 +22,9 @@ import { site, stats } from '../data/site';
       </div>
       <aside class="plate" aria-label="Profile">
         <p class="label">Profile</p>
-        <h2>Khondoker Ridwan Mahin</h2>
+        <h2>{profile.fullName}</h2>
         <dl>
-          <div><dt>Roles</dt><dd>Software engineer · Project manager</dd></div>
-          <div><dt>Companies</dt><dd>{site.companies.join(' · ')}</dd></div>
-          <div><dt>Based in</dt><dd>{site.base}</dd></div>
-          <div><dt>Core stack</dt><dd>Laravel · Vue · Filament · MySQL</dd></div>
-          <div><dt>Team</dt><dd>5 countries</dd></div>
-          <div><dt>Availability</dt><dd>24/7, teams on call</dd></div>
+          {profile.facts.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
         </dl>
       </aside>
     </div>
