@@ -12,10 +12,10 @@ const right = [
   { href: '#featured', label: 'Featured work' },
 ];
 ---
-<section class="hero" data-section-theme="dark" aria-labelledby="hero-name">
+<section class="hero" data-section-theme="light" aria-labelledby="hero-name">
   <div class="stage">
     <nav class="tree tree-l hero-ui" aria-label="About me">
-      {left.map((l) => <a href={l.href}>{l.label}</a>)}
+      {left.map((l) => <a href={l.href}><span>{l.label}</span><i aria-hidden="true">{l.href.startsWith('#') ? '↓' : '↗'}</i></a>)}
     </nav>
     <!-- url is set by the preloader (from a blob it already downloaded), so the scene is fetched once -->
     <spline-viewer
@@ -25,7 +25,7 @@ const right = [
       events-target="global"
       aria-label="3D robot greeting visitors"></spline-viewer>
     <nav class="tree tree-r hero-ui" aria-label="My work">
-      {right.map((l) => <a href={l.href}>{l.label}</a>)}
+      {right.map((l) => <a href={l.href}><span>{l.label}</span><i aria-hidden="true">{l.href.startsWith('#') ? '↓' : '↗'}</i></a>)}
     </nav>
   </div>
 
@@ -58,7 +58,7 @@ const right = [
   /* violet glow behind the robot — a blurred solid disc, no gradient */
   .hero::before {
     content: ''; position: absolute; left: 50%; top: 2%; width: min(56vw, 720px); aspect-ratio: 1;
-    transform: translateX(-50%); border-radius: 50%; background: var(--violet-deep); opacity: .3; filter: blur(120px);
+    transform: translateX(-50%); border-radius: 50%; background: var(--violet); opacity: .16; filter: blur(130px);
     pointer-events: none;
   }
   .stage { position: relative; z-index: 1; width: 100%; max-width: var(--content); height: var(--stage); margin: calc(var(--stage) * -.02) auto 0; }
@@ -66,7 +66,7 @@ const right = [
 
   /* orbit nav: items on an arc, each side turned in perspective so it wraps around the robot */
   .tree {
-    --row: 28px; --gap: calc(var(--stage) * .21 - var(--row)); --fan: clamp(70px, 7vw, 112px);
+    --row: 46px; --gap: calc(var(--stage) * .21 - var(--row)); --fan: clamp(70px, 7vw, 112px);
     --out: min(260px, max(0px, (100vw - 2 * var(--gutter) - var(--content)) / 2));
     position: absolute; top: 22%; z-index: 3; width: var(--branch);
     display: flex; flex-direction: column; gap: var(--gap);
@@ -75,14 +75,28 @@ const right = [
   .tree-r { right: calc(-1 * var(--out)); transform: perspective(800px) rotateY(22deg); transform-origin: 0 50%; }
   .tree a {
     --k: .57;
-    display: flex; align-items: center; justify-content: flex-end; height: var(--row); text-decoration: none; white-space: nowrap;
-    font: 500 clamp(15px, 1.25vw, 19px)/1 var(--font-display); color: var(--muted);
-    transition: color .2s, text-shadow .2s, transform .25s var(--ease);
+    display: inline-flex; align-items: center; gap: 12px; width: fit-content; height: var(--row); padding: 0 18px 0 20px;
+    text-decoration: none; white-space: nowrap;
+    font: 500 clamp(15px, 1.2vw, 18px)/1 var(--font-display); color: var(--fg);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    box-shadow: 0 1px 0 var(--line), 0 10px 24px -14px rgba(11, 7, 18, .35);
+    transition: color .25s, background-color .25s, border-color .25s, box-shadow .25s, transform .25s var(--ease);
+  }
+  .tree a i {
+    font-style: normal; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--fg); color: var(--bg); font-size: 13px; transition: background-color .25s, color .25s, transform .3s var(--ease);
   }
   .tree a:nth-child(2) { --k: .93; }
+  .tree-l { align-items: flex-end; }
+  .tree-r { align-items: flex-start; }
   .tree-l a { margin-right: calc(var(--fan) * var(--k)); }
-  .tree-r a { margin-left: calc(var(--fan) * var(--k)); flex-direction: row-reverse; }
-  .tree a:hover, .tree a:focus-visible { color: var(--violet-hi); text-shadow: 0 0 10px rgba(176, 38, 255, .85), 0 0 22px rgba(176, 38, 255, .45); outline: none; }
+  .tree-r a { margin-left: calc(var(--fan) * var(--k)); }
+  .tree a:hover, .tree a:focus-visible {
+    color: #fff; background: var(--accent); border-color: var(--accent); outline: none;
+    box-shadow: 0 0 0 4px rgba(176, 38, 255, .18), 0 12px 30px -10px rgba(176, 38, 255, .7);
+  }
+  .tree a:hover i, .tree a:focus-visible i { background: #fff; color: var(--accent); transform: rotate(-45deg); }
+  .tree a[href^='#']:hover i, .tree a[href^='#']:focus-visible i { transform: translateY(2px); }
   .tree-l a:hover, .tree-l a:focus-visible { transform: translateX(-4px); }
   .tree-r a:hover, .tree-r a:focus-visible { transform: translateX(4px); }
 
@@ -90,10 +104,10 @@ const right = [
   .hello { position: relative; z-index: 2; isolation: isolate; margin-top: calc(var(--stage) * -.22); padding: 30px 0 8px; }
   .hello::before {
     content: ''; position: absolute; left: 50%; top: 0; bottom: -80px; width: min(1500px, 100vw); transform: translateX(-50%);
-    background: #000; border-radius: 50%; filter: blur(30px); z-index: -1; pointer-events: none;
+    background: var(--bg); border-radius: 50%; filter: blur(30px); z-index: -1; pointer-events: none;
   }
-  .greet { margin: 0 0 10px; font: 500 16px/1 var(--font-mono); color: var(--gold); text-shadow: 0 0 12px rgba(255, 196, 0, .45); }
-  .name { font: 800 clamp(30px, 6.2vw, 96px)/1 var(--font-name); letter-spacing: .02em; color: var(--fg); text-shadow: 0 0 34px rgba(176, 38, 255, .35); }
+  .greet { margin: 0 0 10px; font: 500 16px/1 var(--font-mono); color: var(--gold-text); }
+  .name { font: 800 clamp(30px, 6.2vw, 96px)/1 var(--font-name); letter-spacing: .02em; color: var(--fg); text-shadow: 0 0 30px rgba(176, 38, 255, .25); }
   .greet, .name { transition: opacity .9s var(--ease), transform .9s var(--ease), visibility 0s; }
   .name { transition-delay: .15s; }
   :global(html.intro-pending) .greet, :global(html.intro-pending) .name { transform: translateY(14px); }
@@ -116,11 +130,12 @@ const right = [
   @media (max-width: 860px) {
     .hero { --stage: 44vh; padding-top: var(--header-h); }
     /* no room beside the robot: the menu sits above it */
-    .stage { margin-top: 150px; }
-    .tree { top: -150px; width: calc(50% - 10px); --fan: 64px; --row: 22px; --gap: 34px; --out: 0px; }
+    .stage { margin-top: 170px; }
+    .tree { top: -170px; width: calc(50% - 8px); --fan: 34px; --row: 38px; --gap: 12px; --out: 0px; }
     .tree-l { transform: perspective(700px) rotateY(-12deg); }
     .tree-r { transform: perspective(700px) rotateY(12deg); }
-    .tree a { font-size: 14px; }
+    .tree a { font-size: 13px; gap: 8px; padding: 0 10px 0 14px; }
+    .tree a i { width: 20px; height: 20px; font-size: 11px; }
   }
   @media (prefers-reduced-motion: reduce) {
     spline-viewer { display: none; }

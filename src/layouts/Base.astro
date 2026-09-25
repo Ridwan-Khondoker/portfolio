@@ -8,15 +8,18 @@ interface Props {
   description?: string;
   /** Home runs the boot intro: everything but the robot stays hidden until it settles. */
   intro?: boolean;
+  /** Theme of the first section, so the first paint already has the right background. */
+  theme?: 'dark' | 'light';
 }
 const {
   title = 'Ridwan Khondoker — Software engineer & project manager',
   description = 'Ridwan Khondoker builds web platforms and runs the teams that ship them.',
   intro = false,
+  theme = 'dark',
 } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme={theme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
