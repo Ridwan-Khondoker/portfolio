@@ -27,6 +27,7 @@ npm run capture      # screenshot client sites into src/assets/shots (needs thei
 - `src/data/site.ts`: name, email, socials, profile facts, stats. Add socials there and the menu and footer pick them up.
 - `src/assets/shots/<slug>-{desktop,mobile}.webp`: written by `scripts/capture.mjs`. A card without a shot shows a styled placeholder.
 - `src/assets/portrait/portrait.*` (About section) and `src/assets/portrait/face.*` (split BUILD/PROJECTS section): drop the photo in and it replaces the placeholder.
+- `src/assets/portrait/feature.*` (16:9, ~2560×1440) and optional `feature-mobile.*` (9:16): the full-screen photo band after BUILD/PROJECTS, which slides up over that section.
 - `public/assets/nexbot.splinecode`: the robot scene. The preloader downloads it once and hands the viewer a blob URL.
 
 ## Design rules
