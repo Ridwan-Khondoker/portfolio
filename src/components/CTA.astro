@@ -1,7 +1,10 @@
 ---
 import { site } from '../data/site';
+
+interface Props { theme?: 'dark' | 'light' }
+const { theme = 'dark' } = Astro.props;
 ---
-<section class="section cta" data-section-theme="dark" aria-labelledby="cta-title">
+<section class="section cta" data-section-theme={theme} aria-labelledby="cta-title">
   <div class="wrap">
     <p class="label">Open channel</p>
     <h2 id="cta-title" class="h-xl"><span>Got a project?</span><span class="accent">Let's ship it.</span></h2>

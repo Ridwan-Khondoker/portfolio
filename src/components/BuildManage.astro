@@ -22,7 +22,7 @@ const tracks = [
   },
 ];
 ---
-<section id="build" class="section build" data-section-theme="light" aria-label="What I do">
+<section id="build" class="section build" data-section-theme="dark" aria-label="What I do">
   <div class="wrap">
     <p class="label">Two tracks, one person</p>
     {tracks.map((t, i) => (
@@ -43,6 +43,8 @@ const tracks = [
 </section>
 
 <style>
+  /* the heading halves start pulled apart; don't let that push the page sideways */
+  .build { overflow-x: clip; }
   .build .label { margin-bottom: 40px; }
   .trk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: clamp(28px, 4vw, 64px); align-items: end; padding: clamp(40px, 6vh, 72px) 0; border-top: 1px solid var(--line); }
   .split { display: grid; font-size: clamp(56px, 8.4vw, 150px); }
@@ -57,6 +59,7 @@ const tracks = [
   .body .btn { width: fit-content; margin-top: 8px; }
   @media (max-width: 860px) {
     .trk { grid-template-columns: 1fr; }
+    .split { font-size: clamp(44px, 13vw, 80px); }
     .split .b, .trk:nth-of-type(2) .split .a { padding-left: .25em; }
   }
 </style>
