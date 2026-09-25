@@ -7,6 +7,16 @@ import type { ImageMetadata } from 'astro';
 const found = Object.values(import.meta.glob<{ default: ImageMetadata }>('/src/assets/portrait/face.{png,webp,avif,jpg,jpeg}', { eager: true }))[0];
 const face = found?.default;
 
+// Or one half per side: src/assets/portrait/face-build.* (left half, face centre on its right
+// edge) and face-projects.* (right half, face centre on its left edge), ideally transparent PNG/WebP.
+// With both present they meet at the seam and replace the shared face.
+const pick = (m: Record<string, { default: ImageMetadata }>) => Object.values(m)[0]?.default;
+const halves = {
+  build: pick(import.meta.glob<{ default: ImageMetadata }>('/src/assets/portrait/face-build.{png,webp,avif,jpg,jpeg}', { eager: true })),
+  projects: pick(import.meta.glob<{ default: ImageMetadata }>('/src/assets/portrait/face-projects.{png,webp,avif,jpg,jpeg}', { eager: true })),
+};
+const pair = !!(halves.build && halves.projects);
+
 const sides = [
   {
     key: 'build',
@@ -28,10 +38,23 @@ const sides = [
   },
 ] as const;
 ---
-<section id="build" class="split" data-section-theme="split" data-split-roles aria-label="What I do">
+<section id="build" class:list={['split', { pair }]} data-section-theme="split" data-split-roles aria-label="What I do">
   {sides.map((s) => (
     <article class:list={['side', s.key]} data-side={s.key} data-side-theme={s.key === 'build' ? 'dark' : 'light'} aria-labelledby={`${s.key}-title`}>
       {/* this side's half of the face; each half greys out with its side */}
+      {pair ? (
+        <>
+          <div class="half bust" aria-hidden="true">
+            <Image src={halves[s.key]!} alt="" widths={[240, 420, 640, 840]} sizes="(max-width: 900px) 45vw, 25vw" />
+          </div>
+          {s.key === 'build' && (
+            // phones stack the sides, so the build side carries the other half too
+            <div class="mate bust" aria-hidden="true">
+              <Image src={halves.projects!} alt="" widths={[240, 420, 640]} sizes="45vw" />
+            </div>
+          )}
+        </>
+      ) : (
       <div class="half" aria-hidden="true">
         <div class="face">
           {face ? (
@@ -41,6 +64,7 @@ const sides = [
           )}
         </div>
       </div>
+      )}
       <div class="copy">
         <p class="role">{s.role}</p>
         <h2 id={`${s.key}-title`} class="title">{s.title}</h2>
@@ -78,6 +102,17 @@ const sides = [
   .build .face { left: 0; }
   .projects .face { right: 0; }
   .face :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  /* half-busts (face-build / face-projects): anchored to the bottom, meeting at the seam; the
+     copy moves to the outer edge, over the transparent corner above each shoulder */
+  .pair { --half-w: clamp(200px, 25vw, 460px); }
+  .pair .half { top: auto; bottom: 0; width: var(--half-w); aspect-ratio: 832 / 941; transform: none; }
+  .bust :global(img) { width: 100%; height: 100%; object-fit: contain; }
+  .build .bust :global(img) { object-position: right bottom; }
+  .projects .bust :global(img), .mate :global(img) { object-position: left bottom; }
+  .mate { display: none; }
+  .pair .build .copy { margin-left: 0; margin-right: auto; }
+  .pair .projects .copy { margin-left: auto; margin-right: 0; }
+
   .ph {
     width: 100%; height: 100%; display: grid; place-items: center; border-radius: 48% 48% 44% 44% / 38% 38% 30% 30%;
     border: 2px solid var(--accent);
@@ -118,6 +153,14 @@ const sides = [
     .projects .face { top: auto; bottom: 0; }
     .build .copy, .projects .copy { margin: 0; }
     .title { font-size: clamp(48px, 15vw, 88px); }
+
+    /* both halves sit together at the bottom of the build side, on the seam */
+    .pair { --half-w: min(42vw, 230px); }
+    .pair .build { padding-bottom: calc(var(--half-w) * 1.13 + 32px); }
+    .pair .projects { padding-top: calc(var(--header-h) + 24px); }
+    .pair .projects .half { display: none; }
+    .pair .build .half { left: auto; right: 50%; }
+    .mate { display: block; position: absolute; bottom: 0; left: 50%; width: var(--half-w); aspect-ratio: 832 / 941; pointer-events: none; }
   }
 </style>
 
