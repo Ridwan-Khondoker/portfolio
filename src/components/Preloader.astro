@@ -14,32 +14,37 @@
 </div>
 
 <style>
+  /* white boot screen: same paper tone as the hero it hands over to */
   .preloader {
-    position: fixed; inset: 0; z-index: 150; background: #000; color: #f3ecfc;
+    position: fixed; inset: 0; z-index: 150; background: #f4f1f8; color: #0b0712;
     display: grid; place-items: center; padding: var(--gutter);
   }
   :global(html:not(.intro-pending)) .preloader { display: none; }
   .boot { width: min(560px, 100%); }
   .big { margin: 0 0 22px; font: 800 clamp(44px, 8vw, 96px)/1 var(--font-name); letter-spacing: .02em; }
-  .big .who { color: var(--violet-hi); text-shadow: 0 0 24px rgba(176, 38, 255, .6); }
-  .bar { height: 2px; background: #2b1840; margin-bottom: 18px; }
-  .bar i { display: block; height: 100%; width: 0; background: var(--gold); box-shadow: 0 0 10px var(--gold); transition: width .3s linear; }
-  .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font: 400 14px/1.4 var(--font-mono); color: #a99fbb; }
-  .log li { display: flex; justify-content: space-between; gap: 16px; opacity: .45; transition: opacity .3s; }
-  .log li[data-active], .log li[data-done] { opacity: 1; }
-  .log li[data-done] b { color: var(--violet-hi); }
+  .big .who { color: #8a00e6; }
+  .bar { height: 2px; background: #d6cce4; margin-bottom: 18px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--violet); }
+  .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font: 400 14px/1.4 var(--font-mono); color: #5e5470; }
+  .log li { display: flex; justify-content: space-between; gap: 16px; opacity: 0; transform: translateY(6px); transition: opacity .35s, transform .35s var(--ease); }
+  .log li[data-active], .log li[data-done] { opacity: 1; transform: none; }
+  .log li[data-done] b { color: #7200bf; }
   .log b { font-weight: 400; }
-  .scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--violet); box-shadow: 0 0 18px 2px var(--violet); opacity: 0; }
+  .scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--violet); box-shadow: 0 0 14px 1px rgba(176, 38, 255, .6); opacity: 0; }
 </style>
 
 <script>
   import { gsap, reduceMotion } from '../scripts/motion/core';
 
+  // The boot log runs as a readable sequence: each line stays on screen for a minimum time,
+  // the model percentage counts up smoothly (never faster than the real download), and the
+  // screen only wipes away once the robot scene has actually started.
   const root = document.documentElement;
   const el = document.querySelector<HTMLElement>('[data-preloader]')!;
-  const bot = document.querySelector<HTMLElement & { url?: string }>('.hero spline-viewer');
+  const bot = document.querySelector<HTMLElement>('.hero spline-viewer');
   const bar = el.querySelector<HTMLElement>('[data-bar]')!;
   const pct = el.querySelector<HTMLElement>('[data-pct]')!;
+  const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
   const step = (name: string, state: 'active' | 'done', text?: string) => {
     const li = el.querySelector<HTMLElement>(`[data-step="${name}"]`)!;
     li.toggleAttribute('data-active', state === 'active');
@@ -48,29 +53,29 @@
   };
   const progress = (p: number) => { bar.style.width = `${Math.round(p * 100)}%`; };
 
-  // The camera settles and the robot opens its arms ~1.4s after the scene loads; the UI comes in then.
+  // Once the wipe starts, the robot zooms out on its own; the text and nav follow after it settles.
   const revealUI = () => root.classList.remove('intro-pending');
   let exited = false;
-  function exit() {
+  function exit(fast = false) {
     if (exited) return;
     exited = true;
     const scan = el.querySelector<HTMLElement>('[data-scan]')!;
+    const d = fast ? .5 : 1.1;
     gsap.timeline({ onComplete: () => { el.remove(); } })
       .set(scan, { opacity: 1 })
-      .to(scan, { top: '100%', duration: .7, ease: 'power3.inOut' }, 0)
-      .to(el, { clipPath: 'inset(100% 0 0 0)', duration: .7, ease: 'power3.inOut' }, 0);
-    setTimeout(revealUI, 1400);
+      .to(scan, { top: '100%', duration: d, ease: 'power2.inOut' }, 0)
+      .to(el, { clipPath: 'inset(100% 0 0 0)', duration: d, ease: 'power2.inOut' }, 0);
+    setTimeout(revealUI, 2000);
   }
 
-  async function loadScene(src: string) {
-    step('model', 'active');
+  // Downloads the scene, reporting real progress; returns a blob URL so the viewer doesn't fetch it again.
+  async function download(src: string, onProgress: (f: number) => void) {
     const res = await fetch(src);
     const total = Number(res.headers.get('content-length')) || 0;
     const reader = res.body?.getReader();
     if (!reader || !total) {
       const blob = await res.blob();
-      step('model', 'done', 'ok');
-      progress(.9);
+      onProgress(1);
       return URL.createObjectURL(blob);
     }
     const chunks: Uint8Array<ArrayBuffer>[] = [];
@@ -80,11 +85,24 @@
       if (done) break;
       chunks.push(value);
       got += value.length;
-      pct.textContent = `${Math.round((got / total) * 100)}%`;
-      progress(.15 + (got / total) * .75);
+      onProgress(got / total);
     }
-    step('model', 'done', 'ok');
     return URL.createObjectURL(new Blob(chunks));
+  }
+
+  // Counts the displayed percentage up to the real one at no more than 100% per `minMs`.
+  function countUp(real: () => number, minMs: number) {
+    return new Promise<void>((resolve) => {
+      let shown = 0, last = performance.now();
+      const tick = (now: number) => {
+        shown = Math.min(real(), shown + (now - last) / minMs);
+        last = now;
+        pct.textContent = `${Math.round(shown * 100)}%`;
+        progress(.2 + shown * .6);
+        if (shown >= 1) resolve(); else requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
   }
 
   async function boot() {
@@ -96,25 +114,35 @@
     let seen = false;
     try { seen = sessionStorage.getItem('booted') === '1'; } catch { /* storage blocked: show the full boot */ }
     if (seen) el.style.visibility = 'hidden';
+    setTimeout(() => exit(true), 12000); // slow network or no WebGL: never trap the visitor here
 
-    bot.addEventListener('load-complete', () => {
+    const loaded = new Promise<void>((r) => bot.addEventListener('load-complete', () => r(), { once: true }));
+    let real = 0;
+    const scene = download(src, (f) => { real = f; }).catch(() => src);
+
+    if (!seen) {
+      step('fonts', 'active');
+      await Promise.all([document.fonts.ready, wait(900)]);
+      step('fonts', 'done', 'ok');
+      progress(.2);
+
+      step('model', 'active');
+      await Promise.all([scene, countUp(() => real, 1600)]);
+      step('model', 'done', 'ok');
+    }
+
+    bot.setAttribute('url', await scene);
+    if (!seen) {
+      step('scene', 'active');
+      await Promise.all([loaded, wait(900)]);
       step('scene', 'done', 'online');
       progress(1);
-      try { sessionStorage.setItem('booted', '1'); } catch { /* ignore */ }
-      setTimeout(exit, seen ? 0 : 350);
-    });
-    setTimeout(exit, 8000); // slow network or no WebGL: never trap the visitor behind the preloader
-
-    step('fonts', 'active');
-    document.fonts.ready.then(() => { step('fonts', 'done', 'ok'); progress(.15); });
-
-    try {
-      const url = await loadScene(src);
-      step('scene', 'active');
-      bot.setAttribute('url', url);
-    } catch {
-      bot.setAttribute('url', src);
+      await wait(700); // let "online" land before the wipe
+    } else {
+      await loaded;
     }
+    try { sessionStorage.setItem('booted', '1'); } catch { /* ignore */ }
+    exit(seen);
   }
   boot();
 </script>

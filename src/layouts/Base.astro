@@ -32,7 +32,7 @@ const {
         // Set before first paint so nothing flashes in and back out; the preloader removes it.
         if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
           document.documentElement.classList.add('intro-pending');
-          setTimeout(function () { document.documentElement.classList.remove('intro-pending'); }, 9000);
+          setTimeout(function () { document.documentElement.classList.remove('intro-pending'); }, 14000);
         }
       </script>
     )}
