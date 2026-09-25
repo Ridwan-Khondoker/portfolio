@@ -3,7 +3,7 @@ export const site = {
   role: 'Software engineer & project manager',
   email: 'ridwan.tribemarketing@gmail.com',
   base: 'Dhaka, Bangladesh',
-  companies: ['Tribe Marketing', 'Happy to Deliver'],
+  companies: ['Tribe Marketing', 'Happy To Deliver'],
   // Add links here and the footer/menu pick them up.
   socials: [] as { label: string; href: string }[],
 };
@@ -13,7 +13,7 @@ export const profile = {
   fullName: 'Khondoker Ridwan Mahin',
   facts: [
     ['Roles', 'Software engineer · Project manager'],
-    ['Companies', 'Tribe Marketing · Happy to Deliver'],
+    ['Companies', 'Tribe Marketing · Happy To Deliver'],
     ['Based in', 'Dhaka, Bangladesh'],
     ['Core stack', 'Laravel · Vue · Filament · MySQL'],
     ['Team', '5 countries'],

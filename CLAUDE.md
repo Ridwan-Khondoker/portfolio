@@ -1,6 +1,6 @@
 # Ridwan Khondoker — Portfolio
 
-The personal site of Ridwan Khondoker (Khondoker Ridwan Mahin), software engineer and project manager at Tribe Marketing and Happy to Deliver. It is live at ridwankhondoker.dev. Goals, in order: show the work, wow with motion, bring in leads, tell the story.
+The personal site of Ridwan Khondoker (Khondoker Ridwan Mahin), software engineer and project manager at Tribe Marketing and Happy To Deliver. It is live at ridwankhondoker.dev. Goals, in order: show the work, wow with motion, bring in leads, tell the story.
 
 ## Stack
 - Astro 5 (static output), TypeScript strict
@@ -38,6 +38,7 @@ npm run capture      # screenshot client sites into src/assets/shots (needs thei
 - Keyboard: everything interactive is reachable and has a visible focus state.
 
 ## Content rules
+- Always write the company name as "Happy To Deliver" (capital T in To).
 - Only state facts Ridwan has given. Don't invent results, dates or client details. Unknown URLs show "Link coming soon".
 - Stats: 7 years in project management & marketing, 3 years in development, 2 companies. The projects count is derived from the content files.
 
