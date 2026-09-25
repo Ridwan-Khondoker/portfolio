@@ -164,7 +164,19 @@ const right = [
     st.textContent = '#logo{display:none!important}';
     root.appendChild(st);
   }
-  bot?.addEventListener('load-complete', hideBadge);
+  // The scene's camera ends its zoom-out framing the robot from the knees up. Shrink and lift
+  // the robot inside the scene so the whole body, feet included, is in frame; the zoom still
+  // starts on the head. Uses the viewer's app instance (viewer version is pinned).
+  const FULL_BODY = { scale: 0.65, lift: 122 };
+  function fitWholeRobot() {
+    const app = (bot as unknown as { _spline?: { findObjectByName(n: string): any } } | null)?._spline;
+    const robot = app?.findObjectByName('Bot');
+    if (!robot || robot.userData?.fitted) return;
+    robot.scale.x *= FULL_BODY.scale; robot.scale.y *= FULL_BODY.scale; robot.scale.z *= FULL_BODY.scale;
+    robot.position.y += FULL_BODY.lift;
+    robot.userData = { ...robot.userData, fitted: true };
+  }
+  bot?.addEventListener('load-complete', () => { fitWholeRobot(); hideBadge(); });
 
   // Marquee drifts with scroll position rather than looping on its own.
   const row = document.querySelector<HTMLElement>('[data-marquee]');
