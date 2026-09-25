@@ -3,7 +3,9 @@ import Shot from './Shot.astro';
 import { getDevProjects, getClients, host } from '../lib/data';
 
 const [flagship] = await getDevProjects();
-const clients = (await getClients()).slice(0, 5);
+// Clients left out of this showcase (still listed in the roster and on /work).
+const HIDE = ['stax-army'];
+const clients = (await getClients()).filter((c) => !HIDE.includes(c.id)).slice(0, 5);
 
 const items = [
   {
