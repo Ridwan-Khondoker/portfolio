@@ -46,13 +46,18 @@ export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasEleme
   let bars: Bar[] = [];
   const pointer = { x: -9999, y: -9999, active: false };
 
-  // Bars pass behind the robot, but keep them out of the header strip and the name/text band
-  // (which sits under a soft page-coloured shadow); dots still cover everything.
+  // Keep bars off the robot (the centre column, widened by a bar's reach so none overlaps it),
+  // the header strip and the name/text band (under a soft page-coloured shadow); dots still
+  // cover everything.
   const busy = (cx: number, cy: number) => {
     const y = cy / rows;
     // below 861px the orbit nav sits in a band above the robot (~220px); keep that clear too
     const navBand = W < 861 ? Math.ceil(230 / cell) : 2;
-    return y > 0.6 || cy < navBand;
+    const reach = cell * 0.8;
+    const [l, r] = W < 861 ? [0.04, 0.96] : [0.3, 0.7];
+    const px = cx * cell;
+    const onRobot = px + reach > W * l && px - reach < W * r;
+    return onRobot || y > 0.6 || cy < navBand;
   };
   const freeCell = (): [number, number] => {
     for (let i = 0; i < 60; i++) {
