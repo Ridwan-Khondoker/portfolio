@@ -7,8 +7,8 @@ import { getDevProjects, getClients } from '../../lib/data';
 const projects = await getDevProjects();
 const clientIds = (await getClients()).map((c) => c.id);
 ---
-<Base title="Work — Ridwan Khondoker" description="Software engineering and project management work by Ridwan Khondoker.">
-  <section class="section head" data-section-theme="dark" aria-labelledby="work-title">
+<Base theme="gold" title="Work — Ridwan Khondoker" description="Software engineering and project management work by Ridwan Khondoker.">
+  <section class="section head" data-section-theme="gold" data-track-theme aria-labelledby="work-title">
     <div class="wrap">
       <p class="label">Mission log</p>
       <h1 id="work-title" class="h-xl"><span>Work</span><span class="accent">in the field</span></h1>
@@ -25,7 +25,7 @@ const clientIds = (await getClients()).map((c) => c.id);
   </section>
 
   <div id="development" role="tabpanel" aria-labelledby="tab-development" class="panel">
-    <section class="section dev" data-section-theme="light" aria-label="Software engineering">
+    <section class="section dev" data-section-theme="gold" data-track-theme aria-label="Software engineering">
       <div class="wrap">
         {projects.map((p) => (
           <>
@@ -63,7 +63,7 @@ const clientIds = (await getClients()).map((c) => c.id);
   }
   .tabs button + button { border-left: 1px solid var(--line); }
   .tabs button::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--accent); clip-path: inset(0 100% 0 0); transition: clip-path .6s var(--ease-in-out); }
-  .tabs button[aria-selected='true'] { color: #fff; }
+  .tabs button[aria-selected='true'] { color: var(--on-accent, #fff); }
   .tabs button[aria-selected='true']::before { clip-path: inset(0 0 0 0); }
   .tabs button:not([aria-selected='true']):hover { color: var(--fg); }
   .tabs .n { font: 600 clamp(20px, 2.2vw, 32px)/1.1 var(--font-display); }
@@ -84,7 +84,20 @@ const clientIds = (await getClients()).map((c) => c.id);
   const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
   const clientIds = (list.dataset.clientIds ?? '').split(',');
 
+  // Engineering = black & gold, management = white & purple; the whole page (footer included)
+  // follows the selected tab.
+  const TRACK_THEME: Record<string, string> = { development: 'gold', management: 'light' };
+  const themed = () => [
+    ...document.querySelectorAll<HTMLElement>('[data-track-theme], #management [data-section-theme], .site-footer'),
+  ];
+  function applyTheme(id: string) {
+    const t = TRACK_THEME[id];
+    themed().forEach((el) => { el.dataset.sectionTheme = t; });
+    document.documentElement.dataset.theme = t;
+  }
+
   function select(id: string, focus = false) {
+    applyTheme(id);
     tabs.forEach((t) => {
       const on = t.getAttribute('aria-controls') === id;
       t.setAttribute('aria-selected', String(on));
@@ -117,5 +130,7 @@ const clientIds = (await getClients()).map((c) => c.id);
         if (el) lenis ? lenis.scrollTo(el, { offset: -100, immediate: true }) : el.scrollIntoView();
       });
     }
+  } else {
+    applyTheme('development');
   }
 </script>

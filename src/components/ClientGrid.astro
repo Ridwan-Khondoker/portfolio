@@ -2,7 +2,7 @@
 import ClientCard from './ClientCard.astro';
 import { getClients } from '../lib/data';
 
-interface Props { heading?: boolean; theme?: 'dark' | 'light' }
+interface Props { heading?: boolean; theme?: 'dark' | 'light' | 'gold' }
 const { heading = true, theme = 'dark' } = Astro.props;
 const clients = await getClients();
 ---

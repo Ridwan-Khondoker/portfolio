@@ -39,6 +39,19 @@ html[data-theme='dark'] {
   --gold-text: var(--gold);
   color-scheme: dark;
 }
+/* gold: black page with gold accents (engineering track on /work) */
+html[data-theme='gold'] {
+  --bg: #000;
+  --fg: #f3ecfc;
+  --muted: #bba98a;
+  --line: #3a3014;
+  --surface: #0d0b05;
+  --accent: #ffc400;
+  --accent-text: #ffc400;
+  --gold-text: #ffc400;
+  --on-accent: #000;
+  color-scheme: dark;
+}
 /* split: the header's logo sits over the black half, its buttons over the white half */
 html[data-theme='split'] {
   --bg: #000;
@@ -122,10 +135,10 @@ button { font: inherit; color: inherit; }
   clip-path: inset(100% 0 0 0); transition: clip-path .45s var(--ease-in-out);
 }
 .btn:hover::before, .btn:focus-visible::before { clip-path: inset(0 0 0 0); }
-.btn:hover, .btn:focus-visible { color: #fff; }
+.btn:hover, .btn:focus-visible { color: var(--on-accent, #fff); }
 .btn .arrow { transition: transform .45s var(--ease); }
 .btn:hover .arrow { transform: translateX(4px); }
-.btn.solid { background: var(--accent); color: #fff; }
+.btn.solid { background: var(--accent); color: var(--on-accent, #fff); }
 .btn.solid::before { background: var(--gold); }
 .btn.solid:hover { color: #000; }
 
