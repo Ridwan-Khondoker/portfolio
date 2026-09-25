@@ -1,5 +1,5 @@
-// Hero background: a dot grid that reacts to the pointer, and small bars that blink and
-// glide one grid step at a time.
+// Hero background: a black dot grid drifting in a slow wave that scatters from the pointer
+// and re-forms, plus a few bars of varied size that blink and glide one grid step at a time.
 // Canvas 2D, drawn only while the hero is on screen; a single static frame for reduced motion.
 
 type Bar = {
@@ -7,13 +7,15 @@ type Bar = {
   tx: number; ty: number;       // grid cell (target, while gliding)
   vertical: boolean;
   violet: boolean;
+  len: number;                   // length as a fraction of a cell
+  thick: number;                 // thickness in px
   phase: 'idle' | 'blink' | 'glide';
   t: number;                     // time in current phase (s)
   wait: number;                  // idle duration before the next move
 };
 
 const COLORS = {
-  dot: [207, 198, 220] as const,
+  dot: [11, 7, 18] as const,
   dotHot: [176, 38, 255] as const,
   bar: 'rgba(170, 156, 196, .55)',
   barViolet: 'rgba(176, 38, 255, .55)',
@@ -29,7 +31,9 @@ export function initField(canvas: HTMLCanvasElement) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W = 0, H = 0, cell = 40, cols = 0, rows = 0;
-  let dots: { x: number; y: number; ox: number; oy: number; heat: number }[] = [];
+  // seed: per-dot twist so a scatter looks broken up rather than a clean ring
+  let dots: { x: number; y: number; ox: number; oy: number; heat: number; seed: number }[] = [];
+  let clock = 0;
   let bars: Bar[] = [];
   const pointer = { x: -9999, y: -9999, active: false };
 
@@ -59,12 +63,16 @@ export function initField(canvas: HTMLCanvasElement) {
     cols = Math.ceil(W / cell); rows = Math.ceil(H / cell);
 
     dots = [];
-    for (let y = 0; y <= rows; y++) for (let x = 0; x <= cols; x++) dots.push({ x: x * cell, y: y * cell, ox: 0, oy: 0, heat: 0 });
+    for (let y = 0; y <= rows; y++) for (let x = 0; x <= cols; x++) dots.push({ x: x * cell, y: y * cell, ox: 0, oy: 0, heat: 0, seed: Math.random() * 2 - 1 });
 
-    const count = Math.round((cols * rows) / (W < 700 ? 40 : 28));
+    const count = Math.round((cols * rows) / (W < 700 ? 110 : 85));
     bars = Array.from({ length: count }, () => {
       const [cx, cy] = freeCell();
-      return { cx, cy, tx: cx, ty: cy, vertical: Math.random() < 0.35, violet: Math.random() < 0.22, phase: 'idle' as const, t: 0, wait: rand(0.5, 5) };
+      return {
+        cx, cy, tx: cx, ty: cy, vertical: Math.random() < 0.35, violet: Math.random() < 0.22,
+        len: pick([0.25, 0.4, 0.6, 0.9, 1.3]), thick: pick([2, 3, 4, 6]),
+        phase: 'idle' as const, t: 0, wait: rand(0.5, 5),
+      };
     });
   }
 
@@ -88,22 +96,31 @@ export function initField(canvas: HTMLCanvasElement) {
   function draw() {
     ctx!.clearRect(0, 0, W, H);
 
-    // dots: pushed away from the pointer, warming to violet near it
-    const R = W < 700 ? 90 : 140;
+    // dots: a slow swirling wave keeps the grid alive; the pointer scatters them (fast out,
+    // slow back) so the pattern visibly breaks up and re-forms, warming to violet near it
+    const R = W < 700 ? 100 : 160;
+    const amp = reduce ? 0 : Math.min(cell * 0.12, 5);
     for (const d of dots) {
+      const a = Math.sin(d.x * 0.006 + clock * 0.6) + Math.cos(d.y * 0.007 - clock * 0.45);
+      const wx = Math.cos(a * 1.6) * amp, wy = Math.sin(a * 1.6) * amp;
+      const px = d.x + wx, py = d.y + wy;
       let tx = 0, ty = 0, heat = 0;
       if (pointer.active) {
-        const dx = d.x - pointer.x, dy = d.y - pointer.y, dist = Math.hypot(dx, dy);
+        const dx = px - pointer.x, dy = py - pointer.y, dist = Math.hypot(dx, dy);
         if (dist < R && dist > 0.01) {
           const f = 1 - dist / R;
-          tx = (dx / dist) * f * 14; ty = (dy / dist) * f * 14; heat = f;
+          const ang = Math.atan2(dy, dx) + d.seed * 0.9;
+          const push = f * f * 30 * (0.7 + Math.abs(d.seed) * 0.6);
+          tx = Math.cos(ang) * push; ty = Math.sin(ang) * push; heat = f;
         }
       }
-      d.ox += (tx - d.ox) * 0.15; d.oy += (ty - d.oy) * 0.15; d.heat += (heat - d.heat) * 0.15;
+      const out = Math.hypot(tx, ty) > Math.hypot(d.ox, d.oy);
+      const k = out ? 0.28 : 0.045;
+      d.ox += (tx - d.ox) * k; d.oy += (ty - d.oy) * k; d.heat += (heat - d.heat) * (out ? 0.25 : 0.06);
       const c = COLORS.dot.map((v, i) => Math.round(v + (COLORS.dotHot[i] - v) * d.heat));
-      ctx!.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+      ctx!.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${0.55 + d.heat * 0.45})`;
       ctx!.beginPath();
-      ctx!.arc(d.x + d.ox, d.y + d.oy, 1.2 + d.heat * 1.6, 0, Math.PI * 2);
+      ctx!.arc(px + d.ox, py + d.oy, 1.1 + d.heat * 1.6, 0, Math.PI * 2);
       ctx!.fill();
     }
 
@@ -112,7 +129,7 @@ export function initField(canvas: HTMLCanvasElement) {
       let x = b.cx, y = b.cy, alpha = 1;
       if (b.phase === 'blink') alpha = Math.floor(b.t / 0.15) % 2 ? 0.15 : 1;
       if (b.phase === 'glide') { const k = ease(Math.min(b.t / 0.7, 1)); x += (b.tx - b.cx) * k; y += (b.ty - b.cy) * k; }
-      const long = cell * 0.62, thin = Math.max(3, cell * 0.14);
+      const long = cell * b.len, thin = b.thick;
       const w = b.vertical ? thin : long, h = b.vertical ? long : thin;
       ctx!.globalAlpha = alpha;
       ctx!.fillStyle = b.violet ? COLORS.barViolet : COLORS.bar;
@@ -125,6 +142,7 @@ export function initField(canvas: HTMLCanvasElement) {
   function frame(now: number) {
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
+    clock += dt;
     stepBars(dt);
     draw();
     if (visible) requestAnimationFrame(frame); else running = false;
