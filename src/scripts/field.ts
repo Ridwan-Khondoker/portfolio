@@ -1,5 +1,6 @@
 // Hero background: a black dot grid drifting in a slow wave that scatters from the pointer
-// and re-forms, plus a few bars of varied size that blink and glide one grid step at a time.
+// and re-forms, plus a few solid bars of varied size that blink and glide one grid step at a
+// time. Dots and bars draw on separate canvases so the bars can sit behind the robot.
 // Canvas 2D, drawn only while the hero is on screen; a single static frame for reduced motion.
 
 type Bar = {
@@ -17,17 +18,18 @@ type Bar = {
 const COLORS = {
   dot: [11, 7, 18] as const,
   dotHot: [176, 38, 255] as const,
-  bar: 'rgba(170, 156, 196, .55)',
-  barViolet: 'rgba(176, 38, 255, .55)',
+  bar: '#0b0712',
+  barViolet: '#b026ff',
 };
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
 
-export function initField(canvas: HTMLCanvasElement) {
+export function initField(canvas: HTMLCanvasElement, barsCanvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  const bctx = barsCanvas.getContext('2d');
+  if (!ctx || !bctx) return;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let W = 0, H = 0, cell = 40, cols = 0, rows = 0;
@@ -37,13 +39,13 @@ export function initField(canvas: HTMLCanvasElement) {
   let bars: Bar[] = [];
   const pointer = { x: -9999, y: -9999, active: false };
 
-  // Keep the robot column, the header strip and the name/text band (which sits under a soft
-  // page-coloured shadow) free of bars; dots still cover everything.
+  // Bars pass behind the robot, but keep them out of the header strip and the name/text band
+  // (which sits under a soft page-coloured shadow); dots still cover everything.
   const busy = (cx: number, cy: number) => {
-    const x = cx / cols, y = cy / rows;
+    const y = cy / rows;
     // below 861px the orbit nav sits in a band above the robot (~220px); keep that clear too
     const navBand = W < 861 ? Math.ceil(230 / cell) : 2;
-    return (x > 0.34 && x < 0.66) || y > 0.6 || cy < navBand;
+    return y > 0.6 || cy < navBand;
   };
   const freeCell = (): [number, number] => {
     for (let i = 0; i < 60; i++) {
@@ -57,8 +59,10 @@ export function initField(canvas: HTMLCanvasElement) {
     const r = canvas.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = r.width; H = r.height;
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (const [c, x] of [[canvas, ctx], [barsCanvas, bctx]] as const) {
+      c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+      x!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
     cell = W < 700 ? 30 : 40;
     cols = Math.ceil(W / cell); rows = Math.ceil(H / cell);
 
@@ -69,7 +73,7 @@ export function initField(canvas: HTMLCanvasElement) {
     bars = Array.from({ length: count }, () => {
       const [cx, cy] = freeCell();
       return {
-        cx, cy, tx: cx, ty: cy, vertical: Math.random() < 0.35, violet: Math.random() < 0.22,
+        cx, cy, tx: cx, ty: cy, vertical: Math.random() < 0.35, violet: Math.random() < 0.45,
         len: pick([0.25, 0.4, 0.6, 0.9, 1.3]), thick: pick([2, 3, 4, 6]),
         phase: 'idle' as const, t: 0, wait: rand(0.5, 5),
       };
@@ -95,6 +99,7 @@ export function initField(canvas: HTMLCanvasElement) {
 
   function draw() {
     ctx!.clearRect(0, 0, W, H);
+    bctx!.clearRect(0, 0, W, H);
 
     // dots: a slow swirling wave keeps the grid alive; the pointer scatters them (fast out,
     // slow back) so the pattern visibly breaks up and re-forms, warming to violet near it
@@ -127,15 +132,14 @@ export function initField(canvas: HTMLCanvasElement) {
     // bars: blink (on/off) in place, then glide one cell
     for (const b of bars) {
       let x = b.cx, y = b.cy, alpha = 1;
-      if (b.phase === 'blink') alpha = Math.floor(b.t / 0.15) % 2 ? 0.15 : 1;
+      if (b.phase === 'blink') alpha = Math.floor(b.t / 0.15) % 2 ? 0 : 1;
       if (b.phase === 'glide') { const k = ease(Math.min(b.t / 0.7, 1)); x += (b.tx - b.cx) * k; y += (b.ty - b.cy) * k; }
       const long = cell * b.len, thin = b.thick;
       const w = b.vertical ? thin : long, h = b.vertical ? long : thin;
-      ctx!.globalAlpha = alpha;
-      ctx!.fillStyle = b.violet ? COLORS.barViolet : COLORS.bar;
-      ctx!.fillRect(x * cell - w / 2, y * cell - h / 2, w, h);
+      if (!alpha) continue;
+      bctx!.fillStyle = b.violet ? COLORS.barViolet : COLORS.bar;
+      bctx!.fillRect(x * cell - w / 2, y * cell - h / 2, w, h);
     }
-    ctx!.globalAlpha = 1;
   }
 
   let last = 0, visible = false, running = false;
