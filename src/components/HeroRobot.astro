@@ -52,7 +52,9 @@ const right = [
 
 <style>
   .hero {
-    --stage: min(82vh, 880px);
+    /* the scene is framed by height and crops the robot at the knees; running the canvas to the
+       bottom of the viewport puts that crop off-screen instead of on a line above white */
+    --stage: 100vh; --stage: 100svh;
     --branch: clamp(200px, 21vw, 320px);
     position: relative; isolation: isolate; min-height: 100vh; padding: 0 var(--gutter) 40px; text-align: center; overflow: clip;
   }
@@ -60,7 +62,7 @@ const right = [
   /* layers, bottom to top: robot (1) · page-coloured shadow over its cropped legs (2) ·
      dots and bars (3) · text (4) · orbit nav (5) */
   .field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 3; }
-  .stage { position: relative; width: 100%; max-width: var(--content); height: var(--stage); margin: calc(var(--stage) * -.02) auto 0; }
+  .stage { position: relative; width: 100%; max-width: var(--content); height: var(--stage); margin: 0 auto; }
   spline-viewer { position: relative; z-index: 1; width: 100%; height: 100%; display: block; }
 
   /* orbit nav: items on an arc, each side turned in perspective so it wraps around the robot */
@@ -100,9 +102,9 @@ const right = [
   .tree-r a:hover, .tree-r a:focus-visible { transform: translateX(4px); }
 
   /* the scene's camera crops the robot's legs: the name overlaps them and a soft black shadow hides the edge */
-  .hello { position: relative; margin-top: calc(var(--stage) * -.22); padding: 30px 0 8px; }
+  .hello { position: relative; margin-top: calc(var(--stage) * -.33); padding: 30px 0 8px; }
   .hello::before {
-    content: ''; position: absolute; left: 50%; top: 0; bottom: -80px; width: min(1500px, 100vw); transform: translateX(-50%);
+    content: ''; position: absolute; left: 50%; top: 0; bottom: -300px; width: min(1500px, 100vw); transform: translateX(-50%);
     background: var(--bg); border-radius: 50%; filter: blur(30px); z-index: 2; pointer-events: none;
     transition: opacity 1s var(--ease), transform 1s var(--ease);
   }
@@ -132,9 +134,10 @@ const right = [
   .marquee-row b { font-size: .35em; color: var(--gold); }
 
   @media (max-width: 860px) {
-    .hero { --stage: 44vh; padding-top: var(--header-h); }
+    .hero { --stage: calc(100vh - 170px - var(--header-h)); --stage: calc(100svh - 170px - var(--header-h)); padding-top: var(--header-h); }
     /* no room beside the robot: the menu sits above it */
-    .stage { margin-top: 170px; }
+    /* full-bleed, so the robot's arms leave the screen edge instead of ending on a line */
+    .stage { margin-top: 170px; width: auto; margin-inline: calc(-1 * var(--gutter)); }
     .tree { top: -170px; width: calc(50% - 8px); --fan: 34px; --row: 38px; --gap: 12px; --out: 0px; }
     .tree-l { transform: perspective(700px) rotateY(-12deg); }
     .tree-r { transform: perspective(700px) rotateY(12deg); }
@@ -164,19 +167,7 @@ const right = [
     st.textContent = '#logo{display:none!important}';
     root.appendChild(st);
   }
-  // The scene's camera ends its zoom-out framing the robot from the knees up. Shrink and lift
-  // the robot inside the scene so the whole body, feet included, is in frame; the zoom still
-  // starts on the head. Uses the viewer's app instance (viewer version is pinned).
-  const FULL_BODY = { scale: 0.65, lift: 122 };
-  function fitWholeRobot() {
-    const app = (bot as unknown as { _spline?: { findObjectByName(n: string): any } } | null)?._spline;
-    const robot = app?.findObjectByName('Bot');
-    if (!robot || robot.userData?.fitted) return;
-    robot.scale.x *= FULL_BODY.scale; robot.scale.y *= FULL_BODY.scale; robot.scale.z *= FULL_BODY.scale;
-    robot.position.y += FULL_BODY.lift;
-    robot.userData = { ...robot.userData, fitted: true };
-  }
-  bot?.addEventListener('load-complete', () => { fitWholeRobot(); hideBadge(); });
+  bot?.addEventListener('load-complete', hideBadge);
 
   // Marquee drifts with scroll position rather than looping on its own.
   const row = document.querySelector<HTMLElement>('[data-marquee]');
