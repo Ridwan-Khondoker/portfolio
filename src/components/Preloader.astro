@@ -110,39 +110,38 @@
     if (!bot || !src) return;
     if (reduceMotion) return; // no robot, no boot sequence
 
-    // A repeat visit in the same session skips the log, not the robot's entrance.
-    let seen = false;
-    try { seen = sessionStorage.getItem('booted') === '1'; } catch { /* storage blocked: show the full boot */ }
-    if (seen) el.style.visibility = 'hidden';
-    setTimeout(() => exit(true), 12000); // slow network or no WebGL: never trap the visitor here
-
     const loaded = new Promise<void>((r) => bot.addEventListener('load-complete', () => r(), { once: true }));
     let real = 0;
     const scene = download(src, (f) => { real = f; }).catch(() => src);
 
-    if (!seen) {
-      step('fonts', 'active');
-      await Promise.all([document.fonts.ready, wait(900)]);
-      step('fonts', 'done', 'ok');
-      progress(.2);
-
-      step('model', 'active');
-      await Promise.all([scene, countUp(() => real, 1600)]);
-      step('model', 'done', 'ok');
+    // A repeat visit in the same session never waits: the page is already visible (Base.astro
+    // skips intro-pending) and the robot just fades in once its scene is ready.
+    let seen = false;
+    try { seen = sessionStorage.getItem('booted') === '1'; } catch { /* storage blocked: show the full boot */ }
+    if (seen) {
+      el.remove();
+      bot.setAttribute('url', await scene);
+      return;
     }
+    setTimeout(() => exit(true), 12000); // slow network or no WebGL: never trap the visitor here
+
+    step('fonts', 'active');
+    await Promise.all([document.fonts.ready, wait(900)]);
+    step('fonts', 'done', 'ok');
+    progress(.2);
+
+    step('model', 'active');
+    await Promise.all([scene, countUp(() => real, 1600)]);
+    step('model', 'done', 'ok');
 
     bot.setAttribute('url', await scene);
-    if (!seen) {
-      step('scene', 'active');
-      await Promise.all([loaded, wait(900)]);
-      step('scene', 'done', 'online');
-      progress(1);
-      await wait(700); // let "online" land before the wipe
-    } else {
-      await loaded;
-    }
+    step('scene', 'active');
+    await Promise.all([loaded, wait(900)]);
+    step('scene', 'done', 'online');
+    progress(1);
+    await wait(700); // let "online" land before the wipe
     try { sessionStorage.setItem('booted', '1'); } catch { /* ignore */ }
-    exit(seen);
+    exit();
   }
   boot();
 </script>

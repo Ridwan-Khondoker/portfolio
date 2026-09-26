@@ -32,7 +32,10 @@ const {
     {intro && (
       <script is:inline>
         // Set before first paint so nothing flashes in and back out; the preloader removes it.
-        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        // Only the first visit in a session boots: coming back shows the page straight away.
+        var booted = false;
+        try { booted = sessionStorage.getItem('booted') === '1'; } catch (e) { /* blocked: full intro */ }
+        if (!booted && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
           document.documentElement.classList.add('intro-pending');
           setTimeout(function () { document.documentElement.classList.remove('intro-pending'); }, 14000);
         }
@@ -47,12 +50,33 @@ const {
     </main>
     <Footer />
     <script>
-      import { startLenis } from '../scripts/motion/core';
+      import { startLenis, getLenis, ScrollTrigger } from '../scripts/motion/core';
       import { initThemeSwitch } from '../scripts/motion/theme';
       import { initMenu } from '../scripts/menu';
       startLenis();
       initThemeSwitch();
       initMenu();
+
+      // Back/forward returns to the same spot. The browser's own restore lands before the pinned
+      // sections have measured themselves, so the offset is saved on leave and re-applied once
+      // the layout has settled.
+      const key = `scroll:${location.pathname}`;
+      history.scrollRestoration = 'manual';
+      addEventListener('pagehide', () => { try { sessionStorage.setItem(key, String(Math.round(scrollY))); } catch { /* ignore */ } });
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      if (nav?.type === 'back_forward') {
+        let y = 0;
+        try { y = Number(sessionStorage.getItem(key)) || 0; } catch { /* ignore */ }
+        const restore = () => {
+          ScrollTrigger.refresh();
+          const lenis = getLenis();
+          if (lenis) lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y);
+        };
+        if (document.readyState === 'complete') requestAnimationFrame(restore);
+        else addEventListener('load', () => requestAnimationFrame(restore), { once: true });
+      }
+      // restored whole from the back-forward cache: nothing replays, just re-measure
+      addEventListener('pageshow', (e) => { if (e.persisted) ScrollTrigger.refresh(); });
     </script>
   </body>
 </html>
