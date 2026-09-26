@@ -67,6 +67,9 @@ if (wide) {
     let prev = band?.previousElementSibling as HTMLElement | null;
     while (prev && prev.tagName !== 'SECTION') prev = prev.previousElementSibling as HTMLElement | null;
     if (band && prev) {
+      // hold: the previous section stays fully in view for a stretch of scrolling before the
+      // photo starts to cover it, so a flick doesn't land halfway into the next section
+      band.style.marginTop = '45vh';
       ScrollTrigger.create({
         trigger: prev, start: 'bottom bottom', endTrigger: band, end: 'top top',
         pin: true, pinSpacing: false,
@@ -79,5 +82,6 @@ if (wide) {
         scrollTrigger: { trigger: band, start: 'top bottom', end: 'bottom top', scrub: true },
       });
     }
+    return () => { if (band) band.style.marginTop = ''; };
   });
 </script>

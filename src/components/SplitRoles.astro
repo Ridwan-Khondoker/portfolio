@@ -104,7 +104,9 @@ const sides = [
   .face :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
   /* half-busts (face-build / face-projects): anchored to the bottom, meeting at the seam; the
      copy moves to the outer edge, over the transparent corner above each shoulder */
-  .pair { --bust-h: clamp(226px, 28vw, 520px); }
+  .pair { --bust-h: min(clamp(260px, 34vw, 680px), 72svh); }
+  /* text rides higher so the larger busts have the lower half to themselves */
+  .pair .side { align-items: flex-start; padding-top: calc(var(--header-h) + clamp(32px, 9vh, 110px)); }
   /* one shared height so the halves line up across the seam; each width follows its image */
   .pair .half { top: auto; bottom: 0; height: var(--bust-h); width: auto; aspect-ratio: var(--ar); transform: none; }
   .bust :global(img) { width: 100%; height: 100%; object-fit: contain; }
@@ -156,7 +158,7 @@ const sides = [
     .title { font-size: clamp(48px, 15vw, 88px); }
 
     /* both halves sit together at the bottom of the build side, on the seam */
-    .pair { --bust-h: min(47vw, 260px); }
+    .pair { --bust-h: min(54vw, 300px); }
     .pair .build { padding-bottom: calc(var(--bust-h) + 32px); }
     .pair .projects { padding-top: calc(var(--header-h) + 24px); }
     .pair .projects .half { display: none; }
