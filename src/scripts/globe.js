@@ -128,21 +128,50 @@ export function initGlobe() {
     var rim = reduce ? 0.45 : 0.4 + Math.sin(clock * 1.3) * 0.12;
     gx.strokeStyle='rgba(176,38,255,'+rim.toFixed(3)+')'; gx.lineWidth=1; gx.stroke();
 
-    // arcs from HQ
+    // routes from HQ to every office: a dashed line that flows outward, with a light
+    // travelling along each one (staggered); plain static lines for reduced motion
     var hq = offices.filter(function(x){ return x.hq; })[0];
     for(var i=0;i<offices.length;i++){
       var o = offices[i];
-      if(!o.hub || o===hq) continue;
+      if(o===hq) continue;
+      var span = Math.hypot(o.lat-hq.lat, o.lon-hq.lon);
+      var liftK = 0.03 + 0.11*Math.min(1, span/90);        // short hops stay low
+      var pts = [];
+      for(var s=0;s<=50;s++){
+        var tt = s/50;
+        var a = project(hq.lat + (o.lat-hq.lat)*tt, hq.lon + (o.lon-hq.lon)*tt, R*(1 + liftK*Math.sin(Math.PI*tt)));
+        a.t = tt; pts.push(a);
+      }
       gx.beginPath(); var open=false;
-      for(var t=0;t<=1.0001;t+=0.02){
-        var la3 = hq.lat + (o.lat-hq.lat)*t;
-        var lo3 = hq.lon + (o.lon-hq.lon)*t;
-        var lift = 1 + 0.14*Math.sin(Math.PI*t);
-        var a = project(la3,lo3,R*lift);
-        if(a.z>0){ if(!open){gx.moveTo(a.x,a.y);open=true;} else gx.lineTo(a.x,a.y); }
+      for(var s2=0;s2<pts.length;s2++){
+        var a2 = pts[s2];
+        if(a2.z>0){ if(!open){gx.moveTo(a2.x,a2.y);open=true;} else gx.lineTo(a2.x,a2.y); }
         else open=false;
       }
-      gx.strokeStyle='rgba(255,196,0,.42)'; gx.lineWidth=1; gx.stroke();
+      gx.lineWidth=1;
+      if(reduce){ gx.strokeStyle='rgba(255,196,0,.42)'; gx.stroke(); continue; }
+      gx.setLineDash([3,5]); gx.lineDashOffset = -clock*18;
+      gx.strokeStyle='rgba(255,196,0,'+(o.hub ? .38 : .26)+')'; gx.stroke();
+      gx.setLineDash([]); gx.lineDashOffset = 0;
+
+      // the travelling light: a short fading trail with a bright head
+      var head = (clock*0.32 + i*0.23) % 1.35, tail = 0.22;
+      if(head > 1 + tail) continue;
+      for(var s3=1;s3<pts.length;s3++){
+        var p0 = pts[s3-1], p1 = pts[s3];
+        if(p0.z<=0 || p1.z<=0 || p1.t > head || p1.t < head - tail) continue;
+        var k = (p1.t - (head - tail)) / tail;
+        gx.beginPath(); gx.moveTo(p0.x,p0.y); gx.lineTo(p1.x,p1.y);
+        gx.strokeStyle='rgba(255,196,0,'+(k*0.95).toFixed(3)+')'; gx.lineWidth=1 + k*1.2; gx.stroke();
+      }
+      if(head <= 1){
+        var hp = pts[Math.min(pts.length-1, Math.round(head*50))];
+        if(hp.z>0){
+          gx.beginPath(); gx.arc(hp.x,hp.y,2,0,6.283);
+          gx.fillStyle='#ffc400'; gx.shadowBlur=10; gx.shadowColor='#ffc400'; gx.fill(); gx.shadowBlur=0;
+        }
+      }
+      gx.lineWidth=1;
     }
 
     // markers
