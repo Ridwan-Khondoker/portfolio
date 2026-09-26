@@ -115,6 +115,12 @@ const sides = [
   .mate { display: none; }
   .pair .build .copy { margin-left: 0; margin-right: auto; }
   .pair .projects .copy { margin-left: auto; margin-right: 0; }
+  /* mirror of BUILD: PROJECTS copy hugs the right edge (markers move to the line end) */
+  @media (min-width: 901px) {
+    .pair .projects .copy { text-align: right; justify-items: end; }
+    .pair .projects li::before { content: none; }
+    .pair .projects li::after { content: ' +'; color: var(--accent); }
+  }
 
   .ph {
     width: 100%; height: 100%; display: grid; place-items: center; border-radius: 48% 48% 44% 44% / 38% 38% 30% 30%;
