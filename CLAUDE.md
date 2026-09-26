@@ -29,7 +29,7 @@ npm run capture      # screenshot client sites into src/assets/shots (needs thei
 - `src/assets/portrait/portrait.*` (About section) and `src/assets/portrait/face.*` (split BUILD/PROJECTS section): drop the photo in and it replaces the placeholder.
 - `src/assets/portrait/face-build.*` and `face-projects.*`: transparent half-busts (robot left, Ridwan right) that meet at the BUILD/PROJECTS seam. When both exist they take over from `face.*`; they share one height, so keep the eye lines level in the source files.
 - `src/assets/portrait/feature.*` (16:9, ~2560×1440) and optional `feature-mobile.*` (9:16): the full-screen photo band after BUILD/PROJECTS, which slides up over that section.
-- `src/components/Logo.astro`: the RK monogram as an inline SVG (takes `currentColor`). `public/favicon.svg` is the white mark on a violet tile; `favicon-32.png` and `apple-touch-icon.png` are rendered from it.
+- `src/components/Logo.astro`: the RK monogram as an inline SVG (takes `currentColor`). `public/favicon.svg` is the violet mark on a black tile; `favicon-32.png` and `apple-touch-icon.png` are rendered from it.
 - `public/assets/nexbot.splinecode`: the robot scene. The preloader downloads it once and hands the viewer a blob URL.
 
 ## Design rules
