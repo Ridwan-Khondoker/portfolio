@@ -44,12 +44,12 @@ const sides = [
       {/* this side's half of the face; each half greys out with its side */}
       {pair ? (
         <>
-          <div class="half bust" aria-hidden="true">
+          <div class="half bust" aria-hidden="true" style={`--ar: ${halves[s.key]!.width} / ${halves[s.key]!.height}`}>
             <Image src={halves[s.key]!} alt="" widths={[240, 420, 640, 840]} sizes="(max-width: 900px) 45vw, 25vw" />
           </div>
           {s.key === 'build' && (
             // phones stack the sides, so the build side carries the other half too
-            <div class="mate bust" aria-hidden="true">
+            <div class="mate bust" aria-hidden="true" style={`--ar: ${halves.projects!.width} / ${halves.projects!.height}`}>
               <Image src={halves.projects!} alt="" widths={[240, 420, 640]} sizes="45vw" />
             </div>
           )}
@@ -104,8 +104,9 @@ const sides = [
   .face :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
   /* half-busts (face-build / face-projects): anchored to the bottom, meeting at the seam; the
      copy moves to the outer edge, over the transparent corner above each shoulder */
-  .pair { --half-w: clamp(200px, 25vw, 460px); }
-  .pair .half { top: auto; bottom: 0; width: var(--half-w); aspect-ratio: 832 / 941; transform: none; }
+  .pair { --bust-h: clamp(226px, 28vw, 520px); }
+  /* one shared height so the halves line up across the seam; each width follows its image */
+  .pair .half { top: auto; bottom: 0; height: var(--bust-h); width: auto; aspect-ratio: var(--ar); transform: none; }
   .bust :global(img) { width: 100%; height: 100%; object-fit: contain; }
   .build .bust :global(img) { object-position: right bottom; }
   .projects .bust :global(img), .mate :global(img) { object-position: left bottom; }
@@ -155,12 +156,12 @@ const sides = [
     .title { font-size: clamp(48px, 15vw, 88px); }
 
     /* both halves sit together at the bottom of the build side, on the seam */
-    .pair { --half-w: min(42vw, 230px); }
-    .pair .build { padding-bottom: calc(var(--half-w) * 1.13 + 32px); }
+    .pair { --bust-h: min(47vw, 260px); }
+    .pair .build { padding-bottom: calc(var(--bust-h) + 32px); }
     .pair .projects { padding-top: calc(var(--header-h) + 24px); }
     .pair .projects .half { display: none; }
     .pair .build .half { left: auto; right: 50%; }
-    .mate { display: block; position: absolute; bottom: 0; left: 50%; width: var(--half-w); aspect-ratio: 832 / 941; pointer-events: none; }
+    .mate { display: block; position: absolute; bottom: 0; left: 50%; height: var(--bust-h); aspect-ratio: var(--ar); pointer-events: none; }
   }
 </style>
 
