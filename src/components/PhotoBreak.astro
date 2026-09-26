@@ -1,6 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 import Logo from './Logo.astro';
+import signature from '../assets/brand/signature.png';
 import type { ImageMetadata } from 'astro';
 
 // Full-screen photo band. Drop src/assets/portrait/feature.* (16:9, ideally 2560×1440) and,
@@ -30,6 +31,13 @@ if (wide) {
 }
 ---
 <section class="photo" data-section-theme="dark" aria-label="Photo of Ridwan Khondoker">
+  <!-- motto + signature over the photo; the signature is an alpha mask filled with the accent -->
+  <div class="overlay">
+    <p class="motto" data-motto>
+      <span>Design.</span><span>Develop.</span><span>Deliver.</span>
+      <i class="sig" role="img" aria-label="Ridwan (signature)" style={`--sig: url(${signature.src}); --sig-ar: ${signature.width} / ${signature.height}`}></i>
+    </p>
+  </div>
   {wide ? (
     <picture data-photo>
       {sources.map((s) => <source media={s.media} type={s.type} srcset={s.srcset} sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />)}
@@ -50,6 +58,23 @@ if (wide) {
   img { object-fit: cover; object-position: center; will-change: transform; }
   /* narrow screens crop the sides: keep the rider (right of centre) in frame */
   @media (max-aspect-ratio: 1/1) { img { object-position: 62% center; } }
+  .overlay { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  /* sized off the viewport so it sits where it was designed on a 16:9 screen */
+  .motto {
+    position: absolute; left: 12.5%; top: 11%; margin: 0; display: grid;
+    font: 700 min(6.9vw, 12.2vh)/.84 var(--font-display); text-transform: uppercase; letter-spacing: -.015em; color: #fff;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, .55);
+  }
+  .motto span { display: block; will-change: transform; }
+  .sig {
+    position: absolute; left: .4em; top: 2.05em; width: 2.9em; aspect-ratio: var(--sig-ar);
+    background: var(--violet); -webkit-mask: var(--sig) center / contain no-repeat; mask: var(--sig) center / contain no-repeat;
+    transform: rotate(-4deg); transform-origin: left center;
+  }
+  /* portrait screens: the crop is on the rider, so the motto moves to the ground below him */
+  @media (max-aspect-ratio: 1/1) {
+    .motto { left: var(--gutter); top: auto; bottom: 9%; font-size: min(13vw, 64px); }
+  }
   .ph {
     height: 100%; display: grid; place-content: center; gap: 14px; text-align: center; color: #f3ecfc;
     background-color: #07050b;
@@ -78,6 +103,14 @@ if (wide) {
         trigger: prev, start: 'bottom bottom', endTrigger: band, end: 'top top',
         pin: true, pinSpacing: false,
       });
+    }
+    // motto lines rise in one after another as the photo covers the screen, then the
+    // signature writes itself left to right (scrubbed, so it runs backwards on the way up)
+    const motto = band?.querySelector<HTMLElement>('[data-motto]');
+    if (band && motto) {
+      gsap.timeline({ scrollTrigger: { trigger: band, start: 'top 70%', end: 'top 5%', scrub: 0.6 } })
+        .from(motto.querySelectorAll('span'), { yPercent: 70, opacity: 0, stagger: 0.25, ease: 'power2.out' })
+        .fromTo(motto.querySelector('.sig'), { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', ease: 'none', duration: 0.8 }, '-=0.1');
     }
     const img = band?.querySelector<HTMLElement>('[data-photo] img');
     if (img) {
