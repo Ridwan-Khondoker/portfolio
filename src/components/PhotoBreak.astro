@@ -10,8 +10,9 @@ const wide = pick(import.meta.glob<{ default: ImageMetadata }>('/src/assets/port
 const tall = pick(import.meta.glob<{ default: ImageMetadata }>('/src/assets/portrait/feature-mobile.{jpg,jpeg,png,webp,avif}', { eager: true }));
 
 const set = async (img: ImageMetadata, widths: number[], format: 'avif' | 'webp') => {
-  const w = widths.filter((x) => x <= img.width);
-  const r = await getImage({ src: img, widths: w.length ? w : [img.width], format });
+  // every listed width the source can fill, plus the source's own width
+  const w = [...new Set([...widths.filter((x) => x < img.width), img.width])];
+  const r = await getImage({ src: img, widths: w, format });
   return r.srcSet.attribute;
 };
 const sources = [] as { media?: string; type: string; srcset: string }[];
@@ -31,7 +32,7 @@ if (wide) {
 <section class="photo" data-section-theme="dark" aria-label="Photo of Ridwan Khondoker">
   {wide ? (
     <picture data-photo>
-      {sources.map((s) => <source media={s.media} type={s.type} srcset={s.srcset} sizes="100vw" />)}
+      {sources.map((s) => <source media={s.media} type={s.type} srcset={s.srcset} sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" />)}
       <img src={fallback} alt="Ridwan Khondoker" loading="lazy" decoding="async" />
     </picture>
   ) : (
@@ -47,6 +48,8 @@ if (wide) {
   .photo { position: relative; z-index: 5; height: 100vh; height: 100svh; overflow: hidden; background: #000; }
   picture, img { display: block; width: 100%; height: 100%; }
   img { object-fit: cover; object-position: center; will-change: transform; }
+  /* narrow screens crop the sides: keep the rider (right of centre) in frame */
+  @media (max-aspect-ratio: 1/1) { img { object-position: 62% center; } }
   .ph {
     height: 100%; display: grid; place-content: center; gap: 14px; text-align: center; color: #f3ecfc;
     background-color: #07050b;
