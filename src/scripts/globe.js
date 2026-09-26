@@ -36,18 +36,44 @@ export function initGlobe() {
     [-90,-72,-180,180]
   ];
   var gc = document.getElementById('globe'), gx = gc.getContext('2d');
+  var stage = gc.parentElement;
   var rot = 0, GW = 0, GH = 0;
   function sizeGlobe(){
     var r = gc.parentElement.getBoundingClientRect(), dpr = Math.min(devicePixelRatio||1,2);
     GW = r.width; GH = r.height;
     gc.width = GW*dpr; gc.height = GH*dpr; gx.setTransform(dpr,0,0,dpr,0,0);
   }
-  var TILT = -0.33;
+  // Motion (same model as the /technologies sphere): a slow idle spin with a breathing tilt,
+  // a lean toward the pointer, drag/flick with momentum, and an eased turn to a hovered country.
+  var TILT0 = 0.3, tilt = TILT0;           // viewed from a little above: every office is north of the equator
+  var BASE = reduce ? 0 : 8;               // idle spin, degrees per second
+  var vYaw = BASE;                         // degrees per second
+  var hovering = false, dragging = false, focusLon = null;
+  var lean = { x: 0, y: 0 };               // pointer offset from the centre, -1..1
+  var clock = 0, last = performance.now();
+  function advance(){
+    var now = performance.now(), dt = Math.min((now - last) / 1000, 0.05);
+    last = now; clock += dt;
+    if (focusLon !== null) {
+      // ease the shortest way round to the country, and hold it there
+      var diff = ((-focusLon - rot + 540) % 360) - 180;
+      rot += reduce ? diff : diff * Math.min(1, dt * 5);
+      vYaw = 0;
+    } else if (!dragging) {
+      var tv = hovering && !reduce ? BASE + lean.x * 40 : BASE;
+      vYaw += (tv - vYaw) * Math.min(1, dt * 1.6);
+      rot += vYaw * dt;
+    }
+    if (!dragging && !reduce) {
+      var tt = TILT0 + Math.sin(clock * 0.8) * 0.05 + (hovering ? lean.y * 0.35 : 0);
+      tilt += (tt - tilt) * Math.min(1, dt * 2.2);
+    }
+  }
   function project(lat, lon, radius){
     var ph = lat*Math.PI/180, th = (lon + rot)*Math.PI/180;
     var x = Math.cos(ph)*Math.sin(th), y = Math.sin(ph), z = Math.cos(ph)*Math.cos(th);
-    var y2 = y*Math.cos(TILT) - z*Math.sin(TILT);
-    var z2 = y*Math.sin(TILT) + z*Math.cos(TILT);
+    var y2 = y*Math.cos(tilt) - z*Math.sin(tilt);
+    var z2 = y*Math.sin(tilt) + z*Math.cos(tilt);
     return {x: GW/2 + x*radius, y: GH/2 - y2*radius, z: z2};
   }
   function isLand(lat, lon){
@@ -58,6 +84,7 @@ export function initGlobe() {
     return false;
   }
   function drawGlobe(){
+    advance();
     var R = Math.min(GW,GH)*0.38;
     gx.clearRect(0,0,GW,GH);
 
@@ -98,7 +125,8 @@ export function initGlobe() {
 
     // rim
     gx.beginPath(); gx.arc(GW/2,GH/2,R,0,6.283);
-    gx.strokeStyle='rgba(176,38,255,.45)'; gx.lineWidth=1; gx.stroke();
+    var rim = reduce ? 0.45 : 0.4 + Math.sin(clock * 1.3) * 0.12;
+    gx.strokeStyle='rgba(176,38,255,'+rim.toFixed(3)+')'; gx.lineWidth=1; gx.stroke();
 
     // arcs from HQ
     var hq = offices.filter(function(x){ return x.hq; })[0];
@@ -149,20 +177,58 @@ export function initGlobe() {
       gx.textAlign='left';
     }
 
-    if(!reduce) rot += 0.12;
     if(visible) requestAnimationFrame(drawGlobe); else running = false;
   }
   var visible = false, running = false;
   new IntersectionObserver(function(entries){
     visible = entries[0].isIntersecting;
-    if(visible && !running){ running = true; requestAnimationFrame(drawGlobe); }
+    if(visible && !running){ running = true; last = performance.now(); requestAnimationFrame(drawGlobe); }
   }).observe(gc);
   sizeGlobe();
   window.addEventListener('resize', sizeGlobe);
 
+  // pointer: lean, drag to spin, flick for momentum, click for a kick
+  var px = 0, py = 0, pt = 0, moved = 0;
+  stage.addEventListener('pointermove', function(e){
+    var r = stage.getBoundingClientRect();
+    lean = { x: ((e.clientX - r.left) / r.width - 0.5) * 2, y: ((e.clientY - r.top) / r.height - 0.5) * -2 };
+    hovering = e.pointerType === 'mouse';
+    if (!dragging) return;
+    var R = Math.min(GW, GH) * 0.38, now = performance.now(), dts = Math.max((now - pt) / 1000, 0.008);
+    var dx = e.clientX - px, dy = e.clientY - py;
+    moved += Math.abs(dx) + Math.abs(dy);
+    var d = dx / R * 180 / Math.PI;
+    rot += d; vYaw = d / dts;
+    tilt = Math.max(-0.6, Math.min(1.0, tilt + dy / R));
+    px = e.clientX; py = e.clientY; pt = now;
+  });
+  stage.addEventListener('pointerleave', function(){ hovering = false; });
+  stage.addEventListener('pointerdown', function(e){
+    dragging = true; moved = 0; focusLon = null; px = e.clientX; py = e.clientY; pt = performance.now();
+    stage.setPointerCapture(e.pointerId);
+    stage.classList.add('dragging');
+  });
+  function end(e){
+    if (!dragging) return;
+    dragging = false;
+    stage.classList.remove('dragging');
+    if (moved < 4 && !reduce) {
+      var r = stage.getBoundingClientRect();
+      vYaw += ((e.clientX - r.left) / r.width - 0.5) * 240;   // a click: kick away from the pointer side
+    }
+    vYaw = reduce ? 0 : Math.max(-360, Math.min(360, vYaw));
+  }
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
+
   document.querySelectorAll('.offices li').forEach((li) => {
-    const spin = () => { const lon = parseFloat(li.dataset.lon || ''); if (!isNaN(lon)) rot = -lon; };
-    li.addEventListener('mouseenter', spin);
-    li.addEventListener('focus', spin);
+    const lon = parseFloat(li.dataset.lon || '');
+    if (isNaN(lon)) return;
+    const on = () => { focusLon = lon; };
+    const off = () => { if (focusLon === lon) { focusLon = null; vYaw = 0; } };
+    li.addEventListener('mouseenter', on);
+    li.addEventListener('focus', on);
+    li.addEventListener('mouseleave', off);
+    li.addEventListener('blur', off);
   });
 }
