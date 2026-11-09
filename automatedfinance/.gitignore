@@ -1,0 +1,14 @@
+# Confidential company data: read from local disk by the seed script and tests, never committed.
+/data/
+/source-workbooks/
+/uploads/
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+next-env.d.ts
+coverage/
+test-results/
+*.tsbuildinfo
+*.xlsx

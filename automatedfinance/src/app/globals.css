@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
+
+/* Happy To Deliver brand (happytodeliver.com): white + yellow, yellow is the single accent; neutrals stay clean. */
+@theme {
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  --color-paper: #ffffff;
+  --color-kraft: #fffbeb;
+  --color-ink: #161513;
+  --color-body: #44413b;
+  --color-muted: #857f74;
+  --color-line: #ece7da;
+  --color-line-soft: #f5f1e6;
+  --color-line-strong: #cbbfa6;
+
+  --color-amber: #facc15;
+  --color-amber-hover: #eab308;
+  --color-amber-strong: #b7830a;
+  --color-amber-soft: #fef6c8;
+  --color-amber-ring: #fce38a;
+  --color-amber-ink: #1f1600;
+  --color-brand: #f5a300;
+
+  --color-signal: #2e6e5a;
+  --color-signal-soft: #e4efe9;
+  --color-info: #2563eb;
+  --color-info-soft: #e7effe;
+  --color-resident: #7c3aed;
+  --color-resident-soft: #f3eefe;
+  --color-provider: #ea580c;
+  --color-provider-soft: #feeee2;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+
+  --shadow-card: 0 1px 2px rgba(20, 17, 14, 0.04), 0 10px 30px rgba(20, 17, 14, 0.06);
+  --shadow-pop: 0 20px 60px rgba(20, 17, 14, 0.16);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber-strong);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Native month/date pickers inherit the body font. */
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

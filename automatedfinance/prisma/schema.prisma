@@ -1,0 +1,388 @@
+// automatedfinance data model.
+// Facts (expenses, revenue, recurring list, sheet snapshots) are versioned per import batch so a batch can be
+// rolled back. Everything that depends on settings (category, type, counted, recurring, status, flags) is derived
+// at read time by src/lib/finance, so settings changes apply retroactively.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- auth & audit
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum TokenKind {
+  INVITE
+  RESET
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  role          Role           @default(VIEWER)
+  passwordHash  String?
+  totpSecretEnc String?
+  totpEnabled   Boolean        @default(false)
+  totpLastStep  Int?
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  lastLoginAt   DateTime?
+  sessions      Session[]
+  recoveryCodes RecoveryCode[]
+}
+
+model Session {
+  id           String    @id @default(cuid())
+  tokenHash    String    @unique
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mfaVerified  Boolean   @default(false)
+  csrfToken    String
+  createdAt    DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  revokeReason String?
+  ip           String?
+  userAgent    String?
+
+  @@index([userId])
+}
+
+model RecoveryCode {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// One-time links: invites (new account) and resets (new password and/or new 2FA). Only the SHA-256 of the token is stored.
+model AuthToken {
+  id                  String    @id @default(cuid())
+  tokenHash           String    @unique
+  kind                TokenKind
+  email               String
+  role                Role?
+  userId              String?
+  createdById         String?
+  createdAt           DateTime  @default(now())
+  expiresAt           DateTime
+  usedAt              DateTime?
+  revokedAt           DateTime?
+  pendingPasswordHash String?
+  pendingTotpEnc      String?
+}
+
+model RateLimit {
+  key         String    @id
+  failures    Int       @default(0)
+  windowStart DateTime  @default(now())
+  lockedUntil DateTime?
+}
+
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  at        DateTime @default(now())
+  userId    String?
+  email     String?
+  action    String
+  target    String?
+  details   Json?
+  ip        String?
+  userAgent String?
+
+  @@index([at])
+  @@index([action])
+}
+
+// ---------------------------------------------------------------- reference data & settings
+
+model Department {
+  id         Int     @id @default(autoincrement())
+  name       String  @unique
+  sortOrder  Int
+  colorIndex Int
+  active     Boolean @default(true)
+}
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  expenseType String
+  description String?
+  sortOrder   Int
+  colorIndex  Int
+}
+
+model CategoryMapping {
+  id          Int    @id @default(autoincrement())
+  sourceLabel String @unique
+  category    String
+}
+
+model Setting {
+  key         String   @id
+  value       Json
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+}
+
+model FxRate {
+  code        String   @id
+  unitsPerUsd Decimal? @db.Decimal(24, 10)
+  note        String?
+}
+
+model Budget {
+  department    String  @id
+  monthlyAmount Decimal @db.Decimal(24, 10)
+  source        String?
+}
+
+model Scenario {
+  key            String  @id
+  name           String
+  sortOrder      Int
+  growth         Decimal @db.Decimal(12, 8)
+  // When set, growth = Base growth + this value (the workbook's High-cost "Base + 1%").
+  growthOverBase Decimal? @db.Decimal(12, 8)
+  inflation      Decimal @db.Decimal(12, 8)
+  fixAdjPct      Decimal @db.Decimal(12, 8)
+  fixAdjAmt      Decimal @db.Decimal(24, 10)
+  varAdjPct      Decimal @db.Decimal(12, 8)
+  includePlanned Boolean @default(true)
+  contingency    Decimal @db.Decimal(12, 8)
+}
+
+model SeasonalityIndex {
+  month Int     @id
+  idx   Decimal @db.Decimal(10, 6)
+}
+
+model PlannedExpense {
+  id             String   @id @default(cuid())
+  description    String
+  month          DateTime @db.Date
+  department     String
+  amount         Decimal  @db.Decimal(24, 10)
+  inConservative Boolean  @default(false)
+  inBase         Boolean  @default(false)
+  inHigh         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model IssueLogItem {
+  n              Int       @id
+  sheetCell      String
+  issue          String
+  actionTaken    String
+  status         String
+  resolved       Boolean   @default(false)
+  resolutionNote String?
+  resolvedById   String?
+  resolvedAt     DateTime?
+}
+
+model FlagResolution {
+  flagKey      String   @id
+  note         String
+  resolvedById String
+  resolvedAt   DateTime @default(now())
+}
+
+model ReconciliationCheck {
+  id                  String   @id @default(cuid())
+  sortOrder           Int
+  name                String
+  periodLabel         String
+  periodStart         DateTime @db.Date
+  periodEnd           DateTime @db.Date
+  measure             String // expenses | revenue | manual
+  department          String?
+  sourceRefs          Json // [{ sheet, year, ranges: ["C41:N41"] }]
+  sourceLabel         String
+  explanation         String?
+  explainedDifference Decimal? @db.Decimal(24, 10)
+  active              Boolean  @default(true)
+}
+
+// Per-item metadata for the recurring list that the source sheet doesn't hold (department, match to the October snapshot).
+model RecurringItemMeta {
+  itemKey       String  @id
+  department    String?
+  snapshotMatch String?
+  frequency     String?
+  note          String?
+}
+
+model GoogleSheetSource {
+  id          String    @id @default(cuid())
+  sheetId     String    @unique
+  label       String
+  year        Int?
+  enabled     Boolean   @default(true)
+  lastSyncAt  DateTime?
+  lastStatus  String?
+  lastMessage String?
+  lastBatchId String?
+  createdAt   DateTime  @default(now())
+}
+
+// ---------------------------------------------------------------- imports
+
+enum BatchStatus {
+  PREVIEW
+  HELD
+  COMMITTED
+  ROLLED_BACK
+  DISCARDED
+}
+
+enum BatchOrigin {
+  UPLOAD
+  GOOGLE_SYNC
+  MANUAL
+  SEED
+}
+
+model SourceFile {
+  id           String        @id @default(cuid())
+  filename     String
+  sha256       String
+  size         Int
+  mime         String?
+  bytes        Bytes
+  origin       BatchOrigin
+  uploadedById String?
+  uploadedAt   DateTime      @default(now())
+  batches      ImportBatch[]
+
+  @@index([sha256])
+}
+
+model LayoutProfile {
+  id          String   @id @default(cuid())
+  name        String
+  tabName     String
+  signature   String
+  kind        String
+  config      Json
+  builtin     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  createdById String?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tabName, signature])
+}
+
+model ImportBatch {
+  id             String           @id @default(cuid())
+  status         BatchStatus
+  origin         BatchOrigin
+  label          String
+  sourceFileId   String?
+  sourceFile     SourceFile?      @relation(fields: [sourceFileId], references: [id])
+  googleSourceId String?
+  createdById    String?
+  createdAt      DateTime         @default(now())
+  committedById  String?
+  committedAt    DateTime?
+  rolledBackById String?
+  rolledBackAt   DateTime?
+  heldReason     String?
+  options        Json?
+  summary        Json?
+  plan           Json?
+  expenses       ExpenseVersion[]
+  facts          FactVersion[]
+
+  @@index([status])
+}
+
+// One row per source cell (grid line x month), uploaded transaction, or manual entry, per batch that set it.
+// Current state = supersededById IS NULL AND removed = false.
+model ExpenseVersion {
+  id                String      @id @default(cuid())
+  key               String
+  batchId           String
+  batch             ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  supersededById    String?
+  removed           Boolean     @default(false)
+  kind              String // GRID | SUMMARY | TRANSACTION | MANUAL
+  profileId         String?
+  lineKey           String?
+  month             DateTime?   @db.Date
+  txnDate           DateTime?   @db.Date
+  department        String?
+  sourceCategory    String?
+  categoryOverride  String?
+  item              String?
+  description       String?
+  vendor            String?
+  vendorOverride    String?
+  amount            Decimal?    @db.Decimal(38, 20)
+  currency          String?
+  rawValue          String?
+  recordType        String
+  countRole         String      @default("ALWAYS") // ALWAYS | ESTIMATE | ACTUAL
+  countGroup        String?
+  isTrigger         Boolean     @default(false)
+  recurringOverride String?
+  paymentMethod     String?
+  reference         String?
+  notes             String?
+  sourceFile        String?
+  sheet             String?
+  cell              String?
+  rowNumber         Int?
+  displayId         String?
+  createdById       String?
+  createdAt         DateTime    @default(now())
+
+  @@index([key])
+  @@index([batchId])
+  @@index([supersededById])
+}
+
+// Versioned non-expense facts: REVENUE, RECURRING, DOMAIN, SNAPSHOT_ITEM, SHEET (cell snapshot for reconciliation).
+model FactVersion {
+  id             String      @id @default(cuid())
+  type           String
+  key            String
+  batchId        String
+  batch          ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  supersededById String?
+  removed        Boolean     @default(false)
+  data           Json
+  createdAt      DateTime    @default(now())
+
+  @@index([type, key])
+  @@index([batchId])
+  @@index([supersededById])
+}
+
+// Payment status lives apart from the imported facts, keyed to the stable expense key, so it survives re-imports.
+model PaymentStatus {
+  key         String    @id
+  status      String
+  dueDate     DateTime? @db.Date
+  note        String?
+  updatedById String?
+  updatedAt   DateTime  @updatedAt
+}
