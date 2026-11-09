@@ -40,3 +40,5 @@ export function recordTypeTone(recordType: string): Tone {
   if (recordType.startsWith('Manual')) return 'orange';
   return 'neutral';
 }
+
+export const BATCH_TONE: Record<string, Tone> = { PREVIEW: 'amber', HELD: 'orange', COMMITTED: 'green', ROLLED_BACK: 'neutral', DISCARDED: 'neutral' };

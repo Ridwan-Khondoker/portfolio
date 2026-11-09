@@ -4,6 +4,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   agentRules: false,
+  turbopack: { root: process.cwd() },
   reactStrictMode: true,
   serverExternalPackages: ['@node-rs/argon2', 'xlsx', '@prisma/client', 'google-auth-library'],
   experimental: {
