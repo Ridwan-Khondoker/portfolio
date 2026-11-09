@@ -4,7 +4,7 @@
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
 
-/* Happy To Deliver brand (happytodeliver.com): white + yellow, yellow is the single accent; neutrals stay clean. */
+/* Modern neutral UI (cool greys, white cards) with Happy To Deliver yellow as the brand accent. */
 @theme {
   /* One plain, highly readable typeface everywhere (headings, body and figures). */
   --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -12,40 +12,41 @@
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
 
   --color-paper: #ffffff;
-  --color-canvas: #f8f5ec;
-  --color-kraft: #fffbeb;
-  --color-ink: #161513;
-  --color-body: #44413b;
-  --color-muted: #857f74;
-  --color-line: #ece7da;
-  --color-line-soft: #f5f1e6;
-  --color-line-strong: #cbbfa6;
+  --color-canvas: #f6f7f9;
+  --color-kraft: #f8fafc;
+  --color-ink: #0f172a;
+  --color-body: #334155;
+  --color-muted: #64748b;
+  --color-line: #e5e7eb;
+  --color-line-soft: #f1f5f9;
+  --color-line-strong: #cbd5e1;
 
+  /* Brand: HTD yellow for the logo, active tab and primary actions; amber-700 for accessible text links. */
   --color-amber: #facc15;
   --color-amber-hover: #eab308;
-  --color-amber-strong: #b7830a;
-  --color-amber-soft: #fef6c8;
-  --color-amber-ring: #fce38a;
-  --color-amber-ink: #1f1600;
+  --color-amber-strong: #b45309;
+  --color-amber-soft: #fef9c3;
+  --color-amber-ring: #fde68a;
+  --color-amber-ink: #1c1400;
   --color-brand: #f5a300;
 
-  --color-signal: #2e6e5a;
-  --color-signal-soft: #e4efe9;
+  --color-signal: #047857;
+  --color-signal-soft: #ecfdf5;
   --color-info: #2563eb;
-  --color-info-soft: #e7effe;
+  --color-info-soft: #eff6ff;
   --color-resident: #7c3aed;
-  --color-resident-soft: #f3eefe;
+  --color-resident-soft: #f5f3ff;
   --color-provider: #ea580c;
-  --color-provider-soft: #feeee2;
-  --color-danger: #b42318;
-  --color-danger-soft: #fdecea;
-  --color-gold: #b7830a;
-  --color-gold-soft: #fdf3d2;
-  --color-sky: #3899e2;
-  --color-sky-soft: #e6f2fc;
+  --color-provider-soft: #fff7ed;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
+  --color-gold: #d97706;
+  --color-gold-soft: #fffbeb;
+  --color-sky: #0284c7;
+  --color-sky-soft: #f0f9ff;
 
-  --shadow-card: 0 1px 2px rgba(20, 17, 14, 0.04), 0 10px 30px rgba(20, 17, 14, 0.06);
-  --shadow-pop: 0 20px 60px rgba(20, 17, 14, 0.16);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-pop: 0 16px 48px rgba(15, 23, 42, 0.16);
 }
 
 html {

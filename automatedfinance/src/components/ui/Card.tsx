@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 export function Card({ title, actions, children, className = '', note }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string; note?: ReactNode }) {
   return (
-    <section className={`min-w-0 rounded-2xl border border-line bg-paper p-4 shadow-[0_1px_2px_rgba(20,17,14,0.04)] sm:p-5 ${className}`}>
+    <section className={`min-w-0 rounded-2xl border border-line bg-paper p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5 ${className}`}>
       {(title || actions) && (
         <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
           {title && <h3 className="text-[15px] font-semibold">{title}</h3>}
@@ -16,7 +16,7 @@ export function Card({ title, actions, children, className = '', note }: { title
 }
 
 const MARKER: Record<string, string> = {
-  amber: 'bg-amber',
+  amber: 'bg-brand',
   green: 'bg-signal',
   blue: 'bg-info',
   purple: 'bg-resident',

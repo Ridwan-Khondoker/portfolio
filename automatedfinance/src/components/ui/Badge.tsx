@@ -4,12 +4,12 @@ export type Tone = 'neutral' | 'amber' | 'green' | 'blue' | 'purple' | 'orange' 
 
 const TONES: Record<Tone, string> = {
   neutral: 'bg-line-soft text-body border-line',
-  amber: 'bg-amber-soft text-amber-strong border-amber-ring',
-  green: 'bg-signal-soft text-signal border-[#c3ded2]',
-  blue: 'bg-info-soft text-info border-[#c7d9fb]',
-  purple: 'bg-resident-soft text-resident border-[#ddd0fb]',
-  orange: 'bg-provider-soft text-provider border-[#f6d5bd]',
-  red: 'bg-danger-soft text-danger border-[#f4c7c2]',
+  amber: 'bg-gold-soft text-amber-strong border-amber-ring',
+  green: 'bg-signal-soft text-signal border-[#a7f3d0]',
+  blue: 'bg-info-soft text-info border-[#bfdbfe]',
+  purple: 'bg-resident-soft text-resident border-[#ddd6fe]',
+  orange: 'bg-provider-soft text-provider border-[#fed7aa]',
+  red: 'bg-danger-soft text-danger border-[#fecaca]',
 };
 
 export function Badge({ tone = 'neutral', children, title }: { tone?: Tone; children: ReactNode; title?: string }) {

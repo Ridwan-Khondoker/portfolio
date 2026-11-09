@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 export type Accent = 'gold' | 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'sky' | 'gray';
 
-// Accent bar + tinted icon chip per tile, from Happy To Deliver's palette. Figures stay in ink for readability.
+// Tinted icon chip per tile, by type. Figures stay in ink for readability.
 const ACCENTS: Record<Accent, { bar: string; chip: string }> = {
   gold: { bar: 'bg-gold', chip: 'bg-gold-soft text-gold' },
   blue: { bar: 'bg-info', chip: 'bg-info-soft text-info' },
@@ -60,10 +60,9 @@ export function Kpi({
   const valueCls = tone === 'good' ? 'text-signal' : tone === 'bad' ? 'text-danger' : tone === 'muted' ? 'text-muted' : 'text-ink';
   const body = (
     <>
-      <span aria-hidden className={`absolute inset-y-0 left-0 w-1 ${a.bar}`} />
       <div className="flex items-center gap-2">
         {icon && (
-          <span aria-hidden className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${a.chip}`}>
+          <span aria-hidden className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${a.chip}`}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               {ICONS[icon]}
             </svg>
@@ -75,7 +74,7 @@ export function Kpi({
       {sub && <p className="mt-1 text-[11.5px] leading-snug text-muted">{sub}</p>}
     </>
   );
-  const cls = `relative block min-w-0 overflow-hidden rounded-xl border border-line bg-paper py-3 pr-3.5 pl-4 shadow-[0_1px_2px_rgba(20,17,14,0.04)] ${wide ? 'sm:col-span-2' : ''}`;
+  const cls = `relative block min-w-0 overflow-hidden rounded-xl border border-line bg-paper px-4 py-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${wide ? 'sm:col-span-2' : ''}`;
   return href ? (
     <a href={href} className={`${cls} transition-shadow hover:shadow-[var(--shadow-card)]`}>
       {body}

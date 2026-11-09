@@ -6,6 +6,7 @@ import { hasRole } from '@/lib/security/roles';
 import { Mark } from '@/components/Mark';
 import { Nav, type NavItem } from '@/components/shell/Nav';
 import { UserMenu } from '@/components/shell/UserMenu';
+import { StatusChips } from '@/components/shell/StatusChips';
 
 function fmtDate(ymd: string) {
   return new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
@@ -30,47 +31,38 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ];
   if (hasRole(user.role, 'EDITOR')) items.push({ href: '/upload', label: 'Upload & sync' });
   if (hasRole(user.role, 'ADMIN')) items.push({ href: '/settings', label: 'Settings' }, { href: '/users', label: 'Users' });
-  const syncBad = info.lastSyncStatus && !/^(ok|committed|no changes)/i.test(info.lastSyncStatus);
+  const st = info.lastSyncStatus ?? '';
+  const sync = !info.lastSyncAt
+    ? { text: 'not set up', tone: 'off' as const }
+    : { text: `${fmtWhen(info.lastSyncAt)} · ${st || 'unknown'}`, tone: /^(committed|no changes)/i.test(st) ? ('ok' as const) : /held/i.test(st) ? ('warn' as const) : ('bad' as const) };
+  const chips = <StatusChips asOf={fmtDate(settings.asOf)} asOfFixed={!!app.asOfDate} imported={fmtWhen(info.lastImportAt)} sync={sync} />;
 
   return (
     <>
       <meta name="csrf-token" content={user.csrfToken} />
-      <header className="sticky top-0 z-20 shadow-[0_1px_0_rgba(20,17,14,0.08)]">
-        {/* Happy To Deliver yellow brand bar */}
-        <div className="bg-amber">
-          <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-            <Link href="/" className="flex min-w-0 items-center gap-2.5">
-              <Mark size={32} inverted />
-              <div className="min-w-0">
-                <p className="truncate text-[16px] leading-tight font-bold text-amber-ink">{app.companyName} · Finance</p>
-                <p className="truncate text-xs text-amber-ink/75">
-                  As of <span className="tabular font-semibold text-amber-ink">{fmtDate(settings.asOf)}</span>
-                  {app.asOfDate ? ' (fixed in Settings)' : ''}
-                  {' · '}
-                  <span className="whitespace-nowrap">
-                    Imported <span className="font-medium text-amber-ink">{fmtWhen(info.lastImportAt)}</span>
-                  </span>
-                  <span className="hidden md:inline">
-                    {' · '}Google sync{' '}
-                    <span className={syncBad ? 'rounded bg-danger px-1 font-semibold text-white' : 'font-medium text-amber-ink'}>
-                      {info.lastSyncAt ? `${fmtWhen(info.lastSyncAt)} (${info.lastSyncStatus ?? 'unknown'})` : 'not set up'}
-                    </span>
-                  </span>
-                </p>
-              </div>
-            </Link>
+      <header className="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur-md supports-[backdrop-filter]:bg-paper/80">
+        <div className="mx-auto flex h-14 max-w-[1320px] items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2.5">
+            <Mark size={28} />
+            <span className="truncate text-[15px] font-semibold text-ink">
+              {app.companyName} <span className="font-normal text-muted">Finance</span>
+            </span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 lg:flex">{chips}</div>
             <UserMenu email={user.email} name={user.name} role={user.role} />
           </div>
         </div>
-        <div className="border-b border-line bg-paper">
-          <div className="mx-auto max-w-[1320px] px-4 py-2 sm:px-6">
-            <Suspense>
-              <Nav items={items} />
-            </Suspense>
-          </div>
+        <div className="mx-auto max-w-[1320px] px-4 sm:px-6">
+          <Suspense>
+            <Nav items={items} />
+          </Suspense>
         </div>
       </header>
-      <main className="mx-auto max-w-[1320px] px-4 pt-5 pb-16 sm:px-6">{children}</main>
+      <main className="mx-auto max-w-[1320px] px-4 pt-6 pb-16 sm:px-6">
+        <div className="mb-4 flex flex-wrap gap-2 lg:hidden">{chips}</div>
+        {children}
+      </main>
     </>
   );
 }

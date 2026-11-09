@@ -39,7 +39,7 @@ export function FilterBar({
   }
 
   return (
-    <section aria-label="Filters" className="rounded-2xl border border-amber-ring bg-paper p-3 shadow-[0_1px_2px_rgba(20,17,14,0.04)] sm:p-4" aria-busy={pending}>
+    <section aria-label="Filters" className="rounded-2xl border border-line bg-paper p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-4" aria-busy={pending}>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-[repeat(5,minmax(0,1fr))_auto] md:items-end">
         <div>
           <Label htmlFor="f-start">Start month</Label>

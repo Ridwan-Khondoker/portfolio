@@ -7,11 +7,14 @@ export function UserMenu({ email, name, role }: { email: string; name: string | 
   const initials = (name || email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('');
   return (
     <details className="relative">
-      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-amber-ink/15 bg-paper/70 py-1 pr-3 pl-1 hover:bg-paper [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full py-1 pr-2 pl-1 hover:bg-line-soft [&::-webkit-details-marker]:hidden">
         <span aria-hidden className="grid h-7 w-7 place-items-center rounded-full bg-ink text-[11px] font-bold text-white">
           {initials}
         </span>
-        <span className="hidden text-[13px] font-semibold text-ink sm:inline">{name || email.split('@')[0]}</span>
+        <span className="hidden text-[13px] font-medium text-ink sm:inline">{name || email.split('@')[0]}</span>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden className="hidden text-muted sm:block">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
         <span className="sr-only">Account menu</span>
       </summary>
       <div className="absolute right-0 z-30 mt-2 w-64 rounded-xl border border-line bg-paper p-2 shadow-[var(--shadow-pop)]">
