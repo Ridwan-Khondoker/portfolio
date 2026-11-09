@@ -3,3 +3,15 @@ dist/
 .astro/
 .DS_Store
 .env
+
+# automatedfinance: confidential company data and secrets never go to git
+automatedfinance/data/
+automatedfinance/source-workbooks/
+automatedfinance/.env
+automatedfinance/.env.*
+!automatedfinance/.env.example
+automatedfinance/node_modules/
+automatedfinance/.next/
+automatedfinance/coverage/
+automatedfinance/test-results/
+*.xlsx
