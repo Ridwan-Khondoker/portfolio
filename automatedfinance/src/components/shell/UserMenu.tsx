@@ -7,7 +7,7 @@ export function UserMenu({ email, name, role }: { email: string; name: string | 
   const initials = (name || email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('');
   return (
     <details className="relative">
-      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-line py-1 pr-3 pl-1 hover:border-line-strong [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-amber-ink/15 bg-paper/70 py-1 pr-3 pl-1 hover:bg-paper [&::-webkit-details-marker]:hidden">
         <span aria-hidden className="grid h-7 w-7 place-items-center rounded-full bg-ink text-[11px] font-bold text-white">
           {initials}
         </span>

@@ -71,45 +71,49 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         }`}
       />
 
-      <SectionTitle sub="Counted rows only (no double counting of estimate vs actual blocks)">Expenses</SectionTitle>
+      <SectionTitle tone="amber" sub="Counted rows only (no double counting of estimate vs actual blocks)">Expenses</SectionTitle>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
-        <Kpi label="Total expenses" value={fmtUsd(d.total)} sub="Selected range" href={`/transactions${q}`} />
-        <Kpi label="Current month" value={fmtUsd(d.currentMonth)} sub={`${monthLabel(d.current, true)} (in progress)`} />
-        <Kpi label="Previous month" value={fmtUsd(d.previousMonth)} sub={monthLabel(d.previous, true)} />
+        <Kpi accent="gold" icon="wallet" label="Total expenses" value={fmtUsd(d.total)} sub="Selected range" href={`/transactions${q}`} />
+        <Kpi accent="gold" icon="calendar" label="Current month" value={fmtUsd(d.currentMonth)} sub={`${monthLabel(d.current, true)} (in progress)`} />
+        <Kpi accent="gold" icon="history" label="Previous month" value={fmtUsd(d.previousMonth)} sub={monthLabel(d.previous, true)} />
         <Kpi
+          accent={d.mom !== null && d.mom > 0 ? 'orange' : 'green'}
+          icon="trend"
           label="Month over month"
           value={d.mom === null ? 'n/a' : `${d.mom > 0 ? '▲' : d.mom < 0 ? '▼' : ''} ${fmtPct(Math.abs(d.mom))}`}
           sub={d.mom === null ? 'No spend last month' : `${d.mom > 0 ? 'Up' : 'Down'} vs ${monthLabel(d.previous)}`}
         />
-        <Kpi label="Year to date" value={fmtUsd(d.ytd)} sub={`Fiscal year from ${monthLabel(d.fyStart, true)}`} />
-        <Kpi label="Average per month" value={fmtUsd(d.average)} sub={`Range total ÷ ${d.monthCount}`} />
-        <Kpi label="Fixed" value={fmtUsd(d.byType.Fixed)} sub={pctOf(d.byType.Fixed ?? 0)} />
-        <Kpi label="Variable" value={fmtUsd(d.byType.Variable)} sub={pctOf(d.byType.Variable ?? 0)} />
-        <Kpi label="Recurring commitments" value={fmtUsd(d.recurringCommitments)} sub={`${monthLabel(d.current)}, recurring lines, excl. non-operating`} />
-        <Kpi label="Subscriptions & services" value={fmtUsd(d.subscriptionsMonthly)} sub="Monthly equivalent of the current list" href="/recurring" />
+        <Kpi accent="gold" icon="flag" label="Year to date" value={fmtUsd(d.ytd)} sub={`Fiscal year from ${monthLabel(d.fyStart, true)}`} />
+        <Kpi accent="gold" icon="bars" label="Average per month" value={fmtUsd(d.average)} sub={`Range total ÷ ${d.monthCount}`} />
+        <Kpi accent="blue" icon="anchor" label="Fixed" value={fmtUsd(d.byType.Fixed)} sub={pctOf(d.byType.Fixed ?? 0)} />
+        <Kpi accent="green" icon="wave" label="Variable" value={fmtUsd(d.byType.Variable)} sub={pctOf(d.byType.Variable ?? 0)} />
+        <Kpi accent="purple" icon="repeat" label="Recurring commitments" value={fmtUsd(d.recurringCommitments)} sub={`${monthLabel(d.current)}, recurring lines, excl. non-operating`} />
+        <Kpi accent="sky" icon="card" label="Subscriptions & services" value={fmtUsd(d.subscriptionsMonthly)} sub="Monthly equivalent of the current list" href="/recurring" />
         <Kpi
+          accent={d.overdueCount ? 'red' : 'orange'}
+          icon="clock"
           label="Outstanding"
           value={fmtUsd(d.outstanding)}
           sub={`${d.outstandingCount} pending/overdue (${d.overdueCount} overdue) · status not recorded on ${d.notRecordedCount.toLocaleString()} rows`}
           tone={d.overdueCount ? 'bad' : undefined}
           href={`/transactions?status=Overdue`}
         />
-        <Kpi label="Non-operating" value={fmtUsd(d.byType['Non-operating'])} sub={`Partner distributions${d.byType.Unclassified ? ` · ${fmtUsd(d.byType.Unclassified)} unitemized P&L totals` : ''}`} />
+        <Kpi accent="gray" icon="share" label="Non-operating" value={fmtUsd(d.byType['Non-operating'])} sub={`Partner distributions${d.byType.Unclassified ? ` · ${fmtUsd(d.byType.Unclassified)} unitemized P&L totals` : ''}`} />
       </div>
 
-      <SectionTitle sub="Revenue from the P&L tabs; the category and status filters don't apply">Profitability</SectionTitle>
+      <SectionTitle tone="green" sub="Revenue from the P&L tabs; the category and status filters don't apply">Profitability</SectionTitle>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
-        <Kpi label="Revenue" value={fmtUsd(d.revenue)} sub={d.revenueProjected ? `Includes ${fmtUsd(d.revenueProjected)} projected (after ${monthLabel(d.current)})` : 'P&L revenue, selected range'} />
-        <Kpi label="Expenses" value={fmtUsd(d.expensesForProfit)} sub="Business filter only" />
-        <Kpi label="Net profit / (loss)" value={fmtUsd(d.netProfit)} sub="Revenue − expenses" tone={d.netProfit >= 0 ? 'good' : 'bad'} />
-        <Kpi label="Profit margin" value={d.margin === null ? 'n/a' : fmtPct(d.margin)} sub="Net profit ÷ revenue" />
-        <Kpi label="Operating cash flow" value="Not available" sub="No cash-timing data in the source sheets" tone="muted" />
-        <Kpi label="Largest category" value={d.largestCategory?.name ?? '–'} sub={d.largestCategory ? fmtUsd(d.largestCategory.amount) : ''} tone="text" />
+        <Kpi accent="green" icon="coins" label="Revenue" value={fmtUsd(d.revenue)} sub={d.revenueProjected ? `Includes ${fmtUsd(d.revenueProjected)} projected (after ${monthLabel(d.current)})` : 'P&L revenue, selected range'} />
+        <Kpi accent="gold" icon="receipt" label="Expenses" value={fmtUsd(d.expensesForProfit)} sub="Business filter only" />
+        <Kpi accent={d.netProfit >= 0 ? 'green' : 'red'} icon="spark" label="Net profit / (loss)" value={fmtUsd(d.netProfit)} sub="Revenue − expenses" tone={d.netProfit >= 0 ? 'good' : 'bad'} />
+        <Kpi accent="blue" icon="percent" label="Profit margin" value={d.margin === null ? 'n/a' : fmtPct(d.margin)} sub="Net profit ÷ revenue" />
+        <Kpi accent="gray" icon="drop" label="Operating cash flow" value="Not available" sub="No cash-timing data in the source sheets" tone="muted" />
+        <Kpi accent="purple" icon="pie" label="Largest category" value={d.largestCategory?.name ?? '–'} sub={d.largestCategory ? fmtUsd(d.largestCategory.amount) : ''} tone="text" />
       </div>
 
       <div className="mt-6 grid gap-3 lg:grid-cols-3">
         <Card title="Monthly expenses vs revenue" className="lg:col-span-2" note={firstProjected >= 0 ? 'Dashed revenue = projected months (after the as-of month).' : undefined}>
-          <TrendChart months={d.series.map((s) => s.month)} labels={labels} expenses={d.series.map((s) => s.expenses)} revenue={d.series.map((s) => s.revenue)} firstProjected={firstProjected < 0 ? 9999 : firstProjected} />
+          <TrendChart months={d.series.map((s) => s.month)} labels={labels} expenses={d.series.map((s) => s.expenses)} revenue={d.series.map((s) => s.revenue)} firstProjected={firstProjected < 0 ? 9999 : firstProjected} height={440} />
         </Card>
         <Card title="Expense breakdown by category" note="The seven largest categories overall keep fixed colours; the rest are grouped as All other.">
           {slices.length ? <CategoryDonut slices={slices} /> : <p className="text-sm text-muted">No expenses in this range.</p>}

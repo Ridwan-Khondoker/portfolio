@@ -21,7 +21,7 @@ import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { BODY, FOLD, GRID, INK, MUTED, SERIES, SURFACE } from '@/lib/palette';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Tooltip, Legend, Filler);
-ChartJS.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+ChartJS.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 ChartJS.defaults.font.size = 12;
 ChartJS.defaults.color = BODY;
 
@@ -58,7 +58,7 @@ const tipLabels: Plugin<'bar'> = {
   afterDatasetsDraw(chart) {
     const { ctx } = chart;
     ctx.save();
-    ctx.font = '600 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.font = '600 11.5px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     ctx.fillStyle = INK;
     ctx.textBaseline = 'middle';
     chart.getDatasetMeta(0).data.forEach((bar, i) => {
@@ -86,7 +86,7 @@ function ChartBox({ height = 300, label, children }: { height?: number; label: s
 
 // ------------------------------------------------------------------ 1. trend
 
-export function TrendChart({ months, labels, expenses, revenue, firstProjected }: { months: string[]; labels: string[]; expenses: number[]; revenue: number[]; firstProjected: number }) {
+export function TrendChart({ months, labels, expenses, revenue, firstProjected, height = 300 }: { months: string[]; labels: string[]; expenses: number[]; revenue: number[]; firstProjected: number; height?: number }) {
   const options: ChartOptions<'line'> = {
     maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
@@ -103,7 +103,7 @@ export function TrendChart({ months, labels, expenses, revenue, firstProjected }
     elements: { line: { borderWidth: 2, tension: 0, borderCapStyle: 'round', borderJoinStyle: 'round' }, point: { radius: 4, hoverRadius: 6, borderWidth: 2, borderColor: SURFACE } },
   };
   return (
-    <ChartBox label={`Monthly expenses and revenue, ${labels[0]} to ${labels[labels.length - 1]}`}>
+    <ChartBox height={height} label={`Monthly expenses and revenue, ${labels[0]} to ${labels[labels.length - 1]}`}>
       <Line
         options={options}
         data={{

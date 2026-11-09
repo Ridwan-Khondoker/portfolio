@@ -10,6 +10,7 @@ import { Card, SectionTitle } from '@/components/ui/Card';
 import { Alert, inputClass } from '@/components/ui/Field';
 import { ActionForm, Submit } from '@/components/ui/ActionForm';
 import { ProjectionChart } from '@/components/charts/Charts';
+import { Kpi, type Accent, type IconName } from '@/components/Kpi';
 import { addPlanned, deletePlanned, saveScenarios, saveSeasonality } from './actions';
 
 export const metadata = { title: 'Projections' };
@@ -34,19 +35,19 @@ export default async function ProjectionsPage() {
         </Alert>
       </div>
 
-      <SectionTitle sub={`Window ${monthLabel(p.windowStart, true)} – ${monthLabel(p.windowEnd, true)} (last complete months before ${monthLabel(current, true)})`}>Baseline</SectionTitle>
+      <SectionTitle tone="blue" sub={`Window ${monthLabel(p.windowStart, true)} – ${monthLabel(p.windowEnd, true)} (last complete months before ${monthLabel(current, true)})`}>Baseline</SectionTitle>
       <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
-        <Stat label="Baseline per month" value={fmtUsd(p.baseline, { cents: true })} sub="Recurring fixed + variable" />
-        <Stat label="Recurring fixed / month" value={fmtUsd(p.baseFixed, { cents: true })} />
-        <Stat label="Recurring variable / month" value={fmtUsd(p.baseVariable, { cents: true })} />
-        <Stat label="Reference trend (not applied)" value={fmtPct(p.trend, 2, true)} sub="Monthly, last 3 vs prior 3 months" />
-        <Stat label="One-time spend excluded" value={fmtUsd(p.oneTimeExcluded, { cents: true })} sub="In the window" />
-        <Stat label="Non-operating / unclassified excluded" value={fmtUsd(p.nonOperatingExcluded, { cents: true })} sub="In the window" />
-        <Stat label="Months of history" value={String(p.monthsOfHistory)} sub="Months with spend, last 36" />
-        <Stat label="Seasonality" value={p.seasonalityApplied ? 'Applied' : 'Off'} sub={p.seasonalityApplied ? 'Indexes below are applied to variable costs' : 'Needs 24+ months of history; indexes kept at 1.00'} />
+        <Stat accent="gold" icon="bars" label="Baseline per month" value={fmtUsd(p.baseline, { cents: true })} sub="Recurring fixed + variable" />
+        <Stat accent="blue" icon="anchor" label="Recurring fixed / month" value={fmtUsd(p.baseFixed, { cents: true })} />
+        <Stat accent="green" icon="wave" label="Recurring variable / month" value={fmtUsd(p.baseVariable, { cents: true })} />
+        <Stat accent="purple" icon="trend" label="Reference trend (not applied)" value={fmtPct(p.trend, 2, true)} sub="Monthly, last 3 vs prior 3 months" />
+        <Stat accent="orange" icon="receipt" label="One-time spend excluded" value={fmtUsd(p.oneTimeExcluded, { cents: true })} sub="In the window" />
+        <Stat accent="gray" icon="share" label="Non-operating / unclassified excluded" value={fmtUsd(p.nonOperatingExcluded, { cents: true })} sub="In the window" />
+        <Stat accent="sky" icon="calendar" label="Months of history" value={String(p.monthsOfHistory)} sub="Months with spend, last 36" />
+        <Stat accent="gray" icon="repeat" label="Seasonality" value={p.seasonalityApplied ? 'Applied' : 'Off'} sub={p.seasonalityApplied ? 'Indexes below are applied to variable costs' : 'Needs 24+ months of history; indexes kept at 1.00'} />
       </div>
 
-      <SectionTitle>Outputs</SectionTitle>
+      <SectionTitle tone="green">Outputs</SectionTitle>
       <div className="grid gap-3">
         <Card title="Projected monthly operating expenses" note="Dashed grey line: the recent baseline average, for reference.">
           <ProjectionChart
@@ -85,7 +86,7 @@ export default async function ProjectionsPage() {
         </Card>
       </div>
 
-      <SectionTitle sub={canEdit ? 'Editors and admins can change these' : 'Read-only for viewers'}>Scenario assumptions</SectionTitle>
+      <SectionTitle tone="purple" sub={canEdit ? 'Editors and admins can change these' : 'Read-only for viewers'}>Scenario assumptions</SectionTitle>
       <Card>
         <ActionForm action={saveScenarios}>
           <div className="overflow-x-auto">
@@ -266,14 +267,8 @@ export default async function ProjectionsPage() {
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="rounded-xl border border-line bg-paper px-3.5 py-3">
-      <p className="text-xs font-semibold text-body">{label}</p>
-      <p className="tabular mt-1 font-display text-[20px] font-semibold text-ink">{value}</p>
-      {sub && <p className="mt-0.5 text-[11.5px] text-muted">{sub}</p>}
-    </div>
-  );
+function Stat({ label, value, sub, accent, icon }: { label: string; value: string; sub?: string; accent: Accent; icon: IconName }) {
+  return <Kpi label={label} value={value} sub={sub} accent={accent} icon={icon} />;
 }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {

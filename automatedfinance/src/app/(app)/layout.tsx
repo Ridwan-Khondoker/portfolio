@@ -35,34 +35,39 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <>
       <meta name="csrf-token" content={user.csrfToken} />
-      <header className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur supports-[backdrop-filter]:bg-paper/85">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-3 px-4 pt-3 sm:px-6">
-          <Link href="/" className="flex min-w-0 items-center gap-2.5">
-            <Mark size={30} />
-            <div className="min-w-0">
-              <p className="truncate font-display text-[17px] leading-tight font-semibold text-ink">{app.companyName} · Finance</p>
-              <p className="truncate text-xs text-muted">
-                As of <span className="tabular text-body">{fmtDate(settings.asOf)}</span>
-                {app.asOfDate ? ' (fixed in Settings)' : ''}
-                {' · '}
-                <span className="whitespace-nowrap">
-                  Imported <span className="text-body">{fmtWhen(info.lastImportAt)}</span>
-                </span>
-                <span className="hidden md:inline">
-                  {' · '}Google sync{' '}
-                  <span className={syncBad ? 'font-semibold text-danger' : 'text-body'}>
-                    {info.lastSyncAt ? `${fmtWhen(info.lastSyncAt)} (${info.lastSyncStatus ?? 'unknown'})` : 'not set up'}
+      <header className="sticky top-0 z-20 shadow-[0_1px_0_rgba(20,17,14,0.08)]">
+        {/* Happy To Deliver yellow brand bar */}
+        <div className="bg-amber">
+          <div className="mx-auto flex max-w-[1320px] items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+            <Link href="/" className="flex min-w-0 items-center gap-2.5">
+              <Mark size={32} inverted />
+              <div className="min-w-0">
+                <p className="truncate text-[16px] leading-tight font-bold text-amber-ink">{app.companyName} · Finance</p>
+                <p className="truncate text-xs text-amber-ink/75">
+                  As of <span className="tabular font-semibold text-amber-ink">{fmtDate(settings.asOf)}</span>
+                  {app.asOfDate ? ' (fixed in Settings)' : ''}
+                  {' · '}
+                  <span className="whitespace-nowrap">
+                    Imported <span className="font-medium text-amber-ink">{fmtWhen(info.lastImportAt)}</span>
                   </span>
-                </span>
-              </p>
-            </div>
-          </Link>
-          <UserMenu email={user.email} name={user.name} role={user.role} />
+                  <span className="hidden md:inline">
+                    {' · '}Google sync{' '}
+                    <span className={syncBad ? 'rounded bg-danger px-1 font-semibold text-white' : 'font-medium text-amber-ink'}>
+                      {info.lastSyncAt ? `${fmtWhen(info.lastSyncAt)} (${info.lastSyncStatus ?? 'unknown'})` : 'not set up'}
+                    </span>
+                  </span>
+                </p>
+              </div>
+            </Link>
+            <UserMenu email={user.email} name={user.name} role={user.role} />
+          </div>
         </div>
-        <div className="mx-auto max-w-[1320px] px-4 pt-2 pb-2 sm:px-6">
-          <Suspense>
-            <Nav items={items} />
-          </Suspense>
+        <div className="border-b border-line bg-paper">
+          <div className="mx-auto max-w-[1320px] px-4 py-2 sm:px-6">
+            <Suspense>
+              <Nav items={items} />
+            </Suspense>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-[1320px] px-4 pt-5 pb-16 sm:px-6">{children}</main>

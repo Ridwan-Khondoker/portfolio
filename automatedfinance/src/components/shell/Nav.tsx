@@ -25,7 +25,7 @@ export function Nav({ items }: { items: NavItem[] }) {
                 href={it.keepFilters && q ? `${it.href}?${q}` : it.href}
                 aria-current={active ? 'page' : undefined}
                 className={`block rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${
-                  active ? 'bg-amber-soft text-amber-ink ring-1 ring-amber-ring' : 'text-body hover:bg-line-soft hover:text-ink'
+                  active ? 'bg-ink text-white' : 'text-body hover:bg-amber-soft hover:text-ink'
                 }`}
               >
                 {it.label}
