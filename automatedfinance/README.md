@@ -59,8 +59,8 @@ npm run seed:admin            # prints a one-time invite link for ADMIN_EMAIL
 npm run dev
 ```
 
-Open the invite link, choose a password (12+ characters, not a common password), scan the QR code with Google
-Authenticator (or any TOTP app), and save the 8 recovery codes.
+Open the invite link and choose a password (12+ characters, not a common password). That's it: you're signed in.
+Two-step verification is optional (Account page) unless Settings requires it.
 
 ### Tests
 
@@ -123,10 +123,18 @@ HTTPS certificates are issued automatically once the records resolve. If the DNS
 ## Adding users
 
 **Users → Invite someone**: enter the email and role, then copy the one-time link (or tick *Email it* when Resend is
-configured). There is no public sign-up. From the same page an admin can change roles, deactivate someone (all their
-sessions end immediately), reset a person's password and 2FA (they get a new one-time link), end sessions, and read
-the audit log (logins, failed logins, invites, role changes, uploads, imports, rollbacks, setting changes and exports,
-with user, time and IP).
+configured). There is no public sign-up. The invited person opens the link and chooses a password: one step.
+
+From the same page an admin can:
+
+- change roles, or deactivate someone (all their sessions end immediately);
+- send a password reset link, or turn off someone's 2FA if they lost their phone;
+- end sessions and read the audit log (logins, failed logins, invites, role changes, uploads, imports, rollbacks,
+  setting changes and exports, with user, time and IP).
+
+**Two-step verification** (Google Authenticator or any TOTP app) is optional by default: anyone can turn it on under
+**Account**. To make it mandatory, set **Settings → General → Require two-step verification for** to *Admins* or
+*Everyone*. People who don't have it yet set it up once at their next sign-in, before they can see anything.
 
 ## Enabling Google Sheets sync
 
@@ -219,13 +227,16 @@ log. It's a readable archive, not a restore source.
 
 ## Security notes
 
-- **Public routes:** every route is denied unless signed in with password + 2FA. The only exceptions are `/login`,
+- **Public routes:** every route is denied unless signed in (password, plus the 2FA code for people who use 2FA or when
+  Settings requires it). The only exceptions are `/login`,
   `/invite/<token>`, `/reset/<token>`, the `/api/auth/*` endpoints those pages use, and the hashed build files under
   `/_next/static` (code only, needed to draw the login page).
 - **Passwords:** argon2id (64 MiB, 3 passes), at least 12 characters, checked against a 49,000-entry common-password list.
 - **Lockout:** 5 failures per account or per IP lock that account or IP for 15 minutes, for both the password and the
   2FA step. Error messages are generic, so they never reveal whether an email exists.
-- **2FA:** a TOTP code can't be reused. TOTP secrets are encrypted at rest (AES-256-GCM, key derived from `SESSION_SECRET`).
+- **2FA:** optional by default; required for admins or everyone with one setting. A TOTP code can't be reused, there
+  are 8 one-time recovery codes, and TOTP secrets are encrypted at rest (AES-256-GCM, key derived from `SESSION_SECRET`).
+  The original spec required 2FA for every user; it was made optional at the owner's request.
 - **Sessions:** server-side, idle timeout 12 h, absolute limit 7 days. Cookie `__Host-af_session` with
   `HttpOnly; Secure; SameSite=Strict`.
 - **Cross-site requests:** every state-changing request must come from `APP_URL` (Origin check). API calls also need

@@ -14,7 +14,7 @@ async function main() {
     if (ifNone) return console.log('[seed:admin] ADMIN_EMAIL not set; skipping first-admin bootstrap.');
     throw new Error('Set ADMIN_EMAIL to the first admin’s email address.');
   }
-  const existing = await prisma.user.count({ where: { role: 'ADMIN', active: true, totpEnabled: true } });
+  const existing = await prisma.user.count({ where: { role: 'ADMIN', active: true, passwordHash: { not: null } } });
   if (existing && !process.argv.includes('--force')) {
     if (ifNone) return;
     console.error('An admin already exists. Invite more users from the Users page (or pass --force to issue another admin invite).');
@@ -26,7 +26,7 @@ async function main() {
   }
   const token = await createLink({ kind: 'INVITE', email, role: 'ADMIN', createdById: null });
   await audit({ action: 'invite.created', email, target: email, details: { role: 'ADMIN', via: 'seed:admin' } });
-  console.log(`\nAdmin invite for ${email} (valid 72 hours, single use):\n\n  ${new URL(`/invite/${token}`, appUrl()).toString()}\n\nOpen it, choose a password and scan the 2FA QR code.\n`);
+  console.log(`\nAdmin invite for ${email} (valid 72 hours, single use):\n\n  ${new URL(`/invite/${token}`, appUrl()).toString()}\n\nOpen it and choose a password.\n`);
 }
 
 main()

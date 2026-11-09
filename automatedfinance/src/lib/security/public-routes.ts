@@ -7,8 +7,9 @@ const PUBLIC_API: RegExp[] = [
   /^\/api\/auth\/login$/,
   /^\/api\/auth\/verify$/,
   /^\/api\/auth\/logout$/,
-  new RegExp(`^/api/auth/invite/${TOKEN}/(password|totp)$`),
-  new RegExp(`^/api/auth/reset/${TOKEN}/(password|totp)$`),
+  /^\/api\/auth\/enroll$/,
+  new RegExp(`^/api/auth/invite/${TOKEN}/password$`),
+  new RegExp(`^/api/auth/reset/${TOKEN}/password$`),
 ];
 
 // Hashed, immutable build output (JS/CSS/fonts). It holds code only, never data; the login page cannot render without it.

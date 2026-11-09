@@ -16,6 +16,8 @@ export const DEFAULT_SETTINGS = {
   syncIntervalMinutes: 15,
   syncEnabled: true,
   domainAlertDays: 60,
+  /** Who must use two-step verification: 'optional' (nobody is forced), 'admins' or 'everyone'. */
+  twoFactorPolicy: 'optional' as 'optional' | 'admins' | 'everyone',
 };
 export type AppSettings = typeof DEFAULT_SETTINGS;
 

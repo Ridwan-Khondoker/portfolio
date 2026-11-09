@@ -45,6 +45,7 @@ export async function saveGeneral(_: ActionResult, fd: FormData): Promise<Action
       syncIntervalMinutes: int('syncIntervalMinutes', 5, 1440),
       syncEnabled: str(fd, 'syncEnabled') === 'on',
       domainAlertDays: int('domainAlertDays', 1, 365),
+      twoFactorPolicy: ['optional', 'admins', 'everyone'].includes(str(fd, 'twoFactorPolicy')) ? str(fd, 'twoFactorPolicy') : 'optional',
     };
     for (const [key, value] of Object.entries(values))
       await prisma.setting.upsert({ where: { key }, create: { key, value: value as Prisma.InputJsonValue, updatedById: user.userId }, update: { value: value as Prisma.InputJsonValue, updatedById: user.userId } });

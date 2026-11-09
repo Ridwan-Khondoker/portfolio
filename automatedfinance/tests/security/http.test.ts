@@ -164,12 +164,64 @@ suite('acceptance 7: access control (production build over HTTP)', () => {
     await prisma.rateLimit.deleteMany();
   });
 
-  it('a password alone (no 2FA code yet) opens nothing', async () => {
+  it('a password alone (no 2FA code yet) opens nothing for someone who uses 2FA', async () => {
     const r1 = await req('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ email: viewer.email, password: PASSWORD }) });
     const pending = cookieFrom(r1);
     const r = await req('/', { cookie: pending });
     expect(r.status).toBe(302);
     expect((await req('/api/export/transactions', { cookie: pending })).status).toBe(401);
+  });
+
+  it('an invite is one step: choose a password and you are signed in (no forced 2FA)', async () => {
+    const { createLink } = await import('@/lib/server/accounts');
+    const token = await createLink({ kind: 'INVITE', email: 'newcomer@example.test', role: 'VIEWER' });
+    expect((await req(`/invite/${token}`)).status).toBe(200);
+    const mismatch = await req(`/api/auth/invite/${token}/password`, { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ password: PASSWORD, confirm: PASSWORD + 'x' }) });
+    expect(mismatch.status).toBe(400);
+    const weak = await req(`/api/auth/invite/${token}/password`, { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ password: 'password1234', confirm: 'password1234' }) });
+    expect(weak.status).toBe(400);
+    const r = await req(`/api/auth/invite/${token}/password`, { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ password: PASSWORD, confirm: PASSWORD }) });
+    expect(r.status).toBe(200);
+    expect((await r.json()).next).toBe('done');
+    const c = cookieFrom(r);
+    expect((await req('/', { cookie: c })).status).toBe(200);
+    const user = await prisma.user.findUniqueOrThrow({ where: { email: 'newcomer@example.test' } });
+    expect(user.totpEnabled).toBe(false);
+    // The link works once.
+    const again = await req(`/api/auth/invite/${token}/password`, { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ password: PASSWORD, confirm: PASSWORD }) });
+    expect(again.status).toBe(410);
+  });
+
+  it('someone without 2FA signs in with their password only', async () => {
+    const u = await makeUser('no2fa@example.test', 'VIEWER', { totp: false });
+    const r = await req('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ email: u.email, password: PASSWORD }) });
+    expect(r.status).toBe(200);
+    expect((await r.json()).next).toBe('done');
+    expect((await req('/transactions', { cookie: cookieFrom(r) })).status).toBe(200);
+  });
+
+  it('when Settings requires 2FA, a password-only account must set it up before seeing anything', async () => {
+    const u = await makeUser('mustenroll@example.test', 'EDITOR', { totp: false });
+    await prisma.setting.upsert({ where: { key: 'twoFactorPolicy' }, create: { key: 'twoFactorPolicy', value: 'everyone' }, update: { value: 'everyone' } });
+    try {
+      const r = await req('/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ email: u.email, password: PASSWORD }) });
+      expect((await r.json()).next).toBe('enroll');
+      const pending = cookieFrom(r);
+      expect((await req('/', { cookie: pending })).status).toBe(302);
+      expect((await req('/api/export/transactions', { cookie: pending })).status).toBe(401);
+      const page = await req('/login', { cookie: pending });
+      expect(await page.text()).toContain('Set up two-step verification');
+      const { decrypt } = await import('@/lib/security/crypto');
+      const pendingSecret = decrypt((await prisma.user.findUniqueOrThrow({ where: { id: u.id } })).totpPendingEnc!);
+      const bad = await req('/api/auth/enroll', { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ code: '000000' }), cookie: pending });
+      expect(bad.status).toBe(400);
+      const ok = await req('/api/auth/enroll', { method: 'POST', headers: { 'content-type': 'application/json', ...ORIGIN }, body: JSON.stringify({ code: totpAt(pendingSecret, Date.now()) }), cookie: pending });
+      expect(ok.status).toBe(200);
+      expect((await ok.json()).recoveryCodes).toHaveLength(8);
+      expect((await req('/upload', { cookie: cookieFrom(ok) })).status).toBe(200);
+    } finally {
+      await prisma.setting.update({ where: { key: 'twoFactorPolicy' }, data: { value: 'optional' } });
+    }
   });
 
   it('viewers can read reports but cannot reach Editor or Admin pages and APIs', async () => {

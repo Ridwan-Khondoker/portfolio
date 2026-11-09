@@ -11,7 +11,28 @@ import { verifyTotp } from '@/lib/security/totp';
 import { clearFailures, isLocked, recordFailure } from '@/lib/security/rate-limit';
 import { revokeSession } from '@/lib/security/session';
 import { audit } from '@/lib/security/audit';
+import { confirmEnrollment, disableTwoFactor, normalizeRecovery } from '@/lib/server/accounts';
 import type { ActionResult } from '@/components/ui/ActionForm';
+
+export async function enableTwoFactorAction(_: ActionResult, fd: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const me = await requireActionUser('VIEWER');
+    const r = await confirmEnrollment(me.userId, str(fd, 'code'), await requestMeta());
+    if (!r.ok) return { ok: false, message: r.error };
+    revalidatePath('/account');
+    return { ok: true, message: 'Two-step verification is on.', data: { recoveryCodes: r.recoveryCodes } };
+  });
+}
+
+export async function disableTwoFactorAction(_: ActionResult, fd: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const me = await requireActionUser('VIEWER');
+    const r = await disableTwoFactor(me.userId, str(fd, 'code'), await requestMeta());
+    if (!r.ok) return { ok: false, message: r.error };
+    revalidatePath('/account');
+    return { ok: true, message: 'Two-step verification is off. You can turn it back on any time.' };
+  });
+}
 
 export async function changePasswordAction(_: ActionResult, fd: FormData): Promise<ActionResult> {
   return run(async () => {
@@ -44,6 +65,7 @@ export async function newRecoveryCodesAction(_: ActionResult, fd: FormData): Pro
     const keys = [`mfa:acct:${me.email}`];
     if (await isLocked(keys)) throw new Error('Too many attempts. Wait 15 minutes.');
     const user = await prisma.user.findUniqueOrThrow({ where: { id: me.userId } });
+    if (!user.totpEnabled) throw new Error('Turn on two-step verification first.');
     const step = user.totpSecretEnc ? verifyTotp(decrypt(user.totpSecretEnc), str(fd, 'code')) : null;
     if (step === null || (user.totpLastStep !== null && step <= user.totpLastStep)) {
       await recordFailure(keys);
@@ -58,7 +80,7 @@ export async function newRecoveryCodesAction(_: ActionResult, fd: FormData): Pro
     await prisma.$transaction([
       prisma.user.update({ where: { id: me.userId }, data: { totpLastStep: step } }),
       prisma.recoveryCode.deleteMany({ where: { userId: me.userId } }),
-      prisma.recoveryCode.createMany({ data: codes.map((c) => ({ userId: me.userId, codeHash: sha256(c.replace(/[^a-z0-9]/g, '')) })) }),
+      prisma.recoveryCode.createMany({ data: codes.map((c) => ({ userId: me.userId, codeHash: sha256(normalizeRecovery(c)) })) }),
     ]);
     await audit({ action: 'account.recovery_codes_regenerated', userId: me.userId, email: me.email, ...meta });
     return { ok: true, message: `New recovery codes (the old ones no longer work). Save them now: ${codes.join('  ')}` };

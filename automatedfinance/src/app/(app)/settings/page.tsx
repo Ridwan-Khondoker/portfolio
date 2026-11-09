@@ -67,6 +67,15 @@ export default async function SettingsPage() {
           <Field label="Google sync: auto-commit threshold (%)" name="autoCommitThreshold" type="number" defaultValue={String(Math.round(Number(app.autoCommitThreshold) * 100))} hint="Larger changes to any business-month are held for review." />
           <Field label="Google sync interval (minutes)" name="syncIntervalMinutes" type="number" defaultValue={String(app.syncIntervalMinutes)} />
           <Field label="Domain alert (days before renewal)" name="domainAlertDays" type="number" defaultValue={String(app.domainAlertDays)} />
+          <label className="text-xs font-semibold text-body">
+            Require two-step verification for
+            <select name="twoFactorPolicy" defaultValue={app.twoFactorPolicy ?? 'optional'} className={`${inputClass} mt-1`}>
+              <option value="optional">Nobody (optional for each person)</option>
+              <option value="admins">Admins</option>
+              <option value="everyone">Everyone</option>
+            </select>
+            <span className="mt-1 block font-normal text-muted">People without it set it up once at their next sign-in.</span>
+          </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="syncEnabled" defaultChecked={app.syncEnabled !== false} /> Google sync on
           </label>

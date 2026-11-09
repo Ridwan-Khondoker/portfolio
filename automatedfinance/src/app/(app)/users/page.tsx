@@ -10,7 +10,7 @@ import { inputClass } from '@/components/ui/Field';
 import { buttonClass } from '@/components/ui/Button';
 import { ActionForm, Submit } from '@/components/ui/ActionForm';
 import { LinkResultForm } from '@/components/LinkResultForm';
-import { changeRoleAction, inviteAction, resetAccessAction, revokeInviteAction, revokeSessionAction, setActiveAction } from './actions';
+import { changeRoleAction, disableTwoFactorForUserAction, inviteAction, resetPasswordAction, revokeInviteAction, revokeSessionAction, setActiveAction } from './actions';
 
 export const metadata = { title: 'Users' };
 
@@ -38,9 +38,9 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   return (
     <div>
       <h1 className="text-2xl font-semibold">Users</h1>
-      <p className="mt-1 text-sm text-body">Only invited people can open anything in this app. Every account uses a password and two-step verification.</p>
+      <p className="mt-1 text-sm text-body">Only invited people can open anything in this app. Two-step verification is optional per person unless Settings requires it.</p>
 
-      <SectionTitle sub="One-time link, valid 72 hours. The person sets a password and turns on 2FA.">Invite someone</SectionTitle>
+      <SectionTitle sub="One-time link, valid 72 hours. The person opens it and chooses a password; that's it.">Invite someone</SectionTitle>
       <Card>
         <LinkResultForm action={inviteAction} className="grid gap-2 sm:grid-cols-[2fr_1fr_auto_auto] sm:items-center">
           <input name="email" type="email" required placeholder="name@company.com" aria-label="Email address" className={inputClass} />
@@ -72,7 +72,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                   <p className="mt-0.5 flex flex-wrap gap-1.5 text-[12px]">
                     <Badge tone={u.role === 'ADMIN' ? 'purple' : u.role === 'EDITOR' ? 'blue' : 'neutral'}>{ROLE_LABEL[u.role]}</Badge>
                     {u.active ? <Badge tone="green">Active</Badge> : <Badge tone="red">Deactivated</Badge>}
-                    {u.totpEnabled ? <Badge tone="green">2FA on</Badge> : <Badge tone="amber">2FA not set up</Badge>}
+                    {u.totpEnabled ? <Badge tone="green">2FA on</Badge> : u.passwordHash ? <Badge tone="neutral">2FA off</Badge> : <Badge tone="amber">Invite not accepted</Badge>}
                     <span className="text-muted">Last sign-in {when(u.lastLoginAt)}</span>
                   </p>
                 </div>
@@ -99,21 +99,31 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                   )}
                 </div>
               </div>
-              {u.id !== me.userId && u.active && (
-                <details className="mt-2">
-                  <summary className="cursor-pointer text-[12.5px] text-amber-strong">Reset password &amp; 2FA</summary>
-                  <LinkResultForm action={resetAccessAction} className="mt-2 flex flex-wrap items-center gap-2">
-                    <input type="hidden" name="userId" value={u.id} />
-                    {mail && (
-                      <label className="flex items-center gap-1.5 text-[13px]">
-                        <input type="checkbox" name="send" defaultChecked /> Email the link
-                      </label>
-                    )}
-                    <Submit size="sm" variant="danger" confirm={`Reset ${u.email}'s password and 2FA? Their sessions end and they need the new link to sign in.`}>
-                      Reset and create link
-                    </Submit>
-                  </LinkResultForm>
-                </details>
+              {u.active && u.passwordHash && (
+                <div className="mt-2 flex flex-wrap items-start gap-x-5 gap-y-2">
+                  <details>
+                    <summary className="cursor-pointer text-[12.5px] text-amber-strong">Send password reset link</summary>
+                    <LinkResultForm action={resetPasswordAction} className="mt-2 flex flex-wrap items-center gap-2">
+                      <input type="hidden" name="userId" value={u.id} />
+                      {mail && (
+                        <label className="flex items-center gap-1.5 text-[13px]">
+                          <input type="checkbox" name="send" defaultChecked /> Email the link
+                        </label>
+                      )}
+                      <Submit size="sm" variant="ghost">
+                        Create reset link
+                      </Submit>
+                    </LinkResultForm>
+                  </details>
+                  {u.totpEnabled && u.id !== me.userId && (
+                    <ActionForm action={disableTwoFactorForUserAction}>
+                      <input type="hidden" name="userId" value={u.id} />
+                      <Submit size="sm" variant="link" confirm={`Turn off two-step verification for ${u.email}? Use this if they lost their phone. They'll be signed out and can sign in with their password.`}>
+                        Turn off their 2FA
+                      </Submit>
+                    </ActionForm>
+                  )}
+                </div>
               )}
               {us.length > 0 && (
                 <details className="mt-2">

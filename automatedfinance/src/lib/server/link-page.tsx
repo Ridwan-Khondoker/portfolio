@@ -1,7 +1,5 @@
-import QRCode from 'qrcode';
 import type { TokenKind } from '@prisma/client';
-import { findValidLink, pendingTotpSecret } from './accounts';
-import { otpauthUrl } from '@/lib/security/totp';
+import { findValidLink } from './accounts';
 import { LinkFlow } from '@/components/auth/LinkFlow';
 
 export async function renderLinkPage(token: string, kind: TokenKind) {
@@ -14,9 +12,5 @@ export async function renderLinkPage(token: string, kind: TokenKind) {
       </div>
     );
   }
-  const flowKind = kind === 'INVITE' ? 'invite' : 'reset';
-  const secret = pendingTotpSecret(row);
-  if (!secret) return <LinkFlow kind={flowKind} token={token} email={row.email} step="password" />;
-  const qrSvg = await QRCode.toString(otpauthUrl(secret, row.email, 'Automated Finance'), { type: 'svg', margin: 1, color: { dark: '#161513', light: '#ffffff' } });
-  return <LinkFlow kind={flowKind} token={token} email={row.email} step="totp" qrSvg={qrSvg} secret={secret} />;
+  return <LinkFlow kind={kind === 'INVITE' ? 'invite' : 'reset'} token={token} email={row.email} />;
 }

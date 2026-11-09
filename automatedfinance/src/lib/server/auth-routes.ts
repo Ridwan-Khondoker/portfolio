@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 import type { TokenKind } from '@prisma/client';
 import { clientIp, userAgent } from '@/lib/security/request';
 import { sessionCookieName, sessionCookieOptions } from '@/lib/security/session';
-import { completeLink, findValidLink, setLinkPassword } from './accounts';
-import { createSession } from '@/lib/security/session';
+import { completeLinkWithPassword, findValidLink, INVALID_LINK } from './accounts';
 
 export function metaOf(req: Request) {
   return { ip: clientIp(req.headers), userAgent: userAgent(req.headers) };
@@ -35,29 +34,12 @@ export function withSessionCookie(res: NextResponse, token: string, maxAgeSecond
   return res;
 }
 
-const INVALID_LINK = 'This link is invalid, expired or already used. Ask an admin for a new one.';
-
+/** Invite or reset link: choose a password, signed in. */
 export async function linkPasswordStep(req: Request, token: string, kind: TokenKind) {
   const row = await findValidLink(token, kind);
   if (!row) return json({ error: INVALID_LINK }, 410);
   const body = await readBody(req);
-  if ((body.password ?? '') !== (body.confirm ?? '')) return json({ error: 'The two passwords do not match.' }, 400);
-  const problem = await setLinkPassword(row, body.password ?? '');
-  if (problem) return json({ error: problem }, 400);
-  return json({ ok: true });
-}
-
-export async function linkTotpStep(req: Request, token: string, kind: TokenKind) {
-  const row = await findValidLink(token, kind);
-  if (!row) return json({ error: INVALID_LINK }, 410);
-  const body = await readBody(req);
-  const meta = metaOf(req);
-  try {
-    const result = await completeLink(row, body.code ?? '', meta);
-    if (!result.ok) return json({ error: result.error }, 400);
-    const session = await createSession({ userId: result.userId, mfaVerified: true, ip: meta.ip, userAgent: meta.userAgent });
-    return withSessionCookie(json({ ok: true, recoveryCodes: result.recoveryCodes }), session.token, session.maxAgeSeconds);
-  } catch (err) {
-    return json({ error: (err as Error).message || INVALID_LINK }, 400);
-  }
+  const result = await completeLinkWithPassword(row, body.password ?? '', body.confirm ?? '', metaOf(req));
+  if (!result.ok) return json({ error: result.error }, result.status);
+  return withSessionCookie(json({ ok: true, next: result.next }), result.token, result.maxAgeSeconds);
 }
