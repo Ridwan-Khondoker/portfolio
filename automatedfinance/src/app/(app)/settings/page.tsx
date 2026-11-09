@@ -7,7 +7,7 @@ import { Alert, inputClass } from '@/components/ui/Field';
 import { Badge } from '@/components/ui/Badge';
 import { buttonClass } from '@/components/ui/Button';
 import { ActionForm, Submit } from '@/components/ui/ActionForm';
-import { addSheetSource, deleteProfile, saveBudgets, saveCategories, saveFx, saveGeneral, saveMappings, updateSheetSource } from './actions';
+import { addSheetSource, deleteProfile, saveBudgets, saveCategories, saveFx, saveGeneral, saveMappings, setupFromKitAction, updateSheetSource } from './actions';
 
 export const metadata = { title: 'Settings' };
 
@@ -15,7 +15,7 @@ const TYPES = ['Fixed', 'Variable', 'Non-operating', 'Unclassified'];
 
 export default async function SettingsPage() {
   await requirePageUser('ADMIN');
-  const [app, categories, mappings, budgets, departments, fx, profiles, sources] = await Promise.all([
+  const [app, categories, mappings, budgets, departments, fx, profiles, sources, imported] = await Promise.all([
     loadAppSettings(),
     prisma.category.findMany({ orderBy: { sortOrder: 'asc' } }),
     prisma.categoryMapping.findMany({ orderBy: { sourceLabel: 'asc' } }),
@@ -24,10 +24,11 @@ export default async function SettingsPage() {
     prisma.fxRate.findMany({ orderBy: { code: 'asc' } }),
     prisma.layoutProfile.findMany({ orderBy: [{ tabName: 'asc' }, { name: 'asc' }] }),
     prisma.googleSheetSource.findMany({ orderBy: { createdAt: 'asc' } }),
+    prisma.importBatch.count({ where: { status: 'COMMITTED', origin: { in: ['SEED', 'UPLOAD', 'GOOGLE_SYNC'] } } }),
   ]);
   const sa = serviceAccountEmail();
   const budgetOf = (d: string) => budgets.find((b) => b.department === d)?.monthlyAmount.toString() ?? '0';
-  const toc = ['General', 'Categories', 'Mappings', 'Budgets', 'Currencies', 'Google sync', 'Layout profiles', 'Export & backups'];
+  const toc = ['First-time setup', 'General', 'Categories', 'Mappings', 'Budgets', 'Currencies', 'Google sync', 'Layout profiles', 'Export & backups'];
 
   return (
     <div>
@@ -39,6 +40,18 @@ export default async function SettingsPage() {
           </a>
         ))}
       </nav>
+
+      <SectionTitle sub={imported ? 'Already done: running it again only refreshes reference data' : 'Do this once after deploying'}>
+        <span id="first-time-setup">First-time setup</span>
+      </SectionTitle>
+      <Card>
+        {!imported && <Alert tone="warn">No company data yet. Upload the build kit .zip (the one with data/ and source-workbooks/) to load categories, mappings, budgets, layouts, checks and the issues log, and import the original workbook.</Alert>}
+        <ActionForm action={setupFromKitAction} className="mt-3 flex flex-wrap items-center gap-3">
+          <input name="kit" type="file" accept=".zip,application/zip" aria-label="Build kit zip" className="text-sm" required />
+          <Submit variant={imported ? 'ghost' : 'brand'}>Load company data</Submit>
+        </ActionForm>
+        <p className="mt-2 text-xs text-muted">The zip is read in memory and not stored. Reference data that already exists is kept (your edits win); the workbook is imported only if nothing has been imported yet.</p>
+      </Card>
 
       <SectionTitle>
         <span id="general">General</span>

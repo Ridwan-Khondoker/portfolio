@@ -47,8 +47,8 @@ export default async function ProjectionsPage() {
       </div>
 
       <SectionTitle>Outputs</SectionTitle>
-      <div className="grid gap-3 lg:grid-cols-3">
-        <Card title="Projected monthly operating expenses" className="lg:col-span-2" note="Dashed grey line: the recent baseline average, for reference.">
+      <div className="grid gap-3">
+        <Card title="Projected monthly operating expenses" note="Dashed grey line: the recent baseline average, for reference.">
           <ProjectionChart
             labels={p.months.map((m) => monthLabel(m.month))}
             series={p.scenarios.map((s) => ({ name: s.name, color: COLORS[s.key] ?? SERIES[0], values: p.months.map((m) => m.scenarios[s.key]!.total) }))}
@@ -56,7 +56,8 @@ export default async function ProjectionsPage() {
           />
         </Card>
         <Card title="Totals by horizon">
-          <table className="w-full text-[13px]">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[520px] text-[13px]">
             <thead>
               <tr className="border-b border-line text-left text-body">
                 <th className="py-1.5 font-semibold">Horizon</th>
@@ -72,14 +73,15 @@ export default async function ProjectionsPage() {
                 <tr key={row.label} className="border-b border-line-soft align-top">
                   <td className="py-1.5 pr-2">{row.label}</td>
                   {keys.map((k) => (
-                    <td key={k} className="tabular py-1.5 text-right">
-                      {fmtUsd(row.values[k] ?? 0)}
+                    <td key={k} className="tabular py-1.5 pl-4 text-right whitespace-nowrap">
+                      {fmtUsd(row.values[k] ?? 0, { cents: true })}
                     </td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </Card>
       </div>
 

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && next start -H 0.0.0.0 -p ${PORT:-8080}",
+    "start": "prisma migrate deploy && tsx scripts/seed-admin.ts --if-none && next start -H 0.0.0.0 -p ${PORT:-8080}",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:security": "next build && vitest run tests/security",
@@ -27,6 +27,7 @@
     "@zxcvbn-ts/language-common": "^4.1.3",
     "chart.js": "^4.6.1",
     "decimal.js": "^10.6.0",
+    "fflate": "^0.8.3",
     "google-auth-library": "^11.3.3",
     "next": "16.4.5",
     "prisma": "6.19.3",

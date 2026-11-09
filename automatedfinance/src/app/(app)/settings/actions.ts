@@ -172,3 +172,22 @@ export async function updateSheetSource(_: ActionResult, fd: FormData): Promise<
     return done(s.enabled ? 'Sync on.' : 'Sync paused.');
   });
 }
+
+/** First-time setup on a server: load the confidential build kit from its .zip (reference data + the original workbook). */
+export async function setupFromKitAction(_: ActionResult, fd: FormData): Promise<ActionResult> {
+  return run(async () => {
+    const { user, meta } = await admin();
+    const file = fd.get('kit');
+    if (!(file instanceof File) || !/\.zip$/i.test(file.name)) throw new Error('Choose the build kit .zip file.');
+    if (file.size > 25 * 1024 * 1024) throw new Error('That zip is larger than 25 MB.');
+    const { kitFromZip } = await import('@/lib/seed/kit');
+    const { seedAll } = await import('@/lib/seed/seed');
+    const kit = await kitFromZip(new Uint8Array(await file.arrayBuffer()));
+    const report = await seedAll(prisma, kit);
+    await audit({ action: 'setup.kit_loaded', userId: user.userId, target: file.name, details: { ...report, imported: report.imported ? { ...report.imported } : null }, ...meta });
+    return done(
+      `Loaded ${report.categories} categories, ${report.mappings} mappings, ${report.profiles} layouts, ${report.checks} reconciliation checks and ${report.issues} issues. ` +
+        (report.imported ? `Imported the original workbook: ${report.imported.added} rows.` : 'Data was already imported, so the workbook was not imported again.'),
+    );
+  });
+}
